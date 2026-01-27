@@ -329,7 +329,7 @@ const MatchesPage = () => {
                                             </div>
 
                                             <div className="settled-footer">
-                                                VERIFIED • SECURE • TOTAL 100%
+                                                VERIFIED · SECURE · TOTAL 100%
                                                 <div className="mt-2 opacity-30 text-[8px] font-mono tracking-widest">{savedRes.hash}</div>
                                             </div>
                                         </div>
