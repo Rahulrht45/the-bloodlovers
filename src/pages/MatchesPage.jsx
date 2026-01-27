@@ -368,9 +368,11 @@ const MatchesPage = () => {
                                                                 const cur = Number(localStorage.getItem('tbl_reserve_bal') || 0);
                                                                 localStorage.setItem('tbl_reserve_bal', String(cur + p.amount));
                                                             } else {
+                                                                // Credit individual player wallets
                                                                 target = p.name;
-                                                                // Simulated: If it's the current user, balance was added during settlement
-                                                                // In a real app, this would trigger individual player credit transactions
+                                                                const playerKey = `player_wallet_${p.name.toLowerCase().replace(/\s+/g, '_')}`;
+                                                                const cur = Number(localStorage.getItem(playerKey) || 0);
+                                                                localStorage.setItem(playerKey, String(cur + p.amount));
                                                             }
                                                             return `${target}: ৳${p.amount.toLocaleString()}`;
                                                         }).join('\n');

@@ -5,12 +5,14 @@ import './WalletPage.css';
 const WalletPage = () => {
     const [balance, setBalance] = useState(() => Number(localStorage.getItem('bloods_wallet_balance') || 0));
     const [transactions, setTransactions] = useState(() => JSON.parse(localStorage.getItem('bloods_txs') || '[]'));
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
         // Handle changes if they happen in other tabs/pages
         const handleStorage = () => {
             setBalance(Number(localStorage.getItem('bloods_wallet_balance') || 0));
             setTransactions(JSON.parse(localStorage.getItem('bloods_txs') || '[]'));
+            setRefreshKey(prev => prev + 1); // Force re-render for player wallets
         };
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);
@@ -99,6 +101,61 @@ const WalletPage = () => {
                                 }}
                             >
                                 Reset Corporate Data
+                            </button>
+                        </div>
+
+                        {/* PLAYER WALLETS */}
+                        <div className="balance-card !p-6" style={{ background: 'rgba(251, 188, 4, 0.03)', border: '1px solid rgba(251, 188, 4, 0.1)' }}>
+                            <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[#FBBC04] mb-4">Player Wallets</h3>
+
+                            <div className="space-y-4">
+                                {(() => {
+                                    const playerWallets = [];
+                                    // Scan localStorage for all player wallets
+                                    for (let i = 0; i < localStorage.length; i++) {
+                                        const key = localStorage.key(i);
+                                        if (key && key.startsWith('player_wallet_')) {
+                                            const playerName = key.replace('player_wallet_', '').replace(/_/g, ' ').toUpperCase();
+                                            const balance = Number(localStorage.getItem(key) || 0);
+                                            playerWallets.push({ name: playerName, balance });
+                                        }
+                                    }
+
+                                    if (playerWallets.length === 0) {
+                                        return (
+                                            <div className="text-center py-4 opacity-30">
+                                                <p className="text-[9px] font-bold uppercase tracking-widest">No player wallets found</p>
+                                            </div>
+                                        );
+                                    }
+
+                                    return playerWallets.map((wallet, idx) => (
+                                        <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2">
+                                            <span className="text-[10px] font-bold text-gray-400">{wallet.name}</span>
+                                            <span className="font-black italic text-sm">৳{wallet.balance.toLocaleString()}</span>
+                                        </div>
+                                    ));
+                                })()}
+                            </div>
+
+                            <button
+                                className="mt-4 w-full py-2 bg-red-500/10 text-red-500 text-[9px] font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all rounded"
+                                onClick={() => {
+                                    if (window.confirm("Reset all Player Wallets?")) {
+                                        // Remove all player wallet keys
+                                        const keysToRemove = [];
+                                        for (let i = 0; i < localStorage.length; i++) {
+                                            const key = localStorage.key(i);
+                                            if (key && key.startsWith('player_wallet_')) {
+                                                keysToRemove.push(key);
+                                            }
+                                        }
+                                        keysToRemove.forEach(key => localStorage.removeItem(key));
+                                        window.location.reload();
+                                    }
+                                }}
+                            >
+                                Reset Player Wallets
                             </button>
                         </div>
                     </div>
