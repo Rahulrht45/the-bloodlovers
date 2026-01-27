@@ -1,16 +1,36 @@
-# React + Vite
+# THE BLOODLOVERS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium web application built with React, Vite, and Supabase.
 
-Currently, two official plugins are available:
+## Features
+- **AI Scanner**: Extract text and data from images using Tesseract.js.
+- **Supabase Integration**: Real-time database and authentication.
+- **Premium UI**: Modern design with Framer Motion animations and Tailwind CSS.
+- **Dual Backend**: Python (for heavy processing) and Node.js servers.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started
 
-## React Compiler
+### Prerequisites
+- Node.js
+- Python (for backend)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Installation
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Setup backend (optional):
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
 
-## Expanding the ESLint configuration
+### Running the App
+- Start the frontend: `npm run dev`
+- Start the backend: Run `run_backend.bat` or `start_app.bat`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+- **Frontend**: React, Vite, Tailwind CSS, Framer Motion
+- **Backend**: Python (Flask/FastAPI), Node.js
+- **Database**: Supabase
