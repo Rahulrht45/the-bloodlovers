@@ -135,6 +135,29 @@
     color: var(--neon-cyan);
 }
 
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: var(--neon-cyan);
+    transform: scale(1.1);
+}
+
+.auth-input-wrapper input:focus~.password-toggle {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .auth-submit-btn {
     width: 100%;
     background: var(--neon-cyan);

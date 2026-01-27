@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, Loader2, Zap, Upload, Shield, Trophy } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, Zap, Upload, Shield, Trophy, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../supabase';
 import './AuthPage.css';
 
@@ -11,6 +11,7 @@ const AuthPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     // Form states
     const [email, setEmail] = useState('');
@@ -301,13 +302,21 @@ const AuthPage = () => {
                         <label>Secure Password</label>
                         <div className="auth-input-wrapper">
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
                             <Lock className="auth-input-icon" size={18} />
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() => setShowPassword(!showPassword)}
+                                tabIndex="-1"
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
