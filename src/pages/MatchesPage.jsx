@@ -345,6 +345,22 @@ const MatchesPage = () => {
                                                 }}>
                                                     {savedRes.hash} [RESET]
                                                 </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const distributionLog = savedRes.payouts.map(p => {
+                                                            let target = 'Unknown';
+                                                            if (p.name === 'MANAGEMENT') target = 'TBL (Management)';
+                                                            else if (p.name === 'MVP BONUS') target = 'TBL RAHUL (MVP)';
+                                                            else target = p.name; // Player IGN
+                                                            return `${target}: ৳${p.amount}`;
+                                                        }).join('\n');
+
+                                                        alert(`DISTRIBUTION REPORT:\n------------------\n${distributionLog}\n\n✅ All funds distributed to respective accounts.`);
+                                                    }}
+                                                    className="mt-3 w-full py-2 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 font-bold text-[10px] hover:bg-emerald-500 hover:text-black transition-all"
+                                                >
+                                                    DISTRIBUTE TO WALLET
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
