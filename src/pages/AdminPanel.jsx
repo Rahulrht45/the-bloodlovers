@@ -39,13 +39,13 @@ const AdminPanel = () => {
         prizePool: '',
         slotPrize: '',
         pmPool: '',
-        management: '10%',
-        mvp: '5%',
-        player1: '10%', player1Name: 'PLAYER 1',
-        player2: '20%', player2Name: 'PLAYER 2',
-        player3: '15%', player3Name: 'PLAYER 3',
-        player4: '10%', player4Name: 'PLAYER 4',
-        player5: '10%', player5Name: 'PLAYER 5',
+        management: '৳20',
+        mvp: '৳10',
+        player1: '৳20', player1Name: 'PLAYER 1',
+        player2: '৳20', player2Name: 'PLAYER 2',
+        player3: '৳20', player3Name: 'PLAYER 3',
+        player4: '৳20', player4Name: 'PLAYER 4',
+        player5: '৳20', player5Name: 'PLAYER 5',
         rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
         startTime: toLocalISO(new Date()),
         endTime: toLocalISO(new Date(Date.now() + 3600000))
@@ -53,6 +53,7 @@ const AdminPanel = () => {
     const [savingSettings, setSavingSettings] = useState(false);
     const [isAddingMatch, setIsAddingMatch] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [calcRank, setCalcRank] = useState('');
 
     const fetchMatchSettings = async () => {
         try {
@@ -151,13 +152,13 @@ const AdminPanel = () => {
                 prize_pool: ensureCurrency(matchForm.prizePool),
                 slot_prize: ensureCurrency(matchForm.slotPrize),
                 pm_pool: ensureCurrency(matchForm.pmPool),
-                management: ensurePercent(matchForm.management),
-                mvp: ensurePercent(matchForm.mvp),
-                player1: ensurePercent(matchForm.player1), player1_name: matchForm.player1Name,
-                player2: ensurePercent(matchForm.player2), player2_name: matchForm.player2Name,
-                player3: ensurePercent(matchForm.player3), player3_name: matchForm.player3Name,
-                player4: ensurePercent(matchForm.player4), player4_name: matchForm.player4Name,
-                player5: ensurePercent(matchForm.player5), player5_name: matchForm.player5Name,
+                management: ensureCurrency(matchForm.management),
+                mvp: ensureCurrency(matchForm.mvp),
+                player1: ensureCurrency(matchForm.player1), player1_name: matchForm.player1Name,
+                player2: ensureCurrency(matchForm.player2), player2_name: matchForm.player2Name,
+                player3: ensureCurrency(matchForm.player3), player3_name: matchForm.player3Name,
+                player4: ensureCurrency(matchForm.player4), player4_name: matchForm.player4Name,
+                player5: ensureCurrency(matchForm.player5), player5_name: matchForm.player5Name,
                 rank1_percent: ensureCurrency(matchForm.rank1),
                 rank2_percent: ensureCurrency(matchForm.rank2),
                 rank3_percent: ensureCurrency(matchForm.rank3),
@@ -193,13 +194,13 @@ const AdminPanel = () => {
                 prizePool: '',
                 slotPrize: '',
                 pmPool: '',
-                management: '10%',
-                mvp: '5%',
-                player1: '10%', player1Name: 'PLAYER 1',
-                player2: '20%', player2Name: 'PLAYER 2',
-                player3: '15%', player3Name: 'PLAYER 3',
-                player4: '10%', player4Name: 'PLAYER 4',
-                player5: '10%', player5Name: 'PLAYER 5',
+                management: '৳20',
+                mvp: '৳10',
+                player1: '৳20', player1Name: 'PLAYER 1',
+                player2: '৳20', player2Name: 'PLAYER 2',
+                player3: '৳20', player3Name: 'PLAYER 3',
+                player4: '৳20', player4Name: 'PLAYER 4',
+                player5: '৳20', player5Name: 'PLAYER 5',
                 rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
                 startTime: toLocalISO(new Date()),
                 endTime: toLocalISO(new Date(Date.now() + 3600000))
@@ -715,13 +716,24 @@ const AdminPanel = () => {
                                             />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">P & M Pool</label>
-                                            <input
-                                                type="text"
-                                                value={matchForm.pmPool}
-                                                onChange={(e) => setMatchForm({ ...matchForm, pmPool: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
-                                            />
+                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">P & M Pool Calculator</label>
+                                            <div className="flex gap-2">
+                                                <select
+                                                    value={calcRank}
+                                                    onChange={(e) => setCalcRank(e.target.value)}
+                                                    className="w-1/2 bg-white/5 border border-white/10 rounded-lg px-2 py-3 text-white text-xs focus:border-[var(--neon-cyan)] outline-none"
+                                                >
+                                                    <option value="">Select Rank</option>
+                                                    {[1, 2, 3, 4].map(n => <option key={n} value={n}>#{n} Place</option>)}
+                                                </select>
+                                                <input
+                                                    type="text"
+                                                    readOnly
+                                                    value={calcRank ? `৳${Math.max(0, (parseInt(String(matchForm[`rank${calcRank}`]).replace(/[৳₹,]/g, '')) || 0) - (parseInt(String(matchForm.slotPrize).replace(/[৳₹,]/g, '')) || 0))}` : ''}
+                                                    className="w-1/2 bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-[#00ff88] font-bold text-center outline-none"
+                                                    placeholder="---"
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="admin-section-divider lg:col-span-2" />
@@ -791,7 +803,7 @@ const AdminPanel = () => {
                                                         value={matchForm[`player${num}`]}
                                                         onChange={(e) => setMatchForm({ ...matchForm, [`player${num}`]: e.target.value })}
                                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all font-mono"
-                                                        placeholder="e.g. 10%"
+                                                        placeholder="e.g. ৳20"
                                                     />
                                                 </div>
                                             </React.Fragment>

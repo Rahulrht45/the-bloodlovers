@@ -38,26 +38,24 @@ const MvpPage = () => {
             { id: 4, prize: getVal(match.rank4_percent) }
         ];
 
-        // Get configured percentages (fallback to defaults if missing)
-        const playerPct = getPercent(match.player1) || 0.10; // Assuming equal share for simplicity or taking P1's share
-        const mgmtPct = getPercent(match.management) || 0.10;
-        const mvpPct = getPercent(match.mvp) || 0.05;
+        // Get configured amounts (exact Currency values)
+        const playerAmt = getVal(match.player1);
+        const mgmtAmt = getVal(match.management);
+        const mvpAmt = getVal(match.mvp);
 
         const breakdown = ranks.map(r => {
             const pmPool = Math.max(0, r.prize - slotFee);
 
-            // Distribution Logic
-            const playerShare = (pmPool * playerPct);
-            const managementShare = (pmPool * mgmtPct);
-            const mvpShare = (pmPool * mvpPct);
+            // For showcase, we just display the configured amounts. 
+            // The 'P&M Pool' row is still useful for reference.
 
             return {
                 rank: r.id,
                 basePrize: r.prize,
                 pmPool: pmPool,
-                playerShare: Math.floor(playerShare),
-                managementShare: Math.floor(managementShare),
-                mvpShare: Math.floor(mvpShare)
+                playerShare: playerAmt,
+                managementShare: mgmtAmt,
+                mvpShare: mvpAmt
             };
         });
 
@@ -67,7 +65,7 @@ const MvpPage = () => {
         setCalcResult({
             matchName: match.org_name,
             slotFee: slotFee,
-            percentages: { player: playerPct, mgmt: mgmtPct, mvp: mvpPct },
+            amounts: { player: playerAmt, mgmt: mgmtAmt, mvp: mvpAmt },
             ranks: breakdown,
             totalMvpPool: breakdown.reduce((sum, item) => sum + item.mvpShare, 0)
         });
@@ -148,9 +146,9 @@ const MvpPage = () => {
                                         <th>Rank</th>
                                         <th>Base Prize</th>
                                         <th>P&M Pool ({calcResult.matchName})</th>
-                                        <th>Player ({formatPercent(calcResult.percentages.player)})</th>
-                                        <th>Mgmt ({formatPercent(calcResult.percentages.mgmt)})</th>
-                                        <th>MVP ({formatPercent(calcResult.percentages.mvp)})</th>
+                                        <th>Player Share</th>
+                                        <th>Mgmt Share</th>
+                                        <th>MVP Bonus</th>
                                     </tr>
                                 </thead>
                                 <tbody>
