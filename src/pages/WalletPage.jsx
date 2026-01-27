@@ -45,7 +45,7 @@ const WalletPage = () => {
                             </div>
                             <div className="text-right">
                                 <span className="block text-[10px] font-black text-white/40 uppercase tracking-[3px]">Total Balance</span>
-                                <h1 className="text-5xl font-black italic tracking-tighter mt-1">₹{balance.toLocaleString()}</h1>
+                                <h1 className="text-5xl font-black italic tracking-tighter mt-1">৳{balance.toLocaleString()}</h1>
                             </div>
                         </div>
 
@@ -54,7 +54,7 @@ const WalletPage = () => {
                                 <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Total Profits</span>
                                 <div className="flex items-center gap-2 text-[#00ff88]">
                                     <TrendingUp size={14} />
-                                    <span className="font-black italic">₹{balance.toLocaleString()}</span>
+                                    <span className="font-black italic">৳{balance.toLocaleString()}</span>
                                 </div>
                             </div>
                             <div className="stat-box">
@@ -98,7 +98,7 @@ const WalletPage = () => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[#00ff88] font-black italic text-lg">+ ₹{tx.amount.toLocaleString()}</div>
+                                            <div className="text-[#00ff88] font-black italic text-lg">+ ৳{tx.amount.toLocaleString()}</div>
                                             <div className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Settled</div>
                                         </div>
                                     </div>

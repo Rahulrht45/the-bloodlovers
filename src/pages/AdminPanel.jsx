@@ -46,6 +46,7 @@ const AdminPanel = () => {
         player3: '15%', player3Name: 'PLAYER 3',
         player4: '10%', player4Name: 'PLAYER 4',
         player5: '10%', player5Name: 'PLAYER 5',
+        rank1: '৳600', rank2: '৳300', rank3: '৳100', rank4: '৳50',
         startTime: toLocalISO(new Date()),
         endTime: toLocalISO(new Date(Date.now() + 3600000))
     });
@@ -93,6 +94,10 @@ const AdminPanel = () => {
             player3: match.player3, player3Name: match.player3_name || 'PLAYER 3',
             player4: match.player4, player4Name: match.player4_name || 'PLAYER 4',
             player5: match.player5, player5Name: match.player5_name || 'PLAYER 5',
+            rank1: match.rank1_percent || '৳0',
+            rank2: match.rank2_percent || '৳0',
+            rank3: match.rank3_percent || '৳0',
+            rank4: match.rank4_percent || '৳0',
             startTime: toLocalISO(match.start_at),
             endTime: toLocalISO(match.end_at)
         });
@@ -122,9 +127,9 @@ const AdminPanel = () => {
         };
 
         const ensureCurrency = (val) => {
-            if (!val) return '₹0';
+            if (!val) return '৳0';
             const str = String(val).trim();
-            if (/^\d+$/.test(str.replace(/[₹,]/g, ''))) return `₹${str.replace('₹', '')}`;
+            if (/^\d+$/.test(str.replace(/[৳₹,]/g, ''))) return `৳${str.replace(/[৳₹]/g, '')}`;
             return str;
         };
 
@@ -143,6 +148,10 @@ const AdminPanel = () => {
                 player3: ensurePercent(matchForm.player3), player3_name: matchForm.player3Name,
                 player4: ensurePercent(matchForm.player4), player4_name: matchForm.player4Name,
                 player5: ensurePercent(matchForm.player5), player5_name: matchForm.player5Name,
+                rank1_percent: ensureCurrency(matchForm.rank1),
+                rank2_percent: ensureCurrency(matchForm.rank2),
+                rank3_percent: ensureCurrency(matchForm.rank3),
+                rank4_percent: ensureCurrency(matchForm.rank4),
                 start_at: new Date(matchForm.startTime).toISOString(),
                 end_at: new Date(matchForm.endTime).toISOString()
             };
@@ -728,6 +737,23 @@ const AdminPanel = () => {
                                                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
+
+                                        <div className="md:col-span-2">
+                                            <h4 className="admin-tactical-header">Prize Distribution (Ranks 1-4)</h4>
+                                        </div>
+
+                                        {[1, 2, 3, 4].map((num) => (
+                                            <div key={num} className="admin-input-group">
+                                                <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">#{num} Prize Amount</label>
+                                                <input
+                                                    type="text"
+                                                    value={matchForm[`rank${num}`]}
+                                                    onChange={(e) => setMatchForm({ ...matchForm, [`rank${num}`]: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all font-mono"
+                                                    placeholder="e.g. ৳500"
+                                                />
+                                            </div>
+                                        ))}
 
                                         <div className="admin-section-divider lg:col-span-2" />
 

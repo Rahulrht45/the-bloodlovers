@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Trophy, Users, Award, Target, Gamepad2, Clock, Wallet, Activity, Hash, ArrowUpRight, Zap } from 'lucide-react';
+import { Trophy, Users, Award, Target, Gamepad2, Clock, Wallet, Activity, Hash, ArrowUpRight, Zap, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '../supabase';
 import bgImage from '../assets/freefire_bg.jpg';
 import './MatchesPage.css';
@@ -8,7 +8,18 @@ const MatchesPage = () => {
     const [matches, setMatches] = useState([]);
     const [walletBalance, setWalletBalance] = useState(() => Number(localStorage.getItem('bloods_wallet_balance') || 0));
     const [activeRosterId, setActiveRosterId] = useState(null);
+    const [activePrizeMatchId, setActivePrizeMatchId] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [user, setUser] = useState(null);
+
+    // --- FETCH USER ---
+    useEffect(() => {
+        const getAuth = async () => {
+            const { data: { user: u } } = await supabase.auth.getUser();
+            setUser(u);
+        };
+        getAuth();
+    }, []);
 
     // --- REFRESH DATA ---
     const fetchMatchSettings = useCallback(async () => {
@@ -76,10 +87,15 @@ const MatchesPage = () => {
         // --- 1. ASSIGN FINAL POSITION (1-4) ---
         const rank = userRank;
 
-        // --- 2. PREDEFINED WINNING AMOUNTS (Proportional to Pool) ---
-        const prizeMap = { 1: 0.6, 2: 0.3, 3: 0.1, 4: 0.05 };
-        const totalPool = parseInt(String(match.prize_pool).replace(/[₹,]/g, '')) || 0;
-        const totalWin = Math.floor(totalPool * (prizeMap[rank] || 0));
+        // --- 2. DYNAMIC WINNING AMOUNTS (Fixed amounts from match config) ---
+        const getPrizeValue = (p) => parseInt(String(p).replace(/[৳₹,]/g, '')) || 0;
+        const prizeMap = {
+            1: getPrizeValue(match.rank1_percent || '0'),
+            2: getPrizeValue(match.rank2_percent || '0'),
+            3: getPrizeValue(match.rank3_percent || '0'),
+            4: getPrizeValue(match.rank4_percent || '0')
+        };
+        const totalWin = prizeMap[rank] || 0;
 
         // --- 3. ROSTER PERCENTAGES ---
         const roster = [
@@ -113,6 +129,8 @@ const MatchesPage = () => {
             id: match.id,
             rank: rank,
             totalWin: totalWin,
+            individualWin: creditingAmt,
+            myIGN: userIGN,
             payouts: payouts,
             settledAt: new Date().toISOString(),
             hash: btoa(`${match.id}-${rank}-${totalWin}-${Date.now()}`).slice(0, 18).toUpperCase()
@@ -121,7 +139,12 @@ const MatchesPage = () => {
         // --- 5. PERSISTENCE & LOCKING ---
         localStorage.setItem(`match_res_${match.id}`, JSON.stringify(result));
 
-        const newBalance = walletBalance + totalWin;
+        // --- 5.1 INDIVIDUAL PAYOUT CALCULATION (CRITICAL FIX) ---
+        const userIGN = user?.user_metadata?.full_name || '';
+        const myPayout = payouts.find(p => p.name.trim().toLowerCase() === userIGN.trim().toLowerCase());
+        const creditingAmt = myPayout ? myPayout.amount : 0;
+
+        const newBalance = walletBalance + creditingAmt;
         setWalletBalance(newBalance);
         localStorage.setItem('bloods_wallet_balance', String(newBalance));
 
@@ -130,12 +153,18 @@ const MatchesPage = () => {
         txs.push({
             id: `TX-${Date.now()}-${match.id}`,
             matchId: match.id,
-            amount: totalWin,
+            amount: creditingAmt,
             type: 'TOURNAMENT_WIN',
-            ref: `Rank #${rank} in ${match.org_name}`,
+            ref: `Rank #${rank} Share (${myPayout?.percent || 0}%) in ${match.org_name}`,
             date: new Date().toLocaleString()
         });
         localStorage.setItem('bloods_txs', JSON.stringify(txs));
+
+        if (creditingAmt > 0) {
+            alert(`Victory! Credited ৳${creditingAmt.toLocaleString()} to your wallet.`);
+        } else if (userIGN) {
+            alert(`Match settled. Squad won ৳${totalWin.toLocaleString()}, but your IGN (${userIGN}) was not found in the roster.`);
+        }
     };
 
     useEffect(() => {
@@ -156,7 +185,7 @@ const MatchesPage = () => {
                 </div>
                 <div>
                     <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Global Credits</span>
-                    <span className="font-black italic text-xl">₹{walletBalance.toLocaleString()}</span>
+                    <span className="font-black italic text-xl">৳{walletBalance.toLocaleString()}</span>
                 </div>
             </div>
 
@@ -199,9 +228,36 @@ const MatchesPage = () => {
 
                             <div className="match-card-body">
                                 <div className="match-stats-row">
-                                    <div className="match-stat-box">
-                                        <span className="stat-box-label">Prize Pool</span>
-                                        <span className="stat-box-value text-[#FBBC04]">₹{match.prize_pool || '0'}</span>
+                                    <div
+                                        className={`match-stat-box clickable-stat ${activePrizeMatchId === match.id ? 'active' : ''}`}
+                                        onClick={() => setActivePrizeMatchId(activePrizeMatchId === match.id ? null : match.id)}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <span className="stat-box-label">Prize Pool</span>
+                                            {activePrizeMatchId === match.id ? <ChevronUp size={10} className="text-[#FBBC04]" /> : <ChevronDown size={10} className="text-gray-500" />}
+                                        </div>
+                                        <span className="stat-box-value text-[#FBBC04]">৳{match.prize_pool || '0'}</span>
+
+                                        {activePrizeMatchId === match.id && (
+                                            <div className="prize-breakdown-mini mt-3 pt-3 border-t border-white/5 space-y-2">
+                                                {[1, 2, 3, 4].map(rank => {
+                                                    const getPrizeValue = (p) => parseInt(String(p).replace(/[৳₹,]/g, '')) || 0;
+                                                    const pMap = {
+                                                        1: getPrizeValue(match.rank1_percent || '0'),
+                                                        2: getPrizeValue(match.rank2_percent || '0'),
+                                                        3: getPrizeValue(match.rank3_percent || '0'),
+                                                        4: getPrizeValue(match.rank4_percent || '0')
+                                                    };
+                                                    const amt = pMap[rank];
+                                                    return (
+                                                        <div key={rank} className="flex justify-between items-center text-[10px]">
+                                                            <span className="font-bold text-gray-400">Position #{rank}</span>
+                                                            <span className="font-black text-[var(--neon-cyan)]">৳{amt.toLocaleString()}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="match-stat-box">
                                         <span className="stat-box-label">Instance ID</span>
@@ -235,8 +291,13 @@ const MatchesPage = () => {
                                                 <div className="result-value">RANK #{savedRes.rank}</div>
                                             </div>
                                             <div className="text-right">
-                                                <span className="result-label">Net Payout</span>
-                                                <div className="result-value text-[#00ff88]">₹{savedRes.totalWin.toLocaleString()}</div>
+                                                <span className="result-label">{savedRes.individualWin > 0 ? 'Your Share' : 'Squad Prize'}</span>
+                                                <div className="result-value text-[#00ff88]">
+                                                    ৳{(savedRes.individualWin || 0).toLocaleString()}
+                                                </div>
+                                                {savedRes.individualWin > 0 && (
+                                                    <div className="text-[8px] text-gray-400 font-bold uppercase mt-1">Total: ৳{savedRes.totalWin.toLocaleString()}</div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -247,7 +308,7 @@ const MatchesPage = () => {
                                                     <span className="font-bold opacity-70">{p.name}</span>
                                                     <div className="flex gap-3 items-center">
                                                         <span className="text-[9px] px-2 py-0.5 bg-black/50 rounded-md text-[var(--neon-cyan)]">{p.percent}%</span>
-                                                        <span className="font-black">₹{p.amount.toLocaleString()}</span>
+                                                        <span className="font-black">৳{p.amount.toLocaleString()}</span>
                                                     </div>
                                                 </div>
                                             ))}

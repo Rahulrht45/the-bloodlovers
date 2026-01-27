@@ -276,6 +276,40 @@
     font-weight: 800;
 }
 
+.clickable-stat {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.clickable-stat:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(251, 188, 4, 0.3);
+}
+
+.clickable-stat.active {
+    background: rgba(251, 188, 4, 0.05);
+    border-color: rgba(251, 188, 4, 0.4);
+    box-shadow: inset 0 0 20px rgba(251, 188, 4, 0.05);
+}
+
+.prize-breakdown-mini {
+    animation: slideDownPrize 0.3s ease-out;
+}
+
+@keyframes slideDownPrize {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Result Box */
 .match-result-box {
     background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.02));
