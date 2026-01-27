@@ -249,12 +249,14 @@ const AuthPage = () => {
                                         className="auth-select"
                                     >
                                         <option value="">Select your role</option>
-                                        <option value="Entry Fragger">Entry Fragger</option>
-                                        <option value="Support">Support</option>
-                                        <option value="AWPer">AWPer</option>
-                                        <option value="IGL (In-Game Leader)">IGL (In-Game Leader)</option>
-                                        <option value="Lurker">Lurker</option>
-                                        <option value="Flex">Flex</option>
+                                        <option value="RUSHER">RUSHER</option>
+                                        <option value="SUPPORT">SUPPORT</option>
+                                        <option value="BOMBER">BOMBER</option>
+                                        <option value="SNIPER">SNIPER</option>
+                                        <option value="RIFLER">RIFLER</option>
+                                        <option value="COACH">COACH</option>
+                                        <option value="MANAGER">MANAGER</option>
+                                        <option value="ANALYST">ANALYST</option>
                                     </select>
                                     <User className="auth-input-icon" size={18} />
                                 </div>
