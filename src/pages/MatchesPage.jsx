@@ -106,8 +106,8 @@ const MatchesPage = () => {
             { name: match.player3_name || 'Player 3', percent: getPercent(match.player3) },
             { name: match.player4_name || 'Player 4', percent: getPercent(match.player4) },
             { name: match.player5_name || 'Player 5', percent: getPercent(match.player5) },
-            { name: 'Management Share', percent: getPercent(match.management) },
-            { name: 'MVP Reward', percent: getPercent(match.mvp) }
+            { name: 'MANAGEMENT', percent: getPercent(match.management) },
+            { name: 'MVP BONUS', percent: getPercent(match.mvp) }
         ];
 
         // --- 3. CALCULATE PAYOUTS (Based on P&M Pool) ---
