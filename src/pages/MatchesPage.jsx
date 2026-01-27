@@ -84,47 +84,53 @@ const MatchesPage = () => {
     const settleMatch = (match, userRank) => {
         if (localStorage.getItem(`match_res_${match.id}`)) return;
 
-        // --- 1. ASSIGN FINAL POSITION (1-4) ---
+        // --- 1. RANK & PRIZES ---
         const rank = userRank;
+        const getVal = (p) => parseInt(String(p).replace(/[৳₹,]/g, '')) || 0;
+        const getPercent = (p) => parseInt(String(p).replace('%', '')) || 0;
 
-        // --- 2. DYNAMIC WINNING AMOUNTS (Fixed amounts from match config) ---
-        const getPrizeValue = (p) => parseInt(String(p).replace(/[৳₹,]/g, '')) || 0;
         const prizeMap = {
-            1: getPrizeValue(match.rank1_percent || '0'),
-            2: getPrizeValue(match.rank2_percent || '0'),
-            3: getPrizeValue(match.rank3_percent || '0'),
-            4: getPrizeValue(match.rank4_percent || '0')
+            1: getVal(match.rank1_percent),
+            2: getVal(match.rank2_percent),
+            3: getVal(match.rank3_percent),
+            4: getVal(match.rank4_percent)
         };
-        const totalWin = prizeMap[rank] || 0;
+        const rankPrize = prizeMap[rank] || 0;
+        const slotFee = getVal(match.slot_prize);
+        const pmPool = Math.max(0, rankPrize - slotFee);
 
-        // --- 3. ROSTER PERCENTAGES ---
-        const roster = [
-            { name: match.player1_name || 'Player 1', percent: parseInt(match.player1) || 0 },
-            { name: match.player2_name || 'Player 2', percent: parseInt(match.player2) || 0 },
-            { name: match.player3_name || 'Player 3', percent: parseInt(match.player3) || 0 },
-            { name: match.player4_name || 'Player 4', percent: parseInt(match.player4) || 0 },
-            { name: match.player5_name || 'Management', percent: parseInt(match.player5) || 0 }
+        // --- 2. ROSTER & SHARES (from Match Settings) ---
+        const distribution = [
+            { name: match.player1_name || 'Player 1', percent: getPercent(match.player1) },
+            { name: match.player2_name || 'Player 2', percent: getPercent(match.player2) },
+            { name: match.player3_name || 'Player 3', percent: getPercent(match.player3) },
+            { name: match.player4_name || 'Player 4', percent: getPercent(match.player4) },
+            { name: match.player5_name || 'Player 5', percent: getPercent(match.player5) },
+            { name: 'Management Share', percent: getPercent(match.management) },
+            { name: 'MVP Reward', percent: getPercent(match.mvp) }
         ];
 
-        // --- 4. PERFECT DISTRIBUTION (FLOOR + REMAINDER CORRECTION) ---
+        // --- 3. CALCULATE PAYOUTS (Based on P&M Pool) ---
         let payouts = [];
-        let distributedAmt = 0;
+        let distributedFromPool = 0;
 
-        roster.forEach((member) => {
-            const amt = Math.floor(totalWin * member.percent / 100);
+        distribution.forEach(d => {
+            const amt = Math.floor(pmPool * (d.percent / 100));
             payouts.push({
-                name: member.name,
-                percent: member.percent,
+                name: d.name,
+                percent: d.percent,
                 amount: amt
             });
-            distributedAmt += amt;
+            distributedFromPool += amt;
         });
 
-        const remainder = totalWin - distributedAmt;
+        // --- 4. ROUNDING CORRECTION ---
+        const remainder = pmPool - distributedFromPool;
         if (remainder > 0 && payouts.length > 0) {
             payouts[payouts.length - 1].amount += remainder;
         }
 
+        // --- 5. USER CREDIT ---
         const userIGN = user?.user_metadata?.full_name || '';
         const myPayout = payouts.find(p => p.name.trim().toLowerCase() === userIGN.trim().toLowerCase());
         const creditingAmt = myPayout ? myPayout.amount : 0;
@@ -132,22 +138,24 @@ const MatchesPage = () => {
         const result = {
             id: match.id,
             rank: rank,
-            totalWin: totalWin,
+            totalWin: rankPrize, // Display Squad Win as Rank Prize
+            pmPool: pmPool,
+            slotFee: slotFee,
             individualWin: creditingAmt,
             myIGN: userIGN,
             payouts: payouts,
             settledAt: new Date().toISOString(),
-            hash: btoa(`${match.id}-${rank}-${totalWin}-${Date.now()}`).slice(0, 18).toUpperCase()
+            hash: btoa(`${match.id}-${rank}-${rankPrize}-${Date.now()}`).slice(0, 18).toUpperCase()
         };
 
-        // --- 5. PERSISTENCE & LOCKING ---
+        // --- 6. SAVE & UPDATE ---
         localStorage.setItem(`match_res_${match.id}`, JSON.stringify(result));
 
         const newBalance = walletBalance + creditingAmt;
         setWalletBalance(newBalance);
         localStorage.setItem('bloods_wallet_balance', String(newBalance));
 
-        // --- 6. TRANSACTION LEDGER ---
+        // --- 7. LEDGER ---
         const txs = JSON.parse(localStorage.getItem('bloods_txs') || '[]');
         txs.push({
             id: `TX-${Date.now()}-${match.id}`,
@@ -162,7 +170,9 @@ const MatchesPage = () => {
         if (creditingAmt > 0) {
             alert(`Victory! Credited ৳${creditingAmt.toLocaleString()} to your wallet.`);
         } else if (userIGN) {
-            alert(`Match settled. Squad won ৳${totalWin.toLocaleString()}, but your IGN (${userIGN}) was not found in the roster.`);
+            alert(`Match settled. Squad won ৳${rankPrize.toLocaleString()}, but your IGN (${userIGN}) was not found in the roster.`);
+        } else {
+            alert(`Match settled. Squad won ৳${rankPrize.toLocaleString()}. Please sign in to claim shares.`);
         }
     };
 
@@ -306,7 +316,7 @@ const MatchesPage = () => {
                                                 <div key={i} className="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg">
                                                     <span className="font-bold opacity-70">{p.name}</span>
                                                     <div className="flex gap-3 items-center">
-                                                        <span className="text-[9px] px-2 py-0.5 bg-black/50 rounded-md text-[var(--neon-cyan)]">{p.percent}%</span>
+                                                        <span className="text-[9px] px-2 py-0.5 bg-black/50 rounded-md text-[var(--neon-cyan)]">P&M Pool: {p.percent}%</span>
                                                         <span className="font-black">৳{p.amount.toLocaleString()}</span>
                                                     </div>
                                                 </div>
