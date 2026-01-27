@@ -497,6 +497,120 @@ const AdminPanel = () => {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* PLAYER BALANCES SECTION */}
+                                <div className="admin-content-box pt-8 md:col-span-2">
+                                    <div className="flex justify-between items-center px-4 mb-4">
+                                        <h2 className="text-xl font-black italic text-[#FBBC04] uppercase">Player Wallet Balances</h2>
+                                        <button
+                                            onClick={() => window.location.reload()}
+                                            className="text-[10px] font-bold uppercase tracking-widest bg-white/5 px-4 py-2 rounded-lg hover:bg-white/10 transition-all border border-white/10"
+                                        >
+                                            Refresh
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+                                        {/* Corporate Wallets */}
+                                        <div className="bg-white/5 border border-[var(--neon-cyan)]/20 rounded-xl p-4">
+                                            <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[var(--neon-cyan)] mb-4">Corporate Wallets (TBL)</h3>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                                    <span className="text-[10px] font-bold text-gray-400">TBL MANAGEMENT</span>
+                                                    <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_mgmt_bal') || 0).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                                    <span className="text-[10px] font-bold text-gray-400">TBL RAHUL (MVP)</span>
+                                                    <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_mvp_bal') || 0).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                                    <span className="text-[10px] font-bold text-gray-400">ORG RESERVE</span>
+                                                    <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_reserve_bal') || 0).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center pt-2 border-t border-[var(--neon-cyan)]/30">
+                                                    <span className="text-[10px] font-black text-[var(--neon-cyan)] uppercase">Total Corporate</span>
+                                                    <span className="font-black italic text-lg text-[var(--neon-cyan)]">
+                                                        ৳{(
+                                                            Number(localStorage.getItem('tbl_mgmt_bal') || 0) +
+                                                            Number(localStorage.getItem('tbl_mvp_bal') || 0) +
+                                                            Number(localStorage.getItem('tbl_reserve_bal') || 0)
+                                                        ).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Player Wallets */}
+                                        <div className="bg-white/5 border border-[#FBBC04]/20 rounded-xl p-4">
+                                            <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[#FBBC04] mb-4">Individual Player Wallets</h3>
+                                            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                                                {(() => {
+                                                    const playerWallets = [];
+                                                    let totalPlayerBalance = 0;
+
+                                                    // Scan localStorage for all player wallets
+                                                    for (let i = 0; i < localStorage.length; i++) {
+                                                        const key = localStorage.key(i);
+                                                        if (key && key.startsWith('player_wallet_')) {
+                                                            const playerName = key.replace('player_wallet_', '').replace(/_/g, ' ').toUpperCase();
+                                                            const balance = Number(localStorage.getItem(key) || 0);
+                                                            playerWallets.push({ name: playerName, balance });
+                                                            totalPlayerBalance += balance;
+                                                        }
+                                                    }
+
+                                                    if (playerWallets.length === 0) {
+                                                        return (
+                                                            <div className="text-center py-8 opacity-30">
+                                                                <p className="text-[9px] font-bold uppercase tracking-widest">No player wallets found</p>
+                                                                <p className="text-[8px] text-gray-500 mt-1">Distribute match earnings to create player wallets</p>
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <>
+                                                            {playerWallets.map((wallet, idx) => (
+                                                                <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2">
+                                                                    <span className="text-[10px] font-bold text-gray-400">{wallet.name}</span>
+                                                                    <span className="font-black italic text-sm text-white">৳{wallet.balance.toLocaleString()}</span>
+                                                                </div>
+                                                            ))}
+                                                            <div className="flex justify-between items-center pt-2 border-t border-[#FBBC04]/30">
+                                                                <span className="text-[10px] font-black text-[#FBBC04] uppercase">Total Players</span>
+                                                                <span className="font-black italic text-lg text-[#FBBC04]">৳{totalPlayerBalance.toLocaleString()}</span>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Grand Total */}
+                                    <div className="mx-4 mt-4 p-4 bg-gradient-to-r from-[var(--neon-cyan)]/10 to-[#FBBC04]/10 border border-white/20 rounded-xl">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-black uppercase tracking-widest text-white">Grand Total (All Wallets)</span>
+                                            <span className="font-black italic text-2xl text-white">
+                                                ৳{(() => {
+                                                    let total = 0;
+                                                    total += Number(localStorage.getItem('tbl_mgmt_bal') || 0);
+                                                    total += Number(localStorage.getItem('tbl_mvp_bal') || 0);
+                                                    total += Number(localStorage.getItem('tbl_reserve_bal') || 0);
+
+                                                    for (let i = 0; i < localStorage.length; i++) {
+                                                        const key = localStorage.key(i);
+                                                        if (key && key.startsWith('player_wallet_')) {
+                                                            total += Number(localStorage.getItem(key) || 0);
+                                                        }
+                                                    }
+
+                                                    return total.toLocaleString();
+                                                })()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 

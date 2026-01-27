@@ -355,30 +355,44 @@ const MatchesPage = () => {
 
                                                         const distributionLog = savedRes.payouts.map(p => {
                                                             let target = 'Unknown';
-                                                            if (p.name === 'MANAGEMENT') {
+                                                            const nameTrimmed = (p.name || '').trim().toUpperCase();
+                                                            console.log(`Processing payout: "${p.name}" -> "${nameTrimmed}" = ৳${p.amount}`);
+
+                                                            if (nameTrimmed === 'MANAGEMENT') {
                                                                 target = 'TBL (Management)';
                                                                 const cur = Number(localStorage.getItem('tbl_mgmt_bal') || 0);
-                                                                localStorage.setItem('tbl_mgmt_bal', String(cur + p.amount));
-                                                            } else if (p.name === 'MVP BONUS') {
+                                                                const newBal = cur + p.amount;
+                                                                localStorage.setItem('tbl_mgmt_bal', String(newBal));
+                                                                console.log(`✅ MANAGEMENT: ${cur} + ${p.amount} = ${newBal}`);
+                                                            } else if (nameTrimmed === 'MVP BONUS') {
                                                                 target = 'TBL RAHUL (MVP)';
                                                                 const cur = Number(localStorage.getItem('tbl_mvp_bal') || 0);
-                                                                localStorage.setItem('tbl_mvp_bal', String(cur + p.amount));
-                                                            } else if (p.name === 'ORG RESERVE') {
+                                                                const newBal = cur + p.amount;
+                                                                localStorage.setItem('tbl_mvp_bal', String(newBal));
+                                                                console.log(`✅ MVP BONUS: ${cur} + ${p.amount} = ${newBal}`);
+                                                            } else if (nameTrimmed === 'ORG RESERVE') {
                                                                 target = 'TBL (Org Reserve)';
                                                                 const cur = Number(localStorage.getItem('tbl_reserve_bal') || 0);
-                                                                localStorage.setItem('tbl_reserve_bal', String(cur + p.amount));
+                                                                const newBal = cur + p.amount;
+                                                                localStorage.setItem('tbl_reserve_bal', String(newBal));
+                                                                console.log(`✅ ORG RESERVE: ${cur} + ${p.amount} = ${newBal}`);
                                                             } else {
                                                                 // Credit individual player wallets
                                                                 target = p.name;
                                                                 const playerKey = `player_wallet_${p.name.toLowerCase().replace(/\s+/g, '_')}`;
                                                                 const cur = Number(localStorage.getItem(playerKey) || 0);
-                                                                localStorage.setItem(playerKey, String(cur + p.amount));
+                                                                const newBal = cur + p.amount;
+                                                                localStorage.setItem(playerKey, String(newBal));
+                                                                console.log(`✅ PLAYER ${p.name}: ${cur} + ${p.amount} = ${newBal}`);
                                                             }
                                                             return `${target}: ৳${p.amount.toLocaleString()}`;
                                                         }).join('\n');
 
                                                         localStorage.setItem(`dist_done_${match.id}`, "true");
                                                         alert(`DISTRIBUTION REPORT:\n------------------\n${distributionLog}\n\n✅ TBL Management & Player funds successfully credited.`);
+
+                                                        // Force page reload to show updated balances
+                                                        window.location.reload();
                                                     }}
                                                     className="mt-3 w-full py-2 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 font-bold text-[10px] hover:bg-emerald-500 hover:text-black transition-all"
                                                 >
