@@ -26,6 +26,11 @@ const AdminPanel = () => {
     const [editValues, setEditValues] = useState({});
 
     const [allMatches, setAllMatches] = useState([]);
+    const toLocalISO = (date) => {
+        const tzoffset = date.getTimezoneOffset() * 60000;
+        return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+    };
+
     const [matchForm, setMatchForm] = useState({
         id: null,
         orgName: 'BLOODLOVERS',
@@ -36,9 +41,13 @@ const AdminPanel = () => {
         pmPool: '',
         management: '10%',
         mvp: '5%',
+        player1: '10%', player1Name: 'PLAYER 1',
+        player2: '20%', player2Name: 'PLAYER 2',
+        player3: '15%', player3Name: 'PLAYER 3',
+        player4: '10%', player4Name: 'PLAYER 4',
         player5: '10%', player5Name: 'PLAYER 5',
-        startTime: new Date().toISOString().slice(0, 16),
-        endTime: new Date(Date.now() + 3600000).toISOString().slice(0, 16)
+        startTime: toLocalISO(new Date()),
+        endTime: toLocalISO(new Date(Date.now() + 3600000))
     });
     const [savingSettings, setSavingSettings] = useState(false);
     const [isAddingMatch, setIsAddingMatch] = useState(false);
@@ -62,6 +71,13 @@ const AdminPanel = () => {
     };
 
     const handleEditMatch = (match) => {
+        const toLocalISO = (dateStr) => {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const tzoffset = date.getTimezoneOffset() * 60000;
+            return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+        };
+
         setMatchForm({
             id: match.id,
             orgName: match.org_name,
@@ -77,8 +93,8 @@ const AdminPanel = () => {
             player3: match.player3, player3Name: match.player3_name || 'PLAYER 3',
             player4: match.player4, player4Name: match.player4_name || 'PLAYER 4',
             player5: match.player5, player5Name: match.player5_name || 'PLAYER 5',
-            startTime: match.start_at ? new Date(match.start_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
-            endTime: match.end_at ? new Date(match.end_at).toISOString().slice(0, 16) : new Date(Date.now() + 3600000).toISOString().slice(0, 16)
+            startTime: toLocalISO(match.start_at),
+            endTime: toLocalISO(match.end_at)
         });
         setIsAddingMatch(true);
     };
@@ -122,6 +138,9 @@ const AdminPanel = () => {
                 pm_pool: ensureCurrency(matchForm.pmPool),
                 management: ensurePercent(matchForm.management),
                 mvp: ensurePercent(matchForm.mvp),
+                player1: ensurePercent(matchForm.player1), player1_name: matchForm.player1Name,
+                player2: ensurePercent(matchForm.player2), player2_name: matchForm.player2Name,
+                player3: ensurePercent(matchForm.player3), player3_name: matchForm.player3Name,
                 player4: ensurePercent(matchForm.player4), player4_name: matchForm.player4Name,
                 player5: ensurePercent(matchForm.player5), player5_name: matchForm.player5Name,
                 start_at: new Date(matchForm.startTime).toISOString(),
@@ -142,6 +161,11 @@ const AdminPanel = () => {
             alert('Match configuration saved!');
             fetchMatchSettings();
             setIsAddingMatch(false);
+            const toLocalISO = (date) => {
+                const tzoffset = date.getTimezoneOffset() * 60000;
+                return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+            };
+
             setMatchForm({
                 id: null,
                 orgName: 'BLOODLOVERS',
@@ -157,8 +181,8 @@ const AdminPanel = () => {
                 player3: '15%', player3Name: 'PLAYER 3',
                 player4: '10%', player4Name: 'PLAYER 4',
                 player5: '10%', player5Name: 'PLAYER 5',
-                startTime: new Date().toISOString().slice(0, 16),
-                endTime: new Date(Date.now() + 3600000).toISOString().slice(0, 16)
+                startTime: toLocalISO(new Date()),
+                endTime: toLocalISO(new Date(Date.now() + 3600000))
             });
         } catch (err) {
             console.error('Error saving match:', err);

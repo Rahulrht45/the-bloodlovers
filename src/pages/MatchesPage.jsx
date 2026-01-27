@@ -43,7 +43,6 @@ const MatchesPage = () => {
         };
     }, [fetchMatchSettings]);
 
-    // --- MATCH ENGINE LOGIC ---
     const getMatchState = (match) => {
         if (!match.start_at || !match.end_at) return match.status || 'LIVE';
 
@@ -60,11 +59,22 @@ const MatchesPage = () => {
         return 'LOCKED';
     };
 
-    const settleMatch = (match) => {
+    const getTimeRemaining = (targetDate) => {
+        const diff = new Date(targetDate).getTime() - currentTime.getTime();
+        if (diff <= 0) return "00:00:00";
+
+        const hours = Math.floor(diff / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+
+        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
+
+    const settleMatch = (match, userRank) => {
         if (localStorage.getItem(`match_res_${match.id}`)) return;
 
         // --- 1. ASSIGN FINAL POSITION (1-4) ---
-        const rank = Math.floor(Math.random() * 4) + 1;
+        const rank = userRank;
 
         // --- 2. PREDEFINED WINNING AMOUNTS (Proportional to Pool) ---
         const prizeMap = { 1: 0.6, 2: 0.3, 3: 0.1, 4: 0.05 };
@@ -129,11 +139,7 @@ const MatchesPage = () => {
     };
 
     useEffect(() => {
-        matches.forEach(m => {
-            if (getMatchState(m) === 'LOCKED') {
-                settleMatch(m);
-            }
-        });
+        // Automatic settlement removed to allow for manual position entry
     }, [matches, currentTime]);
 
     return (
@@ -173,10 +179,20 @@ const MatchesPage = () => {
                                 <div className={`match-status-pill status-${mState}`}>
                                     <Zap size={10} className={mState === 'LIVE' ? 'animate-pulse' : ''} />
                                     {mState}
+                                    {mState === 'UPCOMING' && (
+                                        <span className="ml-3 border-l border-white/20 pl-3 text-[var(--neon-cyan)] font-mono tracking-tighter">
+                                            {getTimeRemaining(match.start_at)}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="match-card-info">
-                                    <div className="match-card-org">{match.org_name}</div>
+                                    <div className="match-card-org">
+                                        {match.org_name}
+                                        {mState === 'UPCOMING' && (
+                                            <span className="ml-2 opacity-50 text-[9px]">Starts @ {new Date(match.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        )}
+                                    </div>
                                     <h2 className="match-card-map">{match.map_name || 'BERMUDA'}</h2>
                                 </div>
                             </div>
@@ -192,6 +208,24 @@ const MatchesPage = () => {
                                         <span className="stat-box-value">#{match.id}</span>
                                     </div>
                                 </div>
+
+                                {mState === 'LOCKED' && (
+                                    <div className="match-settlement-prompt p-4 bg-white/5 border border-dashed border-[#ffc800]/30 rounded-2xl mb-4">
+                                        <span className="text-[10px] font-black uppercase text-[#ffc800] tracking-widest mb-3 block text-center">Match Ended // Select Squad Position</span>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {[1, 2, 3, 4].map((r) => (
+                                                <button
+                                                    key={r}
+                                                    onClick={() => settleMatch(match, r)}
+                                                    className="rank-btn py-3 bg-black/40 border border-white/5 rounded-xl hover:bg-[#ffc800] hover:text-black transition-all font-black text-sm"
+                                                >
+                                                    #{r}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className="text-[9px] text-gray-500 text-center mt-3 font-bold uppercase tracking-wider">Note: Position cannot be changed after submission</p>
+                                    </div>
+                                )}
 
                                 {mState === 'SETTLED' && savedRes && (
                                     <div className="match-result-box">
