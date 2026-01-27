@@ -36,14 +36,13 @@ const AdminPanel = () => {
         pmPool: '',
         management: '10%',
         mvp: '5%',
-        player1: '10%', player1Name: 'PLAYER 1',
-        player2: '20%', player2Name: 'PLAYER 2',
-        player3: '15%', player3Name: 'PLAYER 3',
-        player4: '10%', player4Name: 'PLAYER 4',
-        player5: '10%', player5Name: 'PLAYER 5'
+        player5: '10%', player5Name: 'PLAYER 5',
+        startTime: new Date().toISOString().slice(0, 16),
+        endTime: new Date(Date.now() + 3600000).toISOString().slice(0, 16)
     });
     const [savingSettings, setSavingSettings] = useState(false);
     const [isAddingMatch, setIsAddingMatch] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const fetchMatchSettings = async () => {
         try {
@@ -77,7 +76,9 @@ const AdminPanel = () => {
             player2: match.player2, player2Name: match.player2_name || 'PLAYER 2',
             player3: match.player3, player3Name: match.player3_name || 'PLAYER 3',
             player4: match.player4, player4Name: match.player4_name || 'PLAYER 4',
-            player5: match.player5, player5Name: match.player5_name || 'PLAYER 5'
+            player5: match.player5, player5Name: match.player5_name || 'PLAYER 5',
+            startTime: match.start_at ? new Date(match.start_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
+            endTime: match.end_at ? new Date(match.end_at).toISOString().slice(0, 16) : new Date(Date.now() + 3600000).toISOString().slice(0, 16)
         });
         setIsAddingMatch(true);
     };
@@ -121,11 +122,10 @@ const AdminPanel = () => {
                 pm_pool: ensureCurrency(matchForm.pmPool),
                 management: ensurePercent(matchForm.management),
                 mvp: ensurePercent(matchForm.mvp),
-                player1: ensurePercent(matchForm.player1), player1_name: matchForm.player1Name,
-                player2: ensurePercent(matchForm.player2), player2_name: matchForm.player2Name,
-                player3: ensurePercent(matchForm.player3), player3_name: matchForm.player3Name,
                 player4: ensurePercent(matchForm.player4), player4_name: matchForm.player4Name,
                 player5: ensurePercent(matchForm.player5), player5_name: matchForm.player5Name,
+                start_at: new Date(matchForm.startTime).toISOString(),
+                end_at: new Date(matchForm.endTime).toISOString()
             };
 
             if (matchForm.id) {
@@ -156,7 +156,9 @@ const AdminPanel = () => {
                 player2: '20%', player2Name: 'PLAYER 2',
                 player3: '15%', player3Name: 'PLAYER 3',
                 player4: '10%', player4Name: 'PLAYER 4',
-                player5: '10%', player5Name: 'PLAYER 5'
+                player5: '10%', player5Name: 'PLAYER 5',
+                startTime: new Date().toISOString().slice(0, 16),
+                endTime: new Date(Date.now() + 3600000).toISOString().slice(0, 16)
             });
         } catch (err) {
             console.error('Error saving match:', err);
@@ -319,8 +321,16 @@ const AdminPanel = () => {
         <div className="fixed inset-0 z-[100] bg-[#020014] overflow-auto">
             <div className="admin-container">
                 <div className="admin-dashboard">
+                    {/* MOBILE TOGGLE */}
+                    <button
+                        className="admin-mobile-toggle"
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                    >
+                        {sidebarOpen ? '✕' : '☰'}
+                    </button>
+
                     {/* SIDEBAR */}
-                    <div className="admin-sidebar">
+                    <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                         <div className="sidebar-logo">
                             <div className="logo-icon">
                                 <Zap size={20} color="#000" />
@@ -371,12 +381,15 @@ const AdminPanel = () => {
                     {/* MAIN CONTENT */}
                     <div className="admin-main">
                         <header className="dashboard-header">
-                            <div>
-                                <h1>{activeTab}</h1>
-                                <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>Welcome back, Operator {username}</p>
+                            <div className="flex items-center gap-4">
+                                <div className="md:hidden w-8" /> {/* Spacer for toggle */}
+                                <div>
+                                    <h1>{activeTab}</h1>
+                                    <p className="text-xs opacity-40">Welcome back, Operator {username}</p>
+                                </div>
                             </div>
                             <div className="admin-user-info">
-                                <span className="text-sm font-medium">ADMIN MODE</span>
+                                <span className="hidden sm:inline text-sm font-medium">ADMIN MODE</span>
                                 <div className="avatar-circle">{username[0]}</div>
                             </div>
                         </header>
@@ -667,10 +680,35 @@ const AdminPanel = () => {
                                             />
                                         </div>
 
-                                        <div className="col-span-1 md:col-span-2 border-t border-white/10 my-4" />
+                                        <div className="admin-section-divider lg:col-span-2" />
 
-                                        <div className="md:col-span-2 mb-4">
-                                            <h4 className="text-[var(--neon-cyan)] text-[10px] font-black italic uppercase tracking-[3px]">Player Roster & Shares</h4>
+                                        <div className="md:col-span-2">
+                                            <h4 className="admin-tactical-header">Match Lifecycle & Timing</h4>
+                                        </div>
+
+                                        <div className="admin-input-group">
+                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Start Time</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={matchForm.startTime}
+                                                onChange={(e) => setMatchForm({ ...matchForm, startTime: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="admin-input-group">
+                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">End Time</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={matchForm.endTime}
+                                                onChange={(e) => setMatchForm({ ...matchForm, endTime: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                            />
+                                        </div>
+
+                                        <div className="admin-section-divider lg:col-span-2" />
+
+                                        <div className="md:col-span-2">
+                                            <h4 className="admin-tactical-header">Player Roster & Shares</h4>
                                         </div>
 
                                         {[1, 2, 3, 4, 5].map((num) => (
@@ -698,7 +736,7 @@ const AdminPanel = () => {
                                             </React.Fragment>
                                         ))}
 
-                                        <div className="col-span-1 md:col-span-2 border-t border-white/10 my-4" />
+                                        <div className="admin-section-divider lg:col-span-2" />
 
                                         <div className="admin-input-group">
                                             <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Management Share</label>

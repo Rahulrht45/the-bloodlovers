@@ -7,6 +7,7 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import ImageExtractorPage from './pages/ImageExtractorPage';
 import MatchesPage from './pages/MatchesPage';
+import WalletPage from './pages/WalletPage';
 import bgMain from './assets/bg-main.jpg';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/extract" element={<ImageExtractorPage />} />
                         <Route path="/matches" element={<MatchesPage />} />
+                        <Route path="/wallet" element={<WalletPage />} />
                     </Routes>
                 </main>
             </div>

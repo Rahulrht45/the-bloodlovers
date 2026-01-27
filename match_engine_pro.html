@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ENT ESPORTS // MATCH ENGINE PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@100..900&family=Orbitron:wght@400..900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #020014;
+            --cyan: #00f0ff;
+            --purple: #9d00ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Exo', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 50px 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-family: 'Orbitron';
+            font-size: 1.8rem;
+            font-style: italic;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .wallet-hud {
+            text-align: right;
+            background: var(--glass);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .wallet-val {
+            font-family: 'Orbitron';
+            font-size: 1.5rem;
+            color: var(--cyan);
+        }
+
+        .badge {
+            padding: 6px 15px;
+            border-radius: 100px;
+            font-family: 'Orbitron';
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .LIVE {
+            background: rgba(255, 62, 62, 0.1);
+            color: #ff3e3e;
+            border: 1px solid rgba(255, 62, 62, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .SETTLED {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 20px;
+        }
+
+        .card label {
+            font-size: 0.6rem;
+            opacity: 0.4;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .card h2 {
+            font-family: 'Orbitron';
+            font-size: 1.4rem;
+            font-style: italic;
+        }
+
+        .payout-list {
+            margin-top: 40px;
+        }
+
+        .payout-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .payout-item h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .payout-amt {
+            font-family: 'Orbitron';
+            color: var(--cyan);
+            font-weight: 900;
+        }
+
+        .ledger {
+            margin-top: 50px;
+        }
+
+        .tx {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--glass);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-bg"></div>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h5 style="color:var(--cyan); font-size: 0.6rem; letter-spacing: 5px; text-transform: uppercase;">Engine
+                    Mode: Pro</h5>
+                <h1>Nova Esports</h1>
+            </div>
+            <div class="wallet-hud">
+                <small style="opacity:0.4; text-transform: uppercase; font-size: 0.5rem; letter-spacing: 2px;">Secured
+                    Balance</small>
+                <div class="wallet-val">₹<span id="bal">1,25,000</span></div>
+            </div>
+        </header>
+
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <div id="status" class="badge">Tactical Sync...</div>
+            <div id="clock" style="font-family: 'Orbitron'; font-size: 0.8rem; opacity: 0.4;">00:00:00</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="card"><label>Match Instance</label>
+                <h2 id="mid">MTCH-882</h2>
+            </div>
+            <div class="card"><label>Final Rank</label>
+                <h2 id="rank">—</h2>
+            </div>
+            <div class="card"><label>Net Profit</label>
+                <h2 id="profit" style="color:#00ff88;">₹0</h2>
+            </div>
+        </div>
+
+        <div id="settlement" style="display:none;">
+            <h3
+                style="font-family:'Orbitron'; font-size: 1rem; letter-spacing: 3px; border-left: 3px solid var(--cyan); padding-left: 15px; margin: 40px 0 20px;">
+                Payout Distribution</h3>
+            <div id="payouts"></div>
+            <div id="hash" style="font-family: monospace; font-size: 0.6rem; opacity: 0.2; margin-top: 20px;"></div>
+        </div>
+
+        <div class="ledger">
+            <h3
+                style="font-family:'Orbitron'; font-size: 1rem; letter-spacing: 3px; border-left: 3px solid #666; padding-left: 15px; margin-bottom: 20px;">
+                Transaction Ledger</h3>
+            <div id="txs"></div>
+        </div>
+    </div>
+
+    <script>
+        const CFG = { id: "MTCH-PX92", start: Date.now() + 3000, end: Date.now() + 10000, prizes: { 1: 50000, 2: 25000, 3: 10000, 4: 5000 }, roster: [{ n: "Specter", p: 30 }, { n: "Ghost", p: 25 }, { n: "Phantom", p: 20 }, { n: "Reaper", p: 15 }, { n: "House", p: 10 }] };
+        let state = localStorage.getItem('pro_state') || "LIVE";
+        let wallet = Number(localStorage.getItem('pro_wallet') || 125000);
+        let txs = JSON.parse(localStorage.getItem('pro_txs') || "[]");
+
+        function settle() {
+            if (localStorage.getItem('pro_res')) return;
+            const r = Math.floor(Math.random() * 4) + 1;
+            const win = CFG.prizes[r];
+            let dist = 0, payouts = [];
+            CFG.roster.forEach(m => {
+                let a = Math.floor(win * m.p / 100);
+                payouts.push({ n: m.n, p: m.p, a });
+                dist += a;
+            });
+            payouts[payouts.length - 1].a += (win - dist);
+            const res = { r, win, payouts, sig: btoa(win + "-" + r).slice(0, 16) };
+            localStorage.setItem('pro_res', JSON.stringify(res));
+            wallet += win; localStorage.setItem('pro_wallet', wallet);
+            txs.push({ id: "TX-" + Date.now(), ref: "Match Win #" + r, amt: win, date: new Date().toLocaleTimeString() });
+            localStorage.setItem('pro_txs', JSON.stringify(txs));
+            state = "SETTLED"; localStorage.setItem('pro_state', state);
+            render();
+        }
+
+        function render() {
+            document.getElementById('bal').textContent = wallet.toLocaleString();
+            document.getElementById('status').textContent = state;
+            document.getElementById('status').className = "badge " + state;
+            document.getElementById('mid').textContent = CFG.id;
+            const r = JSON.parse(localStorage.getItem('pro_res') || "null");
+            if (r) {
+                document.getElementById('rank').textContent = "#" + r.r;
+                document.getElementById('profit').textContent = "₹" + r.win.toLocaleString();
+                document.getElementById('settlement').style.display = "block";
+                document.getElementById('payouts').innerHTML = r.payouts.map(p => `<div class="payout-item"><div><h4>${p.n}</h4><small>${p.p}% Stake</small></div><div class="payout-amt">₹${p.a.toLocaleString()}</div></div>`).join('');
+                document.getElementById('hash').textContent = "SIG_PRO_ENGINE: " + r.sig;
+            }
+            document.getElementById('txs').innerHTML = txs.slice().reverse().map(t => `<div class="tx"><div><strong>${t.ref}</strong><br><small>${t.date}</small></div><div style="color:#00ff88; font-family:'Orbitron'">+ ₹${t.amt.toLocaleString()}</div></div>`).join('');
+        }
+
+        setInterval(() => {
+            const now = Date.now();
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+            if (state === "LIVE" && now >= CFG.end) settle();
+            render();
+        }, 1000);
+        render();
+    </script>
+</body>
+
+</html>

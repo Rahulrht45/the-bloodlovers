@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Tesseract from 'tesseract.js';
-import { Plus, Mic, Upload, Bot, User, Send } from 'lucide-react';
+import { Plus, Mic, Upload, Bot, User, Send, Zap, BarChart3, MessageSquare } from 'lucide-react';
 import './ImageExtractorPage.css';
 
 const ImageExtractorPage = () => {
@@ -12,6 +12,7 @@ const ImageExtractorPage = () => {
     const [status, setStatus] = useState('idle'); // 'idle', 'reading', 'done'
     const [inputText, setInputText] = useState('');
     const [isThinking, setIsThinking] = useState(false);
+    const [extractionMode, setExtractionMode] = useState('auto'); // 'auto', 'stats', 'chat'
 
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -40,7 +41,7 @@ const ImageExtractorPage = () => {
             console.log("Memory updated:", data);
         } catch (error) {
             console.error("Failed to upload text to memory:", error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Failed to connect to AI memory. Ensure backend is running." }]);
+            // Non-critical if chat is not used immediately
         }
     };
 
@@ -53,25 +54,65 @@ const ImageExtractorPage = () => {
                 body: JSON.stringify({ question })
             });
             const data = await res.json();
-            setMessages(prev => [...prev, { role: 'assistant', content: data.answer || "I couldn't find an answer." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: data.answer || "I couldn't find an answer in the provided context." }]);
         } catch (error) {
             console.error("AI Error:", error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Error contacting AI." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Error contacting AI Backend (Port 3000). Ensure Node server is running." }]);
         } finally {
             setIsThinking(false);
         }
     };
 
+    const runPythonScan = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('http://localhost:8000/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                const players = result.data.players;
+                let summary = `✅ **Statistical Scan Complete (Engine: FreeFireScanner)**\n\n`;
+                summary += `**Map**: ${result.data.map} | **Mode**: ${result.data.match_type}\n\n`;
+
+                players.forEach((p, i) => {
+                    summary += `${i + 1}. **${p.name}** - Kills: ${p.kills} | Dmg: ${p.damage} | Surv: ${p.survival}\n`;
+                });
+
+                setMessages(prev => [...prev, {
+                    role: 'assistant',
+                    content: summary + "\nStats have been synced to the global leaderboard."
+                }]);
+                return true;
+            }
+        } catch (error) {
+            console.warn("Python scanner (Port 8000) not available, falling back to general OCR.");
+        }
+        return false;
+    };
+
     // OCR Logic
-    const readImage = (file) => {
+    const readImage = async (file) => {
         if (!file) return;
 
         setStatus('reading');
         setProgress(0);
-        setMenuOpen(false); // Close menu
-        // Clear previous context if needed, or keep appending? Let's clear for this session to match "New Chat" feel
-        // setMessages([]); 
+        setMenuOpen(false);
 
+        // Try Python Stats Scanner First if in 'auto' or 'stats' mode
+        if (extractionMode !== 'chat') {
+            const pySuccess = await runPythonScan(file);
+            if (pySuccess) {
+                setStatus('done');
+                return;
+            }
+        }
+
+        // Fallback to Tesseract for General OCR / Chat
         Tesseract.recognize(
             file,
             'eng',
@@ -85,7 +126,7 @@ const ImageExtractorPage = () => {
         ).then(async ({ data: { text } }) => {
             const cleanText = text.trim();
             if (cleanText) {
-                setMessages(prev => [...prev, { role: 'system', content: `📄 **Scanned Text**: \n\n${cleanText.substring(0, 300)}... (stored in memory)` }]);
+                setMessages(prev => [...prev, { role: 'assistant', content: `📄 **General OCR Complete**\n\nFound ${cleanText.split(' ').length} words. You can now ask questions about this document.` }]);
                 setStatus('done');
                 await uploadTextToMemory(cleanText);
             } else {
@@ -99,42 +140,26 @@ const ImageExtractorPage = () => {
         });
     };
 
-    // File Input Handler
+    // Handlers
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            readImage(file);
-        }
+        if (file) readImage(file);
     };
 
-    // Drag & Drop Handlers
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragOver(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        setIsDragOver(false);
-    };
-
+    const handleDragOver = (e) => { e.preventDefault(); setIsDragOver(true); };
+    const handleDragLeave = (e) => { e.preventDefault(); setIsDragOver(false); };
     const handleDrop = (e) => {
         e.preventDefault();
         setIsDragOver(false);
         const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            readImage(file);
-        }
+        if (file && file.type.startsWith('image/')) readImage(file);
     };
 
-    // Chat Handler
     const handleSendMessage = () => {
         if (!inputText.trim()) return;
-
         const question = inputText;
         setMessages(prev => [...prev, { role: 'user', content: question }]);
         setInputText('');
-
         askAI(question);
     };
 
@@ -145,12 +170,9 @@ const ImageExtractorPage = () => {
         }
     };
 
-    // Click outside to close menu
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (menuOpen && !event.target.closest('.chat-input-container')) {
-                setMenuOpen(false);
-            }
+            if (menuOpen && !event.target.closest('.chat-input-container')) setMenuOpen(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -159,43 +181,72 @@ const ImageExtractorPage = () => {
     return (
         <div className="image-extractor-page">
             <header className="header">
-                <div className="logo">ChatGPT</div>
-                <button className="plus-btn">Get Plus</button>
+                <div className="logo">
+                    <Zap size={20} className="text-[var(--neon-cyan)] mr-2" />
+                    BLOODLOVERS <span className="text-[var(--neon-cyan)] italic ml-1">AI</span>
+                </div>
+                <div className="flex gap-4">
+                    <button
+                        className={`mode-btn ${extractionMode === 'auto' ? 'active' : ''}`}
+                        onClick={() => setExtractionMode('auto')}
+                    >
+                        Auto
+                    </button>
+                    <button
+                        className={`mode-btn ${extractionMode === 'stats' ? 'active' : ''}`}
+                        onClick={() => setExtractionMode('stats')}
+                        title="Focus on Match Stats (Python Engine)"
+                    >
+                        Stats
+                    </button>
+                </div>
             </header>
 
             <main className="main">
-                {messages.length === 0 && status !== 'reading' && <h1>What can I help with?</h1>}
+                {messages.length === 0 && status !== 'reading' && (
+                    <div className="hero-text-container">
+                        <h1>How can I help with your <span className="text-[var(--neon-cyan)] italic">Matches</span>?</h1>
+                        <p className="subtitle">Upload screenshots to scan kills, analyze stats, or chat with match data.</p>
+                    </div>
+                )}
 
-                {/* Drop Zone (Only show if no messages and not reading, acting as placeholder) */}
+                {/* Drop Zone */}
                 {messages.length === 0 && status !== 'reading' && (
                     <div
                         className={`drop-zone ${isDragOver ? 'drag-active' : ''}`}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
                     >
-                        <p onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
-                            Drag & drop an image here to start
-                        </p>
+                        <div className="drop-icon">
+                            <Upload size={40} />
+                        </div>
+                        <p>Drag & drop or <span className="highlight">Browse Image</span></p>
+                        <span className="hint">Supports Match Screenshots & Documents</span>
                     </div>
                 )}
 
-                {/* Reading Status */}
+                {/* Status Bar */}
                 {status === 'reading' && (
-                    <div className="drop-zone" style={{ border: 'none' }}>
-                        <p>🧠 Reading text from image... {progress}%</p>
-                        <div style={{ marginTop: '10px', height: '4px', background: '#333', borderRadius: '2px', overflow: 'hidden', width: '300px', margin: '10px auto' }}>
-                            <div style={{ width: `${progress}%`, height: '100%', background: '#6f5cff', transition: 'width 0.3s' }}></div>
+                    <div className="reading-container">
+                        <div className="brain-animation">
+                            <div className="pulse"></div>
+                            <Bot size={48} className="text-[var(--neon-cyan)]" />
+                        </div>
+                        <p>🧠 Scanning with Neural Engine... {progress}%</p>
+                        <div className="progress-track">
+                            <div className="progress-fill" style={{ width: `${progress}%` }}></div>
                         </div>
                     </div>
                 )}
 
-                {/* Chat History */}
+                {/* Messages */}
                 <div className="response-container">
                     {messages.map((msg, index) => (
-                        <div key={index} className="gpt-message" style={{ background: msg.role === 'user' ? 'transparent' : '#1a1a1a', border: msg.role === 'user' ? 'none' : '1px solid #333' }}>
-                            <div className="gpt-icon" style={{ background: msg.role === 'user' ? '#5436DA' : '#19c37d' }}>
-                                {msg.role === 'user' ? <User size={20} color="white" /> : <Bot size={20} color="white" />}
+                        <div key={index} className={`gpt-message ${msg.role}`}>
+                            <div className="gpt-icon">
+                                {msg.role === 'user' ? <User size={18} /> : (msg.role === 'system' ? <BarChart3 size={18} /> : <Bot size={18} />)}
                             </div>
                             <div className="gpt-text">
                                 {msg.content}
@@ -203,58 +254,59 @@ const ImageExtractorPage = () => {
                         </div>
                     ))}
                     {isThinking && (
-                        <div className="gpt-message">
-                            <div className="gpt-icon">
-                                <Bot size={20} color="white" />
-                            </div>
-                            <div className="gpt-text">
-                                <span className="animate-pulse">Thinking...</span>
-                            </div>
+                        <div className="gpt-message assistant thinking">
+                            <div className="gpt-icon"><Bot size={18} /></div>
+                            <div className="gpt-text"><span className="animate-pulse">Analyzing context...</span></div>
                         </div>
                     )}
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Area - Fixed at bottom or floating? ChatGPT keeps it sticky bottom. */}
-                {/* For this simple layout, we'll keep it in flow but sticky */}
-                <div className="chat-input-container" style={{ position: 'sticky', bottom: '20px', marginTop: 'auto', background: '#0f0f0f', padding: '10px 0' }}>
-                    <div className="chat-input-bar">
-                        <button className="icon-btn" onClick={toggleMenu} title="Add attachment">
-                            <Plus size={20} />
-                        </button>
-                        <input
-                            type="text"
-                            placeholder="Message ChatGPT..."
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                        />
-                        {inputText ? (
-                            <button className="icon-btn" onClick={handleSendMessage} style={{ color: '#6f5cff' }}>
-                                <Send size={20} />
+                {/* Input Area */}
+                <div className="chat-input-wrapper">
+                    <div className="chat-input-container">
+                        <div className="chat-input-bar">
+                            <button className="icon-btn" onClick={toggleMenu} title="Upload Image">
+                                <Plus size={20} />
                             </button>
-                        ) : (
-                            <button className="icon-btn" title="Voice Mode">
-                                <Mic size={20} />
-                            </button>
+                            <input
+                                type="text"
+                                placeholder="Analyze match stats or ask about scanned text..."
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                            />
+                            {inputText ? (
+                                <button className="icon-btn send-active" onClick={handleSendMessage}>
+                                    <Send size={20} />
+                                </button>
+                            ) : (
+                                <button className="icon-btn" title="Voice Assist">
+                                    <Mic size={20} />
+                                </button>
+                            )}
+                        </div>
+
+                        {menuOpen && (
+                            <div className="upload-menu">
+                                <label className="upload-menu-item">
+                                    <Upload size={18} className="text-[var(--neon-cyan)]" />
+                                    <span>Upload Match Screen</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        hidden
+                                        onChange={handleFileChange}
+                                        ref={fileInputRef}
+                                    />
+                                </label>
+                                <div className="upload-menu-item" onClick={() => setMessages([])}>
+                                    <MessageSquare size={18} />
+                                    <span>New Analysis</span>
+                                </div>
+                            </div>
                         )}
                     </div>
-
-                    {menuOpen && (
-                        <div className="upload-menu" style={{ bottom: '80px' }}>
-                            <label className="upload-menu-item">
-                                <Upload size={18} />
-                                <span>Upload image</span>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    hidden
-                                    onChange={handleFileChange}
-                                    ref={fileInputRef}
-                                />
-                            </label>
-                        </div>
-                    )}
                 </div>
             </main>
         </div>
@@ -262,3 +314,4 @@ const ImageExtractorPage = () => {
 };
 
 export default ImageExtractorPage;
+

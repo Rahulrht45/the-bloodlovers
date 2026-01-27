@@ -1,28 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { Trophy, Users, Award, Target, Gamepad2 } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Trophy, Users, Award, Target, Gamepad2, Clock, Wallet, Activity, Hash, ArrowUpRight, Zap } from 'lucide-react';
 import { supabase } from '../supabase';
 import bgImage from '../assets/freefire_bg.jpg';
+import './MatchesPage.css';
 
 const MatchesPage = () => {
-    // This data would typically come from your backend/Supabase
     const [matches, setMatches] = useState([]);
+    const [walletBalance, setWalletBalance] = useState(() => Number(localStorage.getItem('bloods_wallet_balance') || 0));
+    const [activeRosterId, setActiveRosterId] = useState(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    // Fetch match settings from Supabase
+    // --- REFRESH DATA ---
+    const fetchMatchSettings = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('match_settings')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) console.error('Error fetching match settings:', error);
+            if (data) setMatches(data);
+        } catch (err) {
+            console.error('Failed to load match settings:', err);
+        }
+    }, []);
+
     useEffect(() => {
-        const fetchMatchSettings = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('match_settings')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) console.error('Error fetching match settings:', error);
-                if (data) setMatches(data);
-            } catch (err) {
-                console.error('Failed to load match settings:', err);
-            }
-        };
-
         fetchMatchSettings();
 
         const subscription = supabase
@@ -32,141 +35,237 @@ const MatchesPage = () => {
             })
             .subscribe();
 
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+
         return () => {
             subscription.unsubscribe();
+            clearInterval(timer);
         };
-    }, []);
+    }, [fetchMatchSettings]);
 
-    const [activeRosterId, setActiveRosterId] = useState(null);
+    // --- MATCH ENGINE LOGIC ---
+    const getMatchState = (match) => {
+        if (!match.start_at || !match.end_at) return match.status || 'LIVE';
+
+        const now = currentTime.getTime();
+        const start = new Date(match.start_at).getTime();
+        const end = new Date(match.end_at).getTime();
+
+        if (now < start) return 'UPCOMING';
+        if (now >= start && now < end) return 'LIVE';
+
+        const result = localStorage.getItem(`match_res_${match.id}`);
+        if (result) return 'SETTLED';
+
+        return 'LOCKED';
+    };
+
+    const settleMatch = (match) => {
+        if (localStorage.getItem(`match_res_${match.id}`)) return;
+
+        // --- 1. ASSIGN FINAL POSITION (1-4) ---
+        const rank = Math.floor(Math.random() * 4) + 1;
+
+        // --- 2. PREDEFINED WINNING AMOUNTS (Proportional to Pool) ---
+        const prizeMap = { 1: 0.6, 2: 0.3, 3: 0.1, 4: 0.05 };
+        const totalPool = parseInt(String(match.prize_pool).replace(/[₹,]/g, '')) || 0;
+        const totalWin = Math.floor(totalPool * (prizeMap[rank] || 0));
+
+        // --- 3. ROSTER PERCENTAGES ---
+        const roster = [
+            { name: match.player1_name || 'Player 1', percent: parseInt(match.player1) || 0 },
+            { name: match.player2_name || 'Player 2', percent: parseInt(match.player2) || 0 },
+            { name: match.player3_name || 'Player 3', percent: parseInt(match.player3) || 0 },
+            { name: match.player4_name || 'Player 4', percent: parseInt(match.player4) || 0 },
+            { name: match.player5_name || 'Management', percent: parseInt(match.player5) || 0 }
+        ];
+
+        // --- 4. PERFECT DISTRIBUTION (FLOOR + REMAINDER CORRECTION) ---
+        let payouts = [];
+        let distributedAmt = 0;
+
+        roster.forEach((member) => {
+            const amt = Math.floor(totalWin * member.percent / 100);
+            payouts.push({
+                name: member.name,
+                percent: member.percent,
+                amount: amt
+            });
+            distributedAmt += amt;
+        });
+
+        const remainder = totalWin - distributedAmt;
+        if (remainder > 0 && payouts.length > 0) {
+            payouts[payouts.length - 1].amount += remainder;
+        }
+
+        const result = {
+            id: match.id,
+            rank: rank,
+            totalWin: totalWin,
+            payouts: payouts,
+            settledAt: new Date().toISOString(),
+            hash: btoa(`${match.id}-${rank}-${totalWin}-${Date.now()}`).slice(0, 18).toUpperCase()
+        };
+
+        // --- 5. PERSISTENCE & LOCKING ---
+        localStorage.setItem(`match_res_${match.id}`, JSON.stringify(result));
+
+        const newBalance = walletBalance + totalWin;
+        setWalletBalance(newBalance);
+        localStorage.setItem('bloods_wallet_balance', String(newBalance));
+
+        // --- 6. TRANSACTION LEDGER ---
+        const txs = JSON.parse(localStorage.getItem('bloods_txs') || '[]');
+        txs.push({
+            id: `TX-${Date.now()}-${match.id}`,
+            matchId: match.id,
+            amount: totalWin,
+            type: 'TOURNAMENT_WIN',
+            ref: `Rank #${rank} in ${match.org_name}`,
+            date: new Date().toLocaleString()
+        });
+        localStorage.setItem('bloods_txs', JSON.stringify(txs));
+    };
+
+    useEffect(() => {
+        matches.forEach(m => {
+            if (getMatchState(m) === 'LOCKED') {
+                settleMatch(m);
+            }
+        });
+    }, [matches, currentTime]);
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black text-white flex justify-center overflow-y-auto overflow-x-hidden font-exo">
-            <div
-                className="fixed inset-0 bg-cover bg-center -z-20 transform scale-105"
-                style={{ backgroundImage: `url(${bgImage})` }}
-            />
-            <div className="fixed inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90 -z-10 backdrop-blur-[2px]" />
+        <div className="matches-page-container">
+            {/* BACKGROUNDS */}
+            <div className="matches-bg-overlay" style={{ backgroundImage: `url(${bgImage})` }} />
+            <div className="matches-gradient-overlay" />
+            <div className="matches-grid-pattern" />
 
-            <div className="w-full max-w-6xl relative z-10 py-12 px-4 flex flex-col items-center">
-
-                <h1 className="text-[var(--neon-cyan)] font-black italic text-4xl mb-12 tracking-tighter drop-shadow-[0_0_20px_rgba(0,240,255,0.4)]">TOURNAMENT FEED</h1>
-
-                <div className="flex flex-col gap-16 w-full max-w-2xl mb-20">
-                    {matches.map((match, idx) => (
-                        <div key={match.id} className="match-card-group flex flex-col gap-6 animate-slide-up" style={{ animationDelay: `${idx * 0.1}s` }}>
-                            {/* Org Header */}
-                            <div className="text-center">
-                                <div className="inline-block px-12 py-4 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl text-2xl font-black italic tracking-widest text-white shadow-xl">
-                                    {match.org_name}
-                                    <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[var(--neon-cyan)] to-transparent mt-1 rounded-full opacity-60" />
-                                </div>
-                            </div>
-
-                            {/* Hero Feature */}
-                            <div className="h-[240px] bg-black/50 rounded-[30px] border-2 border-white/10 flex items-center justify-center relative overflow-hidden shadow-[0_0_50px_rgba(0,243,255,0.15)] group">
-                                <div className={`absolute top-4 right-4 text-white px-4 py-1 rounded-full font-black text-xs z-20 shadow-lg ${match.status === 'LIVE' ? 'bg-red-600 animate-pulse' : 'bg-blue-600'}`}>
-                                    {match.status || 'LIVE'}
-                                </div>
-                                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 opacity-80"
-                                    style={{ backgroundImage: `url(${bgImage})` }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                                <div className="relative z-10 text-center">
-                                    <h3 className="text-2xl font-black italic text-white drop-shadow-md uppercase tracking-widest">{match.map_name || 'BERMUDA'}</h3>
-                                    <p className="text-[var(--neon-cyan)] text-xs tracking-[4px] font-bold mt-1">OPERATIONAL ZONE</p>
-
-                                    <button
-                                        onClick={() => setActiveRosterId(activeRosterId === match.id ? null : match.id)}
-                                        className="mt-4 bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-2 rounded-full text-[10px] font-black tracking-widest transition-all backdrop-blur-md"
-                                    >
-                                        {activeRosterId === match.id ? 'CLOSE ROSTER' : 'VIEW ROSTER'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {activeRosterId === match.id ? (
-                                <div className="grid grid-cols-1 gap-4 animate-in fade-in zoom-in duration-300">
-                                    {[1, 2, 3, 4, 5].map((n) => (
-                                        <div key={n} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex justify-between items-center backdrop-blur-sm">
-                                            <div className="flex flex-col text-left">
-                                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">PLAYER 0{n}</span>
-                                                <span className="text-[17px] font-black italic text-white uppercase">{match[`player${n}_name`] || `PLAYER ${n}`}</span>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-[10px] text-[var(--neon-cyan)] font-bold block uppercase">SHARE</span>
-                                                <span className="text-[20px] font-black italic text-[var(--neon-cyan)]">{match[`player${n}`] || '0%'}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <>
-                                    <DetailCard label="SLOT PRIZE" value={match.slot_prize} highlight="cyan" featured />
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <DetailCard label="PRIZE POOL" value={match.prize_pool} highlight="gold" />
-                                        <DetailCard label="P & M POOL" value={match.pm_pool} />
-                                        <DetailCard label="MANAGEMENT" value={match.management} small />
-                                        <DetailCard label="MVP" value={match.mvp} small />
-                                    </div>
-
-                                    <div className="grid grid-cols-5 gap-2">
-                                        <DetailCard label="P1" value={match.player1} tiny />
-                                        <DetailCard label="P2" value={match.player2} tiny />
-                                        <DetailCard label="P3" value={match.player3} tiny />
-                                        <DetailCard label="P4" value={match.player4} tiny />
-                                        <DetailCard label="P5" value={match.player5} tiny />
-                                    </div>
-                                </>
-                            )}
-
-                            {idx < matches.length - 1 && (
-                                <div className="py-8 flex justify-center opacity-20">
-                                    <div className="w-24 h-[1px] bg-white" />
-                                </div>
-                            )}
-                        </div>
-                    ))}
-
-                    {matches.length === 0 && (
-                        <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
-                            <p className="text-gray-500 font-bold italic">NO ACTIVE TOURNAMENTS DETECTED IN SECTOR</p>
-                        </div>
-                    )}
+            {/* WALLET HUD */}
+            <div className="wallet-hud">
+                <div className="p-2 bg-[var(--neon-cyan)]/10 rounded-lg text-[var(--neon-cyan)]">
+                    <Wallet size={20} />
+                </div>
+                <div>
+                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Global Credits</span>
+                    <span className="font-black italic text-xl">₹{walletBalance.toLocaleString()}</span>
                 </div>
             </div>
-        </div>
-    );
-};
 
-const DetailCard = ({ label, value, small, tiny, highlight, delay, featured }) => {
-    let textColor = 'text-white';
-    let borderColor = 'border-white/10';
-    let glow = '';
+            <div className="matches-header">
+                <div className="matches-subtitle">Operational Hub // System Active</div>
+                <h1 className="matches-title">Global <br /> Tournaments</h1>
+            </div>
 
-    if (highlight === 'cyan') {
-        textColor = 'text-[var(--neon-cyan)] drop-shadow-[0_0_10px_rgba(0,243,255,0.6)]';
-        borderColor = 'border-[var(--neon-cyan)]/30';
-        glow = 'shadow-[0_0_30px_rgba(0,243,255,0.1)]';
-    } else if (highlight === 'gold') {
-        textColor = 'text-[#FBBC04] drop-shadow-[0_0_10px_rgba(251,188,4,0.6)]';
-        borderColor = 'border-[#FBBC04]/30';
-        glow = 'shadow-[0_0_30px_rgba(251,188,4,0.1)]';
-    }
+            <main className="matches-main-grid">
+                {matches.map((match) => {
+                    const mState = getMatchState(match);
+                    const savedRes = JSON.parse(localStorage.getItem(`match_res_${match.id}`) || 'null');
 
-    const textSize = featured ? 'text-5xl' : (small ? 'text-3xl' : (tiny ? 'text-lg' : 'text-4xl'));
-    const padding = featured ? 'py-10' : (tiny ? 'py-3' : 'py-6');
+                    return (
+                        <div key={match.id} className="match-card">
+                            <div className="match-card-hero">
+                                <div className="match-card-img" style={{ backgroundImage: `url(${bgImage})` }} />
+                                <div className="match-card-overlay" />
 
-    return (
-        <div
-            className={`group relative bg-black/60 ${borderColor} border rounded-3xl ${padding} px-6 text-center overflow-hidden backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-black/70 ${glow}`}
-            style={{ animationDelay: delay }}
-        >
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <span className="block text-xs font-bold text-gray-400 tracking-[2px] uppercase mb-1">{label}</span>
-                <div className={`font-black italic leading-none ${textSize} ${textColor}`}>
-                    {value}
+                                <div className={`match-status-pill status-${mState}`}>
+                                    <Zap size={10} className={mState === 'LIVE' ? 'animate-pulse' : ''} />
+                                    {mState}
+                                </div>
+
+                                <div className="match-card-info">
+                                    <div className="match-card-org">{match.org_name}</div>
+                                    <h2 className="match-card-map">{match.map_name || 'BERMUDA'}</h2>
+                                </div>
+                            </div>
+
+                            <div className="match-card-body">
+                                <div className="match-stats-row">
+                                    <div className="match-stat-box">
+                                        <span className="stat-box-label">Prize Pool</span>
+                                        <span className="stat-box-value text-[#FBBC04]">₹{match.prize_pool || '0'}</span>
+                                    </div>
+                                    <div className="match-stat-box">
+                                        <span className="stat-box-label">Instance ID</span>
+                                        <span className="stat-box-value">#{match.id}</span>
+                                    </div>
+                                </div>
+
+                                {mState === 'SETTLED' && savedRes && (
+                                    <div className="match-result-box">
+                                        <div className="result-row">
+                                            <div>
+                                                <span className="result-label">Tactical Placement</span>
+                                                <div className="result-value">RANK #{savedRes.rank}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="result-label">Net Payout</span>
+                                                <div className="result-value text-[#00ff88]">₹{savedRes.totalWin.toLocaleString()}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 space-y-2 border-t border-white/5 pt-4">
+                                            <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2 block">Payout Breakdown (Perfect Distribution)</span>
+                                            {savedRes.payouts.map((p, i) => (
+                                                <div key={i} className="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg">
+                                                    <span className="font-bold opacity-70">{p.name}</span>
+                                                    <div className="flex gap-3 items-center">
+                                                        <span className="text-[9px] px-2 py-0.5 bg-black/50 rounded-md text-[var(--neon-cyan)]">{p.percent}%</span>
+                                                        <span className="font-black">₹{p.amount.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="result-hash">SECURE_BLOCK_SIG: {savedRes.hash}</div>
+                                    </div>
+                                )}
+
+                                <button
+                                    className="match-btn"
+                                    onClick={() => setActiveRosterId(activeRosterId === match.id ? null : match.id)}
+                                >
+                                    {activeRosterId === match.id ? 'Hide Tactical Data' : 'View Operational Roster'}
+                                    <ArrowUpRight size={16} />
+                                </button>
+
+                                {activeRosterId === match.id && (
+                                    <div className="match-roster">
+                                        {[1, 2, 3, 4, 5].map((n) => (
+                                            <div key={n} className="roster-player">
+                                                <div className="player-info">
+                                                    <span>OPERATIVE 0{n}</span>
+                                                    <h4>{match[`player${n}_name`] || `UNASSIGNED`}</h4>
+                                                </div>
+                                                <div className="player-share">{match[`player${n}`] || '0%'}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+
+                {matches.length === 0 && (
+                    <div className="lg:col-span-2 text-center py-32 opacity-30">
+                        <Gamepad2 size={48} className="mx-auto mb-6" />
+                        <h3 className="text-xl font-black italic uppercase tracking-[5px]">No Active Combat Zones</h3>
+                    </div>
+                )}
+            </main>
+
+            {/* FOOTER TIMER */}
+            <div className="matches-footer-timer">
+                <div className="flex items-center gap-3">
+                    <Clock size={20} className="text-[var(--neon-cyan)]" />
+                    <span className="footer-time">{currentTime.toLocaleTimeString()}</span>
+                </div>
+                <div className="hidden sm:flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[10px] font-bold tracking-[3px] uppercase opacity-60">Neural Network Active</span>
                 </div>
             </div>
         </div>

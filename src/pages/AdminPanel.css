@@ -2,7 +2,7 @@
     background: radial-gradient(circle at top left, #050b18, #02050a);
     color: #fff;
     min-height: 100vh;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-exo);
     overflow-x: hidden;
 }
 
@@ -21,7 +21,7 @@
     position: absolute;
     inset: 0;
     background: rgba(2, 0, 20, 0.85);
-    backdrop-blur: 4px;
+    backdrop-filter: blur(4px);
 }
 
 .login-box {
@@ -59,12 +59,12 @@
 
 .admin-input-group label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 8px;
-    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+    margin-bottom: 10px;
+    font-weight: 800;
 }
 
 .login-box input {
@@ -210,6 +210,7 @@
     margin-left: 280px;
     padding: 40px;
     width: calc(100% - 280px);
+    transition: all 0.3s ease;
 }
 
 .dashboard-header {
@@ -221,8 +222,84 @@
 
 .dashboard-header h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 2rem;
+    font-size: clamp(1.2rem, 4vw, 2rem);
     color: #fff;
+    text-transform: uppercase;
+}
+
+/* MOBILE TOGGLE */
+.admin-mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--neon-cyan);
+    color: #000;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        width: 240px;
+    }
+
+    .admin-main {
+        margin-left: 240px;
+        width: calc(100% - 240px);
+        padding: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-mobile-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .admin-main {
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 15px 20px 15px;
+    }
+
+    .admin-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-header {
+        flex-direction: row;
+        align-items: center;
+    }
 }
 
 .admin-user-info {
@@ -230,7 +307,7 @@
     align-items: center;
     gap: 15px;
     background: rgba(255, 255, 255, 0.05);
-    padding: 8px 20px;
+    padding: 8px 12px;
     border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
