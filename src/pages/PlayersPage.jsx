@@ -70,8 +70,13 @@ const PlayersPage = () => {
                         Connection Error: {error}
                     </div>
                 ) : players.length === 0 ? (
-                    <div className="col-span-full text-white text-center py-10 font-orbitron opacity-50">
-                        No players found in database.
+                    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center opacity-80">
+                        <div className="text-4xl mb-4">👑</div>
+                        <h2 className="font-orbitron text-2xl text-[var(--neon-cyan)] mb-2 uppercase tracking-widest">No Players Yet</h2>
+                        <p className="font-exo text-gray-400 mb-6 max-w-md">The arena is empty. This is your chance to claim the top spot.</p>
+                        <Link to="/signup" className="btn-primary flex items-center gap-2">
+                            BECOME THE FIRST LEGEND <ArrowRight size={16} />
+                        </Link>
                     </div>
                 ) : (
                     players.map((player) => (
