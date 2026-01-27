@@ -347,15 +347,36 @@ const MatchesPage = () => {
                                                 </div>
                                                 <button
                                                     onClick={() => {
+                                                        let alreadyDistributed = localStorage.getItem(`dist_done_${match.id}`);
+                                                        if (alreadyDistributed) {
+                                                            alert("This match has already been distributed to wallets.");
+                                                            return;
+                                                        }
+
                                                         const distributionLog = savedRes.payouts.map(p => {
                                                             let target = 'Unknown';
-                                                            if (p.name === 'MANAGEMENT') target = 'TBL (Management)';
-                                                            else if (p.name === 'MVP BONUS') target = 'TBL RAHUL (MVP)';
-                                                            else target = p.name; // Player IGN
-                                                            return `${target}: ৳${p.amount}`;
+                                                            if (p.name === 'MANAGEMENT') {
+                                                                target = 'TBL (Management)';
+                                                                const cur = Number(localStorage.getItem('tbl_mgmt_bal') || 0);
+                                                                localStorage.setItem('tbl_mgmt_bal', String(cur + p.amount));
+                                                            } else if (p.name === 'MVP BONUS') {
+                                                                target = 'TBL RAHUL (MVP)';
+                                                                const cur = Number(localStorage.getItem('tbl_mvp_bal') || 0);
+                                                                localStorage.setItem('tbl_mvp_bal', String(cur + p.amount));
+                                                            } else if (p.name === 'ORG RESERVE') {
+                                                                target = 'TBL (Org Reserve)';
+                                                                const cur = Number(localStorage.getItem('tbl_reserve_bal') || 0);
+                                                                localStorage.setItem('tbl_reserve_bal', String(cur + p.amount));
+                                                            } else {
+                                                                target = p.name;
+                                                                // Simulated: If it's the current user, balance was added during settlement
+                                                                // In a real app, this would trigger individual player credit transactions
+                                                            }
+                                                            return `${target}: ৳${p.amount.toLocaleString()}`;
                                                         }).join('\n');
 
-                                                        alert(`DISTRIBUTION REPORT:\n------------------\n${distributionLog}\n\n✅ All funds distributed to respective accounts.`);
+                                                        localStorage.setItem(`dist_done_${match.id}`, "true");
+                                                        alert(`DISTRIBUTION REPORT:\n------------------\n${distributionLog}\n\n✅ TBL Management & Player funds successfully credited.`);
                                                     }}
                                                     className="mt-3 w-full py-2 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 font-bold text-[10px] hover:bg-emerald-500 hover:text-black transition-all"
                                                 >

@@ -37,33 +37,69 @@ const WalletPage = () => {
                 </header>
 
                 <div className="wallet-main-grid">
-                    {/* LEFT: BALANCE CARD */}
-                    <div className="balance-card">
-                        <div className="card-top">
-                            <div className="p-3 bg-[var(--neon-cyan)]/10 rounded-2xl text-[var(--neon-cyan)]">
-                                <Wallet size={32} />
+                    <div className="flex flex-col gap-6">
+                        {/* LEFT: BALANCE CARD */}
+                        <div className="balance-card">
+                            <div className="card-top">
+                                <div className="p-3 bg-[var(--neon-cyan)]/10 rounded-2xl text-[var(--neon-cyan)]">
+                                    <Wallet size={32} />
+                                </div>
+                                <div className="text-right">
+                                    <span className="block text-[10px] font-black text-white/40 uppercase tracking-[3px]">Total Balance</span>
+                                    <h1 className="text-5xl font-black italic tracking-tighter mt-1">৳{balance.toLocaleString()}</h1>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <span className="block text-[10px] font-black text-white/40 uppercase tracking-[3px]">Total Balance</span>
-                                <h1 className="text-5xl font-black italic tracking-tighter mt-1">৳{balance.toLocaleString()}</h1>
+
+                            <div className="card-stats mt-12 grid grid-cols-2 gap-4">
+                                <div className="stat-box">
+                                    <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Total Profits</span>
+                                    <div className="flex items-center gap-2 text-[#00ff88]">
+                                        <TrendingUp size={14} />
+                                        <span className="font-black italic">৳{balance.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                <div className="stat-box">
+                                    <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Status</span>
+                                    <div className="flex items-center gap-2 text-[var(--neon-cyan)]">
+                                        <ShieldCheck size={14} />
+                                        <span className="font-black italic">VERIFIED</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="card-stats mt-12 grid grid-cols-2 gap-4">
-                            <div className="stat-box">
-                                <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Total Profits</span>
-                                <div className="flex items-center gap-2 text-[#00ff88]">
-                                    <TrendingUp size={14} />
-                                    <span className="font-black italic">৳{balance.toLocaleString()}</span>
+                        {/* CORPORATE WALLETS (TBL Management Sync) */}
+                        <div className="balance-card !p-6" style={{ background: 'rgba(0, 240, 255, 0.03)', border: '1px solid rgba(0, 240, 255, 0.1)' }}>
+                            <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[var(--neon-cyan)] mb-4">Corporate Wallets (TBL Hub)</h3>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span className="text-[10px] font-bold text-gray-400">TBL MANAGEMENT</span>
+                                    <span className="font-black italic text-sm">৳{Number(localStorage.getItem('tbl_mgmt_bal') || 0).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span className="text-[10px] font-bold text-gray-400">TBL RAHUL (MVP)</span>
+                                    <span className="font-black italic text-sm">৳{Number(localStorage.getItem('tbl_mvp_bal') || 0).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                    <span className="text-[10px] font-bold text-gray-400">ORG RESERVE</span>
+                                    <span className="font-black italic text-sm">৳{Number(localStorage.getItem('tbl_reserve_bal') || 0).toLocaleString()}</span>
                                 </div>
                             </div>
-                            <div className="stat-box">
-                                <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Status</span>
-                                <div className="flex items-center gap-2 text-[var(--neon-cyan)]">
-                                    <ShieldCheck size={14} />
-                                    <span className="font-black italic">VERIFIED</span>
-                                </div>
-                            </div>
+
+                            <button
+                                className="mt-4 w-full py-2 bg-red-500/10 text-red-500 text-[9px] font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all rounded"
+                                onClick={() => {
+                                    if (window.confirm("Reset all TBL Corporate Balances?")) {
+                                        localStorage.removeItem('tbl_mgmt_bal');
+                                        localStorage.removeItem('tbl_mvp_bal');
+                                        localStorage.removeItem('tbl_reserve_bal');
+                                        window.location.reload();
+                                    }
+                                }}
+                            >
+                                Reset Corporate Data
+                            </button>
                         </div>
                     </div>
 
