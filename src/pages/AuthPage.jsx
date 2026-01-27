@@ -325,7 +325,7 @@ const AuthPage = () => {
                             <Loader2 className="loader" size={20} />
                         ) : (
                             <>
-                                {isLogin ? 'ESTABLISH LINK' : 'INITIATE REGISTRATION'}
+                                {isLogin ? 'LOG IN' : 'SIGN UP'}
                                 <ArrowRight size={18} />
                             </>
                         )}
