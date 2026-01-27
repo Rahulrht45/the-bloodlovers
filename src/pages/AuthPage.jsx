@@ -272,11 +272,10 @@ const AuthPage = () => {
                                         className="auth-select"
                                     >
                                         <option value="">Select experience level</option>
-                                        <option value="Beginner (0-5 tournaments)">Beginner (0-5 tournaments)</option>
-                                        <option value="Intermediate (6-15 tournaments)">Intermediate (6-15 tournaments)</option>
-                                        <option value="Advanced (16-30 tournaments)">Advanced (16-30 tournaments)</option>
-                                        <option value="Professional (30+ tournaments)">Professional (30+ tournaments)</option>
-                                        <option value="Elite (International level)">Elite (International level)</option>
+                                        <option value="Beginner (1-2 years)">Beginner (1-2 years)</option>
+                                        <option value="Advanced (2-3 years)">Advanced (2-3 years)</option>
+                                        <option value="Elite (4 years)">Elite (4 years)</option>
+                                        <option value="Professional (5 years)">Professional (5 years)</option>
                                     </select>
                                     <Trophy className="auth-input-icon" size={18} />
                                 </div>
