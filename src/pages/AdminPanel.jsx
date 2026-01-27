@@ -723,8 +723,8 @@ const AdminPanel = () => {
                                                     onChange={(e) => setCalcRank(e.target.value)}
                                                     className="w-1/2 bg-white/5 border border-white/10 rounded-lg px-2 py-3 text-white text-xs focus:border-[var(--neon-cyan)] outline-none"
                                                 >
-                                                    <option value="">Select Rank</option>
-                                                    {[1, 2, 3, 4].map(n => <option key={n} value={n}>#{n} Place</option>)}
+                                                    <option value="" className="text-black">Select Rank</option>
+                                                    {[1, 2, 3, 4].map(n => <option key={n} value={n} className="text-black">#{n} Place</option>)}
                                                 </select>
                                                 <input
                                                     type="text"

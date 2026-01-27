@@ -108,9 +108,9 @@ const MvpPage = () => {
                             onChange={(e) => setSelectedMatch(parseInt(e.target.value))}
                             className="mvp-select"
                         >
-                            <option value="">-- Choose Match --</option>
+                            <option value="" className="text-black">-- Choose Match --</option>
                             {matches.map(m => (
-                                <option key={m.id} value={m.id}>{m.org_name} (ID: #{m.id})</option>
+                                <option key={m.id} value={m.id} className="text-black">{m.org_name} (ID: #{m.id})</option>
                             ))}
                         </select>
                     </div>
