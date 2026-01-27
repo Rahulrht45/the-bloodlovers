@@ -24,6 +24,8 @@ const AdminPanel = () => {
     const [activeTab, setActiveTab] = useState('Dashboard');
     const [editingId, setEditingId] = useState(null);
     const [editValues, setEditValues] = useState({});
+    const [editingWallet, setEditingWallet] = useState(null);
+    const [walletRefresh, setWalletRefresh] = useState(0);
 
     const [allMatches, setAllMatches] = useState([]);
     const toLocalISO = (date) => {
@@ -515,18 +517,160 @@ const AdminPanel = () => {
                                         <div className="bg-white/5 border border-[var(--neon-cyan)]/20 rounded-xl p-4">
                                             <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[var(--neon-cyan)] mb-4">Corporate Wallets (TBL)</h3>
                                             <div className="space-y-3">
-                                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                                                    <span className="text-[10px] font-bold text-gray-400">TBL MANAGEMENT</span>
-                                                    <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_mgmt_bal') || 0).toLocaleString()}</span>
+                                                {/* TBL MANAGEMENT */}
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-2 gap-2">
+                                                    <span className="text-[10px] font-bold text-gray-400 flex-shrink-0">TBL MANAGEMENT</span>
+                                                    {editingWallet === 'tbl_mgmt_bal' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="number"
+                                                                defaultValue={Number(localStorage.getItem('tbl_mgmt_bal') || 0)}
+                                                                id="edit_tbl_mgmt_bal"
+                                                                className="w-24 bg-black/40 border border-[var(--neon-cyan)] rounded px-2 py-1 text-white text-sm font-bold text-right"
+                                                                onKeyPress={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        const newBalance = Number(document.getElementById('edit_tbl_mgmt_bal').value);
+                                                                        localStorage.setItem('tbl_mgmt_bal', String(newBalance));
+                                                                        setEditingWallet(null);
+                                                                        setWalletRefresh(prev => prev + 1);
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <button
+                                                                onClick={() => {
+                                                                    const newBalance = Number(document.getElementById('edit_tbl_mgmt_bal').value);
+                                                                    localStorage.setItem('tbl_mgmt_bal', String(newBalance));
+                                                                    setEditingWallet(null);
+                                                                    setWalletRefresh(prev => prev + 1);
+                                                                }}
+                                                                className="text-[8px] bg-green-500 text-black px-2 py-1 rounded font-bold hover:bg-green-400"
+                                                            >
+                                                                ✓
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingWallet(null)}
+                                                                className="text-[8px] bg-red-500/80 text-white px-2 py-1 rounded font-bold hover:bg-red-500"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_mgmt_bal') || 0).toLocaleString()}</span>
+                                                            <button
+                                                                onClick={() => setEditingWallet('tbl_mgmt_bal')}
+                                                                className="text-[8px] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)] px-2 py-1 rounded font-bold hover:bg-[var(--neon-cyan)]/40"
+                                                                title="Edit balance"
+                                                            >
+                                                                ✎
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                                                    <span className="text-[10px] font-bold text-gray-400">TBL RAHUL (MVP)</span>
-                                                    <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_mvp_bal') || 0).toLocaleString()}</span>
+
+                                                {/* TBL RAHUL (MVP) */}
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-2 gap-2">
+                                                    <span className="text-[10px] font-bold text-gray-400 flex-shrink-0">TBL RAHUL (MVP)</span>
+                                                    {editingWallet === 'tbl_mvp_bal' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="number"
+                                                                defaultValue={Number(localStorage.getItem('tbl_mvp_bal') || 0)}
+                                                                id="edit_tbl_mvp_bal"
+                                                                className="w-24 bg-black/40 border border-[var(--neon-cyan)] rounded px-2 py-1 text-white text-sm font-bold text-right"
+                                                                onKeyPress={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        const newBalance = Number(document.getElementById('edit_tbl_mvp_bal').value);
+                                                                        localStorage.setItem('tbl_mvp_bal', String(newBalance));
+                                                                        setEditingWallet(null);
+                                                                        setWalletRefresh(prev => prev + 1);
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <button
+                                                                onClick={() => {
+                                                                    const newBalance = Number(document.getElementById('edit_tbl_mvp_bal').value);
+                                                                    localStorage.setItem('tbl_mvp_bal', String(newBalance));
+                                                                    setEditingWallet(null);
+                                                                    setWalletRefresh(prev => prev + 1);
+                                                                }}
+                                                                className="text-[8px] bg-green-500 text-black px-2 py-1 rounded font-bold hover:bg-green-400"
+                                                            >
+                                                                ✓
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingWallet(null)}
+                                                                className="text-[8px] bg-red-500/80 text-white px-2 py-1 rounded font-bold hover:bg-red-500"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_mvp_bal') || 0).toLocaleString()}</span>
+                                                            <button
+                                                                onClick={() => setEditingWallet('tbl_mvp_bal')}
+                                                                className="text-[8px] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)] px-2 py-1 rounded font-bold hover:bg-[var(--neon-cyan)]/40"
+                                                                title="Edit balance"
+                                                            >
+                                                                ✎
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                                                    <span className="text-[10px] font-bold text-gray-400">ORG RESERVE</span>
-                                                    <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_reserve_bal') || 0).toLocaleString()}</span>
+
+                                                {/* ORG RESERVE */}
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-2 gap-2">
+                                                    <span className="text-[10px] font-bold text-gray-400 flex-shrink-0">ORG RESERVE</span>
+                                                    {editingWallet === 'tbl_reserve_bal' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="number"
+                                                                defaultValue={Number(localStorage.getItem('tbl_reserve_bal') || 0)}
+                                                                id="edit_tbl_reserve_bal"
+                                                                className="w-24 bg-black/40 border border-[var(--neon-cyan)] rounded px-2 py-1 text-white text-sm font-bold text-right"
+                                                                onKeyPress={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        const newBalance = Number(document.getElementById('edit_tbl_reserve_bal').value);
+                                                                        localStorage.setItem('tbl_reserve_bal', String(newBalance));
+                                                                        setEditingWallet(null);
+                                                                        setWalletRefresh(prev => prev + 1);
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <button
+                                                                onClick={() => {
+                                                                    const newBalance = Number(document.getElementById('edit_tbl_reserve_bal').value);
+                                                                    localStorage.setItem('tbl_reserve_bal', String(newBalance));
+                                                                    setEditingWallet(null);
+                                                                    setWalletRefresh(prev => prev + 1);
+                                                                }}
+                                                                className="text-[8px] bg-green-500 text-black px-2 py-1 rounded font-bold hover:bg-green-400"
+                                                            >
+                                                                ✓
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingWallet(null)}
+                                                                className="text-[8px] bg-red-500/80 text-white px-2 py-1 rounded font-bold hover:bg-red-500"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-black italic text-sm text-white">৳{Number(localStorage.getItem('tbl_reserve_bal') || 0).toLocaleString()}</span>
+                                                            <button
+                                                                onClick={() => setEditingWallet('tbl_reserve_bal')}
+                                                                className="text-[8px] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)] px-2 py-1 rounded font-bold hover:bg-[var(--neon-cyan)]/40"
+                                                                title="Edit balance"
+                                                            >
+                                                                ✎
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
+
+                                                {/* Total Corporate */}
                                                 <div className="flex justify-between items-center pt-2 border-t border-[var(--neon-cyan)]/30">
                                                     <span className="text-[10px] font-black text-[var(--neon-cyan)] uppercase">Total Corporate</span>
                                                     <span className="font-black italic text-lg text-[var(--neon-cyan)]">
@@ -542,7 +686,22 @@ const AdminPanel = () => {
 
                                         {/* Player Wallets */}
                                         <div className="bg-white/5 border border-[#FBBC04]/20 rounded-xl p-4">
-                                            <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[#FBBC04] mb-4">Individual Player Wallets</h3>
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h3 className="text-[10px] font-black uppercase tracking-[3px] text-[#FBBC04]">Individual Player Wallets</h3>
+                                                <button
+                                                    onClick={() => {
+                                                        const playerName = prompt('Enter player name:');
+                                                        if (playerName) {
+                                                            const key = `player_wallet_${playerName.toLowerCase().replace(/\s+/g, '_')}`;
+                                                            localStorage.setItem(key, '0');
+                                                            setWalletRefresh(prev => prev + 1);
+                                                        }
+                                                    }}
+                                                    className="text-[8px] font-bold uppercase bg-[#FBBC04]/20 px-3 py-1 rounded hover:bg-[#FBBC04]/40 transition-all border border-[#FBBC04]/30"
+                                                >
+                                                    + Add Player
+                                                </button>
+                                            </div>
                                             <div className="space-y-3 max-h-[300px] overflow-y-auto">
                                                 {(() => {
                                                     const playerWallets = [];
@@ -554,7 +713,7 @@ const AdminPanel = () => {
                                                         if (key && key.startsWith('player_wallet_')) {
                                                             const playerName = key.replace('player_wallet_', '').replace(/_/g, ' ').toUpperCase();
                                                             const balance = Number(localStorage.getItem(key) || 0);
-                                                            playerWallets.push({ name: playerName, balance });
+                                                            playerWallets.push({ name: playerName, key: key, balance });
                                                             totalPlayerBalance += balance;
                                                         }
                                                     }
@@ -563,7 +722,7 @@ const AdminPanel = () => {
                                                         return (
                                                             <div className="text-center py-8 opacity-30">
                                                                 <p className="text-[9px] font-bold uppercase tracking-widest">No player wallets found</p>
-                                                                <p className="text-[8px] text-gray-500 mt-1">Distribute match earnings to create player wallets</p>
+                                                                <p className="text-[8px] text-gray-500 mt-1">Distribute match earnings or add players manually</p>
                                                             </div>
                                                         );
                                                     }
@@ -571,9 +730,67 @@ const AdminPanel = () => {
                                                     return (
                                                         <>
                                                             {playerWallets.map((wallet, idx) => (
-                                                                <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2">
-                                                                    <span className="text-[10px] font-bold text-gray-400">{wallet.name}</span>
-                                                                    <span className="font-black italic text-sm text-white">৳{wallet.balance.toLocaleString()}</span>
+                                                                <div key={idx} className="flex justify-between items-center border-b border-white/5 pb-2 gap-2">
+                                                                    <span className="text-[10px] font-bold text-gray-400 flex-shrink-0">{wallet.name}</span>
+
+                                                                    {editingWallet === wallet.key ? (
+                                                                        <div className="flex items-center gap-2">
+                                                                            <input
+                                                                                type="number"
+                                                                                defaultValue={wallet.balance}
+                                                                                id={`edit_${wallet.key}`}
+                                                                                className="w-24 bg-black/40 border border-[#FBBC04] rounded px-2 py-1 text-white text-sm font-bold text-right"
+                                                                                onKeyPress={(e) => {
+                                                                                    if (e.key === 'Enter') {
+                                                                                        const newBalance = Number(document.getElementById(`edit_${wallet.key}`).value);
+                                                                                        localStorage.setItem(wallet.key, String(newBalance));
+                                                                                        setEditingWallet(null);
+                                                                                        setWalletRefresh(prev => prev + 1);
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const newBalance = Number(document.getElementById(`edit_${wallet.key}`).value);
+                                                                                    localStorage.setItem(wallet.key, String(newBalance));
+                                                                                    setEditingWallet(null);
+                                                                                    setWalletRefresh(prev => prev + 1);
+                                                                                }}
+                                                                                className="text-[8px] bg-green-500 text-black px-2 py-1 rounded font-bold hover:bg-green-400"
+                                                                            >
+                                                                                ✓
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => setEditingWallet(null)}
+                                                                                className="text-[8px] bg-red-500/80 text-white px-2 py-1 rounded font-bold hover:bg-red-500"
+                                                                            >
+                                                                                ✕
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="font-black italic text-sm text-white">৳{wallet.balance.toLocaleString()}</span>
+                                                                            <button
+                                                                                onClick={() => setEditingWallet(wallet.key)}
+                                                                                className="text-[8px] bg-[#FBBC04]/20 text-[#FBBC04] px-2 py-1 rounded font-bold hover:bg-[#FBBC04]/40"
+                                                                                title="Edit balance"
+                                                                            >
+                                                                                ✎
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    if (window.confirm(`Delete ${wallet.name}'s wallet?`)) {
+                                                                                        localStorage.removeItem(wallet.key);
+                                                                                        setWalletRefresh(prev => prev + 1);
+                                                                                    }
+                                                                                }}
+                                                                                className="text-[8px] bg-red-500/20 text-red-500 px-2 py-1 rounded font-bold hover:bg-red-500/40"
+                                                                                title="Delete wallet"
+                                                                            >
+                                                                                🗑
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             ))}
                                                             <div className="flex justify-between items-center pt-2 border-t border-[#FBBC04]/30">
@@ -999,8 +1216,8 @@ const AdminPanel = () => {
                         )}
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

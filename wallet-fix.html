@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Wallet Fix</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #00ff00;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .section {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #ffff00;
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .wallet-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .name {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .balance {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff00, #00ffff);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .error {
+            color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ff0000;
+        }
+
+        .success {
+            color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+        }
+
+        input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>💰 WALLET DIAGNOSTIC & FIX TOOL</h1>
+
+        <div class="section">
+            <h2>🔍 Current Player Wallets</h2>
+            <div id="playerWallets"></div>
+        </div>
+
+        <div class="section">
+            <h2>🏢 Corporate Wallets</h2>
+            <div id="corporateWallets"></div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Quick Fix for RAHUL SARDER</h2>
+            <p style="color: #ffff00;">Enter the amount to add to RAHUL SARDER's wallet:</p>
+            <input type="number" id="amountInput" placeholder="Enter amount (e.g., 72)" value="72">
+            <div class="button-group">
+                <button onclick="addToRahulSarder()">➕ Add to RAHUL SARDER Wallet</button>
+                <button onclick="setRahulSarderBalance()">🔄 Set RAHUL SARDER Balance</button>
+            </div>
+            <div id="message" style="margin-top: 20px;"></div>
+        </div>
+
+        <div class="section">
+            <h2>📊 All Match Results</h2>
+            <div id="matchResults"></div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="refreshData()">🔄 Refresh Data</button>
+            <button onclick="window.location.href='http://localhost:5173/'">🏠 Go to Website</button>
+        </div>
+    </div>
+
+    <script>
+        function refreshData() {
+            // Player Wallets
+            let playerHtml = '';
+            let foundPlayers = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('player_wallet_')) {
+                    foundPlayers = true;
+                    const playerName = key.replace('player_wallet_', '').replace(/_/g, ' ').toUpperCase();
+                    const balance = Number(localStorage.getItem(key) || 0);
+                    playerHtml += `
+                        <div class="wallet-item">
+                            <span class="name">${playerName}</span>
+                            <span class="balance">৳${balance.toLocaleString()}</span>
+                        </div>
+                    `;
+                }
+            }
+            if (!foundPlayers) {
+                playerHtml = '<div class="error">❌ No player wallets found! Distribution may not have been done yet.</div>';
+            }
+            document.getElementById('playerWallets').innerHTML = playerHtml;
+
+            // Corporate Wallets
+            const mgmt = Number(localStorage.getItem('tbl_mgmt_bal') || 0);
+            const mvp = Number(localStorage.getItem('tbl_mvp_bal') || 0);
+            const reserve = Number(localStorage.getItem('tbl_reserve_bal') || 0);
+
+            const corpHtml = `
+                <div class="wallet-item">
+                    <span class="name">TBL MANAGEMENT</span>
+                    <span class="balance">৳${mgmt.toLocaleString()}</span>
+                </div>
+                <div class="wallet-item">
+                    <span class="name">TBL RAHUL (MVP)</span>
+                    <span class="balance">৳${mvp.toLocaleString()}</span>
+                </div>
+                <div class="wallet-item">
+                    <span class="name">ORG RESERVE</span>
+                    <span class="balance">৳${reserve.toLocaleString()}</span>
+                </div>
+            `;
+            document.getElementById('corporateWallets').innerHTML = corpHtml;
+
+            // Match Results
+            let matchHtml = '';
+            let foundMatches = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('match_res_')) {
+                    foundMatches = true;
+                    const matchData = JSON.parse(localStorage.getItem(key));
+                    matchHtml += `
+                        <div style="background: rgba(0,255,255,0.05); padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #00ffff;">
+                            <strong style="color: #00ffff;">Match ID: ${matchData.id} | Rank #${matchData.rank} | Total: ৳${matchData.totalWin}</strong>
+                            <div style="margin-top: 10px;">
+                                ${matchData.payouts.map(p => `
+                                    <div class="wallet-item">
+                                        <span class="name">${p.name} (${p.percent}%)</span>
+                                        <span class="balance">৳${p.amount}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            if (!foundMatches) {
+                matchHtml = '<div class="error">❌ No match results found! Settle a match first.</div>';
+            }
+            document.getElementById('matchResults').innerHTML = matchHtml;
+        }
+
+        function addToRahulSarder() {
+            const amount = Number(document.getElementById('amountInput').value);
+            if (!amount || amount <= 0) {
+                document.getElementById('message').innerHTML = '<div class="error">❌ Please enter a valid amount!</div>';
+                return;
+            }
+
+            const key = 'player_wallet_rahul_sarder';
+            const currentBalance = Number(localStorage.getItem(key) || 0);
+            const newBalance = currentBalance + amount;
+            localStorage.setItem(key, String(newBalance));
+
+            document.getElementById('message').innerHTML = `
+                <div class="success">
+                    ✅ Successfully added ৳${amount} to RAHUL SARDER's wallet!<br>
+                    Previous: ৳${currentBalance} → New: ৳${newBalance}
+                </div>
+            `;
+
+            setTimeout(() => {
+                refreshData();
+            }, 500);
+        }
+
+        function setRahulSarderBalance() {
+            const amount = Number(document.getElementById('amountInput').value);
+            if (!amount || amount < 0) {
+                document.getElementById('message').innerHTML = '<div class="error">❌ Please enter a valid amount!</div>';
+                return;
+            }
+
+            const key = 'player_wallet_rahul_sarder';
+            const currentBalance = Number(localStorage.getItem(key) || 0);
+            localStorage.setItem(key, String(amount));
+
+            document.getElementById('message').innerHTML = `
+                <div class="success">
+                    ✅ Successfully set RAHUL SARDER's wallet balance to ৳${amount}!<br>
+                    Previous: ৳${currentBalance} → New: ৳${amount}
+                </div>
+            `;
+
+            setTimeout(() => {
+                refreshData();
+            }, 500);
+        }
+
+        // Initial load
+        refreshData();
+    </script>
+</body>
+
+</html>
