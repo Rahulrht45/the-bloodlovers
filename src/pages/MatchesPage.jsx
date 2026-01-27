@@ -293,37 +293,46 @@ const MatchesPage = () => {
                                 )}
 
                                 {mState === 'SETTLED' && savedRes && (
-                                    <div className="match-result-box">
-                                        <div className="result-row">
-                                            <div>
-                                                <span className="result-label">Tactical Placement</span>
-                                                <div className="result-value">RANK #{savedRes.rank}</div>
+                                    <div className="settled-card">
+                                        <div className="settled-top">
+                                            <div className="settled-box">
+                                                <div className="settled-label">PRIZE POOL</div>
+                                                <div className="settled-value green">৳{match.prize_pool || '0'}</div>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="result-label">{savedRes.individualWin > 0 ? 'Your Share' : 'Squad Prize'}</span>
-                                                <div className="result-value text-[#00ff88]">
-                                                    ৳{(savedRes.individualWin || 0).toLocaleString()}
-                                                </div>
-                                                {savedRes.individualWin > 0 && (
-                                                    <div className="text-[8px] text-gray-400 font-bold uppercase mt-1">Total: ৳{savedRes.totalWin.toLocaleString()}</div>
-                                                )}
+                                            <div className="settled-box">
+                                                <div className="settled-label">INSTANCE ID</div>
+                                                <div className="settled-value">#{match.id}</div>
                                             </div>
                                         </div>
 
-                                        <div className="mt-6 space-y-2 border-t border-white/5 pt-4">
-                                            <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2 block">Payout Breakdown (Perfect Distribution)</span>
-                                            {savedRes.payouts.map((p, i) => (
-                                                <div key={i} className="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg">
-                                                    <span className="font-bold opacity-70">{p.name}</span>
-                                                    <div className="flex gap-3 items-center">
-                                                        <span className="text-[9px] px-2 py-0.5 bg-black/50 rounded-md text-[var(--neon-cyan)]">P&M Pool: {p.percent}%</span>
-                                                        <span className="font-black">৳{p.amount.toLocaleString()}</span>
+                                        <div className="settled-main">
+                                            <div className="settled-header">
+                                                <div>
+                                                    <div className="settled-label">TACTICAL PLACEMENT</div>
+                                                    <div className="settled-rank">RANK #{savedRes.rank}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="settled-label">SQUAD PRIZE</div>
+                                                    <div className="settled-squad">৳{savedRes.totalWin?.toLocaleString()}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="settled-sub">PAYOUT BREAKDOWN · PERFECT DISTRIBUTION</div>
+
+                                            <div className="settled-list">
+                                                {savedRes.payouts.map((p, i) => (
+                                                    <div className="settled-row" key={i}>
+                                                        <div>{p.name.toUpperCase()} — {p.percent}%</div>
+                                                        <div className="settled-amount">৳{p.amount.toLocaleString()}</div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                ))}
+                                            </div>
 
-                                        <div className="result-hash">SECURE_BLOCK_SIG: {savedRes.hash}</div>
+                                            <div className="settled-footer">
+                                                VERIFIED • SECURE • TOTAL 100%
+                                                <div className="mt-2 opacity-30 text-[8px] font-mono tracking-widest">{savedRes.hash}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 

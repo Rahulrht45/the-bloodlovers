@@ -525,3 +525,160 @@
 .rank-btn:hover {
     box-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
 }
+
+/* --- FINAL BOSS PRIZE UI --- */
+
+.settled-card {
+    width: 100%;
+    padding: 26px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #0d1428, #060a16);
+    border: 1px solid rgba(0, 245, 160, .35);
+    box-shadow:
+        0 0 40px rgba(0, 245, 160, .12),
+        0 40px 120px rgba(0, 0, 0, .7);
+    animation: enter 1s ease forwards;
+    margin-bottom: 25px;
+}
+
+@keyframes enter {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.settled-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.settled-box {
+    background: rgba(16, 23, 38, 0.85);
+    padding: 18px 22px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, .05);
+    backdrop-filter: blur(8px);
+}
+
+.settled-label {
+    font-size: 11px;
+    color: #8b94b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.settled-value {
+    font-size: 28px;
+    font-weight: 800;
+    margin-top: 6px;
+    font-family: 'Orbitron', sans-serif;
+    color: #e9edff;
+}
+
+.settled-value.green {
+    color: #00f5a0;
+}
+
+.settled-main {
+    padding: 26px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(0, 245, 160, .1), rgba(0, 217, 255, .05));
+    border: 1px solid rgba(0, 245, 160, .4);
+    position: relative;
+    overflow: hidden;
+}
+
+.settled-main::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle, rgba(0, 245, 160, .15), transparent 60%);
+    animation: pulse-bg 6s infinite linear;
+}
+
+@keyframes pulse-bg {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.settled-main>* {
+    position: relative;
+    z-index: 1;
+}
+
+.settled-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settled-rank {
+    font-size: 38px;
+    font-weight: 900;
+    color: #00f5a0;
+    text-shadow: 0 0 12px rgba(0, 245, 160, .6);
+    font-family: 'Orbitron', sans-serif;
+    font-style: italic;
+}
+
+.settled-squad {
+    font-size: 30px;
+    font-weight: 900;
+    color: #00d9ff;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.settled-sub {
+    margin-top: 6px;
+    font-size: 10px;
+    color: #8b94b8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.settled-list {
+    margin-top: 18px;
+}
+
+.settled-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 11px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, .1);
+    transition: transform .2s ease, color .2s ease;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.settled-row:hover {
+    transform: translateX(6px);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.settled-amount {
+    font-weight: 800;
+    color: #00f5a0;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.settled-footer {
+    margin-top: 18px;
+    font-size: 10px;
+    color: #8b94b8;
+    text-align: center;
+    opacity: .7;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
