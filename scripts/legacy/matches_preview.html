@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Esports Tournament Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.06);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent: #ffffff;
+            --glow-color: rgba(255, 255, 255, 0.15);
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: black;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            /* Cinematic Background */
+            background-image:
+                radial-gradient(circle at 50% 0%, #1a1a1a 0%, #000000 70%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Background Effects */
+        .ambient-glow {
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Organisation Header */
+        .org-header {
+            margin-bottom: 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .org-pill {
+            display: inline-block;
+            padding: 18px 60px;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #fff;
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .org-pill:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Main Grid Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .column-center {
+            margin-top: -40px;
+            /* Elevated Center */
+        }
+
+        /* Card Styles */
+        .detail-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Glow Effect handling */
+        .detail-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 60%);
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+            filter: blur(20px);
+        }
+
+        .detail-card:hover::after {
+            opacity: 0.3;
+        }
+
+        /* Typography */
+        .label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .value.small {
+            font-size: 24px;
+        }
+
+        .highlight-blue {
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+        }
+
+        .highlight-purple {
+            color: var(--neon-purple);
+            text-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+        }
+
+        /* Center Photo Area */
+        .matches-photo {
+            height: 200px;
+            background: linear-gradient(45deg, #111, #222);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .matches-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            transition: 0.5s;
+        }
+
+        .matches-photo:hover img {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .vs-badge {
+            position: absolute;
+            background: #fff;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 14px;
+            z-index: 2;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Animations */
+        .col-left .detail-card {
+            animation: fadeSlideRight 0.8s ease-out backwards;
+        }
+
+        .col-right .detail-card {
+            animation: fadeSlideLeft 0.8s ease-out backwards;
+        }
+
+        .col-center .detail-card,
+        .col-center .matches-photo {
+            animation: fadeSlideUp 0.8s ease-out backwards;
+        }
+
+        .col-left .detail-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .col-left .detail-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .col-left .detail-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .col-right .detail-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .col-right .detail-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .col-right .detail-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .col-center .matches-photo {
+            animation-delay: 0s;
+        }
+
+        .col-center .detail-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .col-center .detail-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .col-center .detail-card:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes fadeSlideRight {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeSlideLeft {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .column-center {
+                margin-top: 0;
+                grid-row: 1;
+                /* Center column goes first on mobile */
+            }
+
+            .org-header {
+                margin-bottom: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+
+        <div class="org-header">
+            <div class="org-pill" id="orgName">NOVA ESPORTS</div>
+        </div>
+
+        <div class="grid-layout">
+
+            <!-- LEFT COLUMN -->
+            <div class="column col-left">
+                <!-- Prize Pool -->
+                <div class="detail-card">
+                    <span class="label">PRIZE POOL</span>
+                    <div class="value highlight-blue" id="prizePool">₹50,000</div>
+                </div>
+                <!-- Management -->
+                <div class="detail-card">
+                    <span class="label">MANAGEMENT</span>
+                    <div class="value small" id="management">10%</div>
+                </div>
+                <!-- Player 3 -->
+                <div class="detail-card">
+                    <span class="label">PLAYER 3</span>
+                    <div class="value small" id="player3">15%</div>
+                </div>
+            </div>
+
+            <!-- CENTER COLUMN -->
+            <div class="column col-center">
+                <!-- Photo Area -->
+                <div class="matches-photo">
+                    <div class="vs-badge">LIVE MATCH</div>
+                    <!-- Placeholder for match image -->
+                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop"
+                        alt="Esports Arena">
+                </div>
+
+                <!-- Slot Prize -->
+                <div class="detail-card">
+                    <span class="label">SLOT PRIZE</span>
+                    <div class="value highlight-purple" id="slotPrize">₹20,000</div>
+                </div>
+                <!-- MVP -->
+                <div class="detail-card">
+                    <span class="label">MVP REWARD</span>
+                    <div class="value small" id="mvp">5%</div>
+                </div>
+                <!-- Player 4 -->
+                <div class="detail-card">
+                    <span class="label">PLAYER 4</span>
+                    <div class="value small" id="player4">10%</div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="column col-right">
+                <!-- P&M Pool -->
+                <div class="detail-card">
+                    <span class="label">P & M POOL</span>
+                    <div class="value" id="pmPool">₹5,000</div>
+                </div>
+                <!-- Player 2 -->
+                <div class="detail-card">
+                    <span class="label">PLAYER 2</span>
+                    <div class="value small" id="player2">20%</div>
+                </div>
+                <!-- Player 5 -->
+                <div class="detail-card">
+                    <span class="label">PLAYER 5</span>
+                    <div class="value small" id="player5">10%</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // Dynamic Data Control
+        const matchData = {
+            orgName: "NOVA ESPORTS",
+            prizePool: "₹50,000",
+            slotPrize: "₹20,000",
+            pmPool: "₹5,000",
+            management: "10%",
+            mvp: "5%",
+            player2: "20%",
+            player3: "15%",
+            player4: "10%",
+            player5: "10%"
+        };
+
+        // Bind Data
+        document.getElementById('orgName').textContent = matchData.orgName;
+        document.getElementById('prizePool').textContent = matchData.prizePool;
+        document.getElementById('slotPrize').textContent = matchData.slotPrize;
+        document.getElementById('pmPool').textContent = matchData.pmPool;
+        document.getElementById('management').textContent = matchData.management;
+        document.getElementById('mvp').textContent = matchData.mvp;
+        document.getElementById('player2').textContent = matchData.player2;
+        document.getElementById('player3').textContent = matchData.player3;
+        document.getElementById('player4').textContent = matchData.player4;
+        document.getElementById('player5').textContent = matchData.player5;
+    </script>
+
+</body>
+
+</html>

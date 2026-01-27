@@ -1,0 +1,497 @@
+@import "tailwindcss";
+
+:root {
+    --bg-dark: #020014;
+    --bg-deep: #050511;
+    --neon-cyan: #00f0ff;
+    --neon-purple: #9d00ff;
+    --neon-blue: #2e6eff;
+    --accent-gold: #FFD700;
+    --accent-gold-glow: #FFA500;
+    --text-main: #ffffff;
+    --text-muted: #C8D0E0;
+
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-glow: 0 0 20px rgba(0, 240, 255, 0.1);
+
+    --font-orbitron: 'Orbitron', sans-serif;
+    --font-exo: 'Exo', sans-serif;
+    --font-bebas: 'Bebas Neue', output;
+    --font-inter: 'Inter', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    background-image:
+        linear-gradient(rgba(2, 0, 20, 0.8), rgba(2, 0, 20, 0.9)),
+        url('./assets/bg-main.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--text-main);
+    font-family: var(--font-inter);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+}
+
+/* Utilities */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-radius: 16px;
+}
+
+.text-gradient {
+    background: linear-gradient(90deg, #fff 0%, var(--neon-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glow-text {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.btn-primary {
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    padding: 12px 24px;
+    font-family: var(--font-exo);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    /* Slightly angular for gaming feel */
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), inset 0 0 0 rgba(0, 240, 255, 0);
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+
+.btn-primary:hover {
+    background: var(--neon-cyan);
+    color: #000;
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 24px;
+    font-family: var(--font-exo);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    border-color: var(--neon-purple);
+    color: var(--neon-purple);
+    background: rgba(157, 0, 255, 0.1);
+}
+
+.btn-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 240, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Particles / Grid Background */
+.bg-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+}
+
+/* Animations extracted from HeroSection */
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+@keyframes scan {
+    0% {
+        top: 0%;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.animate-scan {
+    animation: scan 2s linear infinite;
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.font-digital {
+    font-family: 'Orbitron', monospace;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
+   USER PROVIDED HUD STYLES (Adapted)
+   ========================================= */
+
+/* MAIN HUD CONTAINER */
+.hero-hud {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    /* Centering for the column */
+}
+
+/* COMMON CARD */
+.hero-card {
+    background: linear-gradient(145deg, #0b1c25, #071118);
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.6),
+        inset 0 0 20px rgba(0, 255, 255, 0.15);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+/* TOP FRAGGER CARD */
+.hero-fragger {
+    width: 220px;
+    text-align: center;
+    display: flex;
+    /* Flex to center content vertically/horizontally if needed, matching user's simple block but safe to add */
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero-crown {
+    font-size: 40px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px cyan);
+}
+
+.hero-label {
+    font-size: 12px;
+    color: #7fffd4;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.hero-fragger h2 {
+    font-size: 14px;
+    margin: 10px 0 0;
+    color: #b6faff;
+    font-family: 'Segoe UI', sans-serif;
+    /* Conserve font or inherit? Keeping user's choice or mapping to project font */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.hero-fragger h1 {
+    margin: 5px 0 0;
+    font-size: 26px;
+    color: #ffffff;
+    text-shadow: 0 0 10px cyan;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 900;
+}
+
+/* MATCH STANDINGS */
+.hero-standings {
+    width: 300px;
+}
+
+.hero-standings h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #c9faff;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.hero-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 40px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 600;
+}
+
+.hero-bar {
+    height: 6px;
+    background: #0b2a33;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.hero-bar div {
+    height: 100%;
+    background: linear-gradient(90deg, #00f2ff, #a100ff);
+    box-shadow: 0 0 10px rgba(161, 0, 255, 0.8);
+}
+
+/* VS BOX */
+.hero-vs {
+    margin-top: 25px;
+    padding: 15px 30px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #2a1400, #160a00);
+    border: 2px solid #ff7b00;
+    box-shadow: 0 0 15px rgba(255, 123, 0, 0.8);
+    text-align: center;
+    color: #ffb84d;
+    width: fit-content;
+    margin-left: auto;
+    /* To align it somewhat right or center? User's CSS centered it via flex column on body. I'll center it in container. */
+    margin-right: auto;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.hero-vs strong {
+    color: #fff;
+    font-size: 1.1em;
+}
+
+/* Mobile Responsiveness for Hud */
+@media (max-width: 1024px) {
+    .hero-hud {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* ================= HERO LEFT CONTENT REFACTOR ================= */
+.hero-left-wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    /* Main Gap from Left Edge */
+    padding-left: 50px;
+    padding-right: 20px;
+}
+
+/* Responsive Gaps */
+@media (max-width: 1200px) {
+    .hero-left-wrapper {
+        padding-left: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-left-wrapper {
+        padding-left: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-left-wrapper {
+        padding-left: 20px;
+    }
+}
+
+.hero-badge {
+    display: inline-block;
+    margin-bottom: 18px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: rgba(255, 200, 0, 0.15);
+    color: #ffc800;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-weight: bold;
+}
+
+.hero-h1 {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 64px;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.hero-accent {
+    color: #00d4ff;
+}
+
+.hero-muted-text {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.hero-desc {
+    font-family: "Segoe UI", Arial, sans-serif;
+    max-width: 600px;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.hero-btn {
+    padding: 14px 24px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.hero-btn-primary {
+    background: linear-gradient(90deg, #00d4ff, #008cff);
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-stats-row {
+    display: flex;
+    gap: 40px;
+}
+
+.hero-stats-item {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    opacity: 0.9;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.hero-stats-item strong {
+    font-size: 26px;
+    color: white;
+}
+
+.hero-stats-item.gold strong {
+    color: #ffc800;
+}
+
+.hero-stats-item span {
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 1px;
+}
+
+/* Force Dark Overlay specific to user request */
+.hero-overlay-gradient {
+    background: linear-gradient(to right,
+            rgba(5, 9, 20, 0.88),
+            rgba(5, 9, 20, 0.55),
+            rgba(5, 9, 20, 0));
+}

@@ -1,0 +1,159 @@
+/* ================= LAYOUT ================= */
+.players-page-container {
+    background: transparent;
+    color: #fff;
+    min-height: calc(100vh - 72px);
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+/* ================= TITLE ================= */
+.page-title {
+    max-width: 1400px;
+    margin: 0 auto 60px;
+    /* More space for the popped heads */
+    padding: 0 20px;
+    text-align: center;
+}
+
+.page-title h1 {
+    font-size: 36px;
+    font-weight: 900;
+}
+
+.page-title p {
+    color: #aaa;
+    margin-top: 8px;
+}
+
+/* ================= GRID ================= */
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 60px 40px;
+    /* Increased vertical gap for popping avatars */
+    max-width: 1400px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+/* ================= SCENE ================= */
+.scene {
+    perspective: 1000px;
+    height: 360px;
+    /* Explicit height needed for the relative card */
+    margin-top: 40px;
+    /* Space for the head popping out */
+}
+
+/* ================= CARD ================= */
+.card {
+    background: linear-gradient(160deg, #111827, #020617);
+    border-radius: 20px;
+    position: relative;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    /* Smoother follow, snap back handled in JS or distinct reset */
+    box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(0, 255, 255, 0.15);
+}
+
+/* ================= AVATAR POP ================= */
+.avatar-3d {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(60px);
+    width: 120px;
+    height: 120px;
+    /* Ensure height for cover */
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.8));
+    border-radius: 50%;
+    /* maintain circle shape if dicebear */
+    object-fit: cover;
+    pointer-events: none;
+    /* Let clicks pass through if needed */
+}
+
+/* ================= CONTENT ================= */
+.card-content {
+    position: absolute;
+    bottom: 25px;
+    width: 100%;
+    text-align: center;
+    transform: translateZ(30px);
+}
+
+.player-name {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.player-team {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 6px;
+}
+
+.role {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #00eaff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 18px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 0;
+}
+
+.stat-item {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.stat-item small {
+    display: block;
+    font-size: 11px;
+    opacity: 0.6;
+    font-weight: 400;
+}
+
+/* ================= BUTTON ================= */
+.btn-view {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #00eaff, #0066ff);
+    color: #000;
+    font-weight: 800;
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 1px;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.btn-view:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
+}
+
+/* ================= FOOTER ================= */
+.players-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    opacity: 0.5;
+    margin-top: 40px;
+}

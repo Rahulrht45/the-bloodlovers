@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Statistics Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff00ea;
+            --bg-dark: #020014;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 234, 0.05) 0%, transparent 40%);
+            color: white;
+            font-family: 'Exo 2', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            background: linear-gradient(to right, #fff, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        .stats-container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            perspective: 1000px;
+        }
+
+        .player-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            opacity: 0.7;
+        }
+
+        .player-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.2);
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--neon-cyan);
+            border: 2px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .player-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            gap: 15px;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 20px;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .btn-sync {
+            margin-top: 40px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-sync:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Match Result</h1>
+        <p>Extracted statistics from Battle Royale</p>
+    </div>
+
+    <div class="stats-container" id="statsGrid">
+        <!-- Stats will be loaded here -->
+        <div class="player-card">
+            <div class="player-avatar">👤</div>
+            <div class="player-name">#Dipro</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-value">6</span>
+                    <span class="stat-label">Kills</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-value">3563</span>
+                    <span class="stat-label">Damage</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-card">
+            <div class="player-avatar">👤</div>
+            <div class="player-name">TBL RAHUL</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-value">3</span>
+                    <span class="stat-label">Kills</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-value">1441</span>
+                    <span class="stat-label">Damage</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-card">
+            <div class="player-avatar">👤</div>
+            <div class="player-name">TBL CRYSTAL!</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-value">3</span>
+                    <span class="stat-label">Kills</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-value">1504</span>
+                    <span class="stat-label">Damage</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="player-card">
+            <div class="player-avatar">👤</div>
+            <div class="player-name">FGB-B!O</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-value">2</span>
+                    <span class="stat-label">Kills</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-value">1710</span>
+                    <span class="stat-label">Damage</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-sync" onclick="location.reload()">Refresh Data</button>
+
+</body>
+
+</html>
