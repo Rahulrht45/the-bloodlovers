@@ -330,7 +330,12 @@ const MatchesPage = () => {
 
                                             <div className="settled-footer">
                                                 VERIFIED · SECURE · TOTAL 100%
-                                                <div className="mt-2 opacity-30 text-[8px] font-mono tracking-widest">{savedRes.hash}</div>
+                                                <div className="mt-2 opacity-30 text-[8px] font-mono tracking-widest cursor-pointer hover:text-red-500 hover:opacity-100" onClick={() => {
+                                                    localStorage.removeItem(`match_res_${match.id}`);
+                                                    window.location.reload();
+                                                }}>
+                                                    {savedRes.hash} [RESET]
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
