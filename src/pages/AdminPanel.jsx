@@ -39,13 +39,13 @@ const AdminPanel = () => {
         prizePool: '',
         slotPrize: '',
         pmPool: '',
-        management: '৳20',
-        mvp: '৳10',
-        player1: '৳20', player1Name: 'PLAYER 1',
-        player2: '৳20', player2Name: 'PLAYER 2',
-        player3: '৳20', player3Name: 'PLAYER 3',
-        player4: '৳20', player4Name: 'PLAYER 4',
-        player5: '৳20', player5Name: 'PLAYER 5',
+        management: '10%',
+        mvp: '5%',
+        player1: '10%', player1Name: 'PLAYER 1',
+        player2: '10%', player2Name: 'PLAYER 2',
+        player3: '10%', player3Name: 'PLAYER 3',
+        player4: '10%', player4Name: 'PLAYER 4',
+        player5: '10%', player5Name: 'PLAYER 5',
         rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
         startTime: toLocalISO(new Date()),
         endTime: toLocalISO(new Date(Date.now() + 3600000))
@@ -152,13 +152,13 @@ const AdminPanel = () => {
                 prize_pool: ensureCurrency(matchForm.prizePool),
                 slot_prize: ensureCurrency(matchForm.slotPrize),
                 pm_pool: ensureCurrency(matchForm.pmPool),
-                management: ensureCurrency(matchForm.management),
-                mvp: ensureCurrency(matchForm.mvp),
-                player1: ensureCurrency(matchForm.player1), player1_name: matchForm.player1Name,
-                player2: ensureCurrency(matchForm.player2), player2_name: matchForm.player2Name,
-                player3: ensureCurrency(matchForm.player3), player3_name: matchForm.player3Name,
-                player4: ensureCurrency(matchForm.player4), player4_name: matchForm.player4Name,
-                player5: ensureCurrency(matchForm.player5), player5_name: matchForm.player5Name,
+                management: ensurePercent(matchForm.management),
+                mvp: ensurePercent(matchForm.mvp),
+                player1: ensurePercent(matchForm.player1), player1_name: matchForm.player1Name,
+                player2: ensurePercent(matchForm.player2), player2_name: matchForm.player2Name,
+                player3: ensurePercent(matchForm.player3), player3_name: matchForm.player3Name,
+                player4: ensurePercent(matchForm.player4), player4_name: matchForm.player4Name,
+                player5: ensurePercent(matchForm.player5), player5_name: matchForm.player5Name,
                 rank1_percent: ensureCurrency(matchForm.rank1),
                 rank2_percent: ensureCurrency(matchForm.rank2),
                 rank3_percent: ensureCurrency(matchForm.rank3),
@@ -194,13 +194,13 @@ const AdminPanel = () => {
                 prizePool: '',
                 slotPrize: '',
                 pmPool: '',
-                management: '৳20',
-                mvp: '৳10',
-                player1: '৳20', player1Name: 'PLAYER 1',
-                player2: '৳20', player2Name: 'PLAYER 2',
-                player3: '৳20', player3Name: 'PLAYER 3',
-                player4: '৳20', player4Name: 'PLAYER 4',
-                player5: '৳20', player5Name: 'PLAYER 5',
+                management: '10%',
+                mvp: '5%',
+                player1: '10%', player1Name: 'PLAYER 1',
+                player2: '10%', player2Name: 'PLAYER 2',
+                player3: '10%', player3Name: 'PLAYER 3',
+                player4: '10%', player4Name: 'PLAYER 4',
+                player5: '10%', player5Name: 'PLAYER 5',
                 rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
                 startTime: toLocalISO(new Date()),
                 endTime: toLocalISO(new Date(Date.now() + 3600000))
@@ -803,7 +803,7 @@ const AdminPanel = () => {
                                                         value={matchForm[`player${num}`]}
                                                         onChange={(e) => setMatchForm({ ...matchForm, [`player${num}`]: e.target.value })}
                                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all font-mono"
-                                                        placeholder="e.g. ৳20"
+                                                        placeholder="e.g. 10%"
                                                     />
                                                 </div>
                                             </React.Fragment>
