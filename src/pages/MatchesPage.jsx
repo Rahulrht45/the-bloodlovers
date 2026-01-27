@@ -110,6 +110,15 @@ const MatchesPage = () => {
             { name: 'MVP BONUS', percent: getPercent(match.mvp) }
         ];
 
+        // --- 2.1 ORG RESERVE CALCULATION ---
+        const currentTotalPercent = distribution.reduce((sum, d) => sum + d.percent, 0);
+        if (currentTotalPercent < 100) {
+            distribution.push({
+                name: 'ORG RESERVE',
+                percent: 100 - currentTotalPercent
+            });
+        }
+
         // --- 3. CALCULATE PAYOUTS (Based on P&M Pool) ---
         let payouts = [];
         let distributedFromPool = 0;
@@ -124,7 +133,7 @@ const MatchesPage = () => {
             distributedFromPool += amt;
         });
 
-        // --- 4. ROUNDING CORRECTION ---
+        // --- 4. ROUNDING CORRECTION (Add to Org Reserve) ---
         const remainder = pmPool - distributedFromPool;
         if (remainder > 0 && payouts.length > 0) {
             payouts[payouts.length - 1].amount += remainder;
