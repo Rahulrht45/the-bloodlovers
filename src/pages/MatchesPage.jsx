@@ -306,7 +306,7 @@ const MatchesPage = () => {
                                         <div className="settled-top">
                                             <div className="settled-box">
                                                 <div className="settled-label">PRIZE POOL</div>
-                                                <div className="settled-value green">৳{match.prize_pool || '0'}</div>
+                                                <div className="settled-value green">৳{parseInt(String(match.prize_pool || '0').replace(/[^\d]/g, '')).toLocaleString()}</div>
                                             </div>
                                             <div className="settled-box">
                                                 <div className="settled-label">INSTANCE ID</div>
