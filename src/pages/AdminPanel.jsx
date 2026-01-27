@@ -129,9 +129,19 @@ const AdminPanel = () => {
         const ensureCurrency = (val) => {
             if (!val) return '৳0';
             const str = String(val).trim();
-            if (/^\d+$/.test(str.replace(/[৳₹,]/g, ''))) return `৳${str.replace(/[৳₹]/g, '')}`;
+            if (/^[\d,.]+$/.test(str.replace(/[৳₹,]/g, ''))) return `৳${str.replace(/[৳₹]/g, '')}`;
             return str;
         };
+
+        const getVal = (v) => parseInt(String(v).replace(/[৳₹,]/g, '')) || 0;
+        const totalPrizesSum = getVal(matchForm.rank1) + getVal(matchForm.rank2) + getVal(matchForm.rank3) + getVal(matchForm.rank4);
+        const expectedPool = getVal(matchForm.prizePool);
+
+        if (totalPrizesSum !== expectedPool && expectedPool > 0) {
+            alert(`Validation Failed: The sum of rank prizes (৳${totalPrizesSum}) must equal the total Prize Pool (৳${expectedPool}). Please adjust the rank amounts.`);
+            setSavingSettings(false);
+            return;
+        }
 
         try {
             const rowData = {
