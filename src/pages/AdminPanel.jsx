@@ -449,132 +449,134 @@ const AdminPanel = () => {
                                     <button className="btn-primary text-xs py-2 px-6">ADD PLAYER</button>
                                 </div>
 
-                                <table className="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Rank / ID</th>
-                                            <th>Player / IGN</th>
-                                            <th>Assigned Team</th>
-                                            <th>Kills</th>
-                                            <th>Wins</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {players.map((p) => (
-                                            <tr key={p.id}>
-                                                <td style={{ fontWeight: 'bold', color: '#00f0ff' }}>#{p.id}</td>
-                                                <td>
-                                                    <div className="player-cell-info">
-                                                        <img
-                                                            src={p.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${p.ign}`}
-                                                            className="player-avatar-mini"
-                                                            alt=""
-                                                        />
+                                <div className="table-container">
+                                    <table className="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank / ID</th>
+                                                <th>Player / IGN</th>
+                                                <th>Assigned Team</th>
+                                                <th>Kills</th>
+                                                <th>Wins</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {players.map((p) => (
+                                                <tr key={p.id}>
+                                                    <td style={{ fontWeight: 'bold', color: '#00f0ff' }}>#{p.id}</td>
+                                                    <td>
+                                                        <div className="player-cell-info">
+                                                            <img
+                                                                src={p.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${p.ign}`}
+                                                                className="player-avatar-mini"
+                                                                alt=""
+                                                            />
+                                                            {editingId === p.id ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={editValues.ign}
+                                                                    onChange={(e) => setEditValues({ ...editValues, ign: e.target.value })}
+                                                                    style={{
+                                                                        width: '150px',
+                                                                        padding: '4px 8px',
+                                                                        background: 'rgba(0,240,255,0.1)',
+                                                                        border: '1px solid var(--neon-cyan)',
+                                                                        borderRadius: '4px',
+                                                                        color: '#fff',
+                                                                        fontSize: '0.9rem',
+                                                                        fontWeight: '600'
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <span style={{ fontWeight: '600' }}>{p.ign}</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span className="team-badge">{p.team || 'FREE AGENT'}</span>
+                                                    </td>
+                                                    <td>
                                                         {editingId === p.id ? (
                                                             <input
-                                                                type="text"
-                                                                value={editValues.ign}
-                                                                onChange={(e) => setEditValues({ ...editValues, ign: e.target.value })}
+                                                                type="number"
+                                                                value={editValues.kills}
+                                                                onChange={(e) => setEditValues({ ...editValues, kills: parseInt(e.target.value) || 0 })}
                                                                 style={{
-                                                                    width: '150px',
+                                                                    width: '80px',
                                                                     padding: '4px 8px',
                                                                     background: 'rgba(0,240,255,0.1)',
                                                                     border: '1px solid var(--neon-cyan)',
                                                                     borderRadius: '4px',
                                                                     color: '#fff',
-                                                                    fontSize: '0.9rem',
-                                                                    fontWeight: '600'
+                                                                    fontSize: '0.9rem'
                                                                 }}
                                                             />
                                                         ) : (
-                                                            <span style={{ fontWeight: '600' }}>{p.ign}</span>
+                                                            <span style={{ fontWeight: '600', color: '#fff' }}>{p.kills || 0}</span>
                                                         )}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span className="team-badge">{p.team || 'FREE AGENT'}</span>
-                                                </td>
-                                                <td>
-                                                    {editingId === p.id ? (
-                                                        <input
-                                                            type="number"
-                                                            value={editValues.kills}
-                                                            onChange={(e) => setEditValues({ ...editValues, kills: parseInt(e.target.value) || 0 })}
-                                                            style={{
-                                                                width: '80px',
-                                                                padding: '4px 8px',
-                                                                background: 'rgba(0,240,255,0.1)',
-                                                                border: '1px solid var(--neon-cyan)',
-                                                                borderRadius: '4px',
-                                                                color: '#fff',
-                                                                fontSize: '0.9rem'
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span style={{ fontWeight: '600', color: '#fff' }}>{p.kills || 0}</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {editingId === p.id ? (
-                                                        <input
-                                                            type="number"
-                                                            value={editValues.wins}
-                                                            onChange={(e) => setEditValues({ ...editValues, wins: parseInt(e.target.value) || 0 })}
-                                                            style={{
-                                                                width: '80px',
-                                                                padding: '4px 8px',
-                                                                background: 'rgba(0,240,255,0.1)',
-                                                                border: '1px solid var(--neon-cyan)',
-                                                                borderRadius: '4px',
-                                                                color: '#fff',
-                                                                fontSize: '0.9rem'
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span style={{ fontWeight: '600', color: '#fff' }}>{p.wins || 0}</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <div className="admin-actions">
+                                                    </td>
+                                                    <td>
                                                         {editingId === p.id ? (
-                                                            <>
-                                                                <button
-                                                                    className="admin-btn-icon"
-                                                                    style={{ background: '#00f0ff', color: '#000' }}
-                                                                    onClick={() => handleSaveEdit(p.id)}
-                                                                >
-                                                                    Save
-                                                                </button>
-                                                                <button
-                                                                    className="admin-btn-icon admin-btn-delete"
-                                                                    onClick={handleCancelEdit}
-                                                                >
-                                                                    Cancel
-                                                                </button>
-                                                            </>
+                                                            <input
+                                                                type="number"
+                                                                value={editValues.wins}
+                                                                onChange={(e) => setEditValues({ ...editValues, wins: parseInt(e.target.value) || 0 })}
+                                                                style={{
+                                                                    width: '80px',
+                                                                    padding: '4px 8px',
+                                                                    background: 'rgba(0,240,255,0.1)',
+                                                                    border: '1px solid var(--neon-cyan)',
+                                                                    borderRadius: '4px',
+                                                                    color: '#fff',
+                                                                    fontSize: '0.9rem'
+                                                                }}
+                                                            />
                                                         ) : (
-                                                            <>
-                                                                <button
-                                                                    className="admin-btn-icon admin-btn-edit"
-                                                                    onClick={() => handleEditPlayer(p)}
-                                                                >
-                                                                    <Edit size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="admin-btn-icon admin-btn-delete"
-                                                                    onClick={() => handleDeletePlayer(p.id)}
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </>
+                                                            <span style={{ fontWeight: '600', color: '#fff' }}>{p.wins || 0}</span>
                                                         )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                                    </td>
+                                                    <td>
+                                                        <div className="admin-actions">
+                                                            {editingId === p.id ? (
+                                                                <>
+                                                                    <button
+                                                                        className="admin-btn-icon"
+                                                                        style={{ background: '#00f0ff', color: '#000' }}
+                                                                        onClick={() => handleSaveEdit(p.id)}
+                                                                    >
+                                                                        Save
+                                                                    </button>
+                                                                    <button
+                                                                        className="admin-btn-icon admin-btn-delete"
+                                                                        onClick={handleCancelEdit}
+                                                                    >
+                                                                        Cancel
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <button
+                                                                        className="admin-btn-icon admin-btn-edit"
+                                                                        onClick={() => handleEditPlayer(p)}
+                                                                    >
+                                                                        <Edit size={16} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="admin-btn-icon admin-btn-delete"
+                                                                        onClick={() => handleDeletePlayer(p.id)}
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
 
@@ -728,7 +730,7 @@ const AdminPanel = () => {
                                         </div>
                                     </form>
                                 ) : (
-                                    <div className="p-4 overflow-x-auto">
+                                    <div className="table-container p-4">
                                         <table className="admin-table">
                                             <thead>
                                                 <tr>
