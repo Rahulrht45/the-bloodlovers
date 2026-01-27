@@ -115,6 +115,15 @@ const AuthPage = () => {
                                 console.error('Failed to update user metadata:', updateError);
                             } else {
                                 console.log('User metadata updated with avatar URL');
+
+                                // FORCE SYNC to players table (since trigger ran before upload)
+                                const { error: playerUpdateError } = await supabase
+                                    .from('players')
+                                    .update({ avatar: avatarUrl })
+                                    .eq('user_id', data.user.id);
+
+                                if (playerUpdateError) console.error('Failed to sync avatar to players table:', playerUpdateError);
+                                else console.log('Players table synced with avatar URL');
                             }
                         }
                     } catch (uploadError) {
