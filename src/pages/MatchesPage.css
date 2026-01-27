@@ -641,3 +641,49 @@
     color: #8b94b8;
     opacity: .7;
 }
+/* --- ANDROID / MOBILE OPTIMIZATIONS --- */
+@media (max-width: 480px) {
+    .match-stats-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .settled-card {
+        padding: 15px;
+        border-radius: 16px;
+    }
+    .settled-top {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .settled-box {
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .settled-value {
+        font-size: 20px;
+        margin-top: 0;
+    }
+    .settled-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .settled-header .text-right {
+        text-align: left;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .settled-rank {
+        font-size: 28px;
+    }
+    .settled-squad {
+        font-size: 24px;
+    }
+    .settled-main {
+        padding: 15px;
+    }
+}
