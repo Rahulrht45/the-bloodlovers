@@ -125,6 +125,10 @@ const MatchesPage = () => {
             payouts[payouts.length - 1].amount += remainder;
         }
 
+        const userIGN = user?.user_metadata?.full_name || '';
+        const myPayout = payouts.find(p => p.name.trim().toLowerCase() === userIGN.trim().toLowerCase());
+        const creditingAmt = myPayout ? myPayout.amount : 0;
+
         const result = {
             id: match.id,
             rank: rank,
@@ -138,11 +142,6 @@ const MatchesPage = () => {
 
         // --- 5. PERSISTENCE & LOCKING ---
         localStorage.setItem(`match_res_${match.id}`, JSON.stringify(result));
-
-        // --- 5.1 INDIVIDUAL PAYOUT CALCULATION (CRITICAL FIX) ---
-        const userIGN = user?.user_metadata?.full_name || '';
-        const myPayout = payouts.find(p => p.name.trim().toLowerCase() === userIGN.trim().toLowerCase());
-        const creditingAmt = myPayout ? myPayout.amount : 0;
 
         const newBalance = walletBalance + creditingAmt;
         setWalletBalance(newBalance);
