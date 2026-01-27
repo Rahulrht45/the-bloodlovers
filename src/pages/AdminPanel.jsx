@@ -46,7 +46,7 @@ const AdminPanel = () => {
         player3: '15%', player3Name: 'PLAYER 3',
         player4: '10%', player4Name: 'PLAYER 4',
         player5: '10%', player5Name: 'PLAYER 5',
-        rank1: '৳600', rank2: '৳300', rank3: '৳100', rank4: '৳50',
+        rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
         startTime: toLocalISO(new Date()),
         endTime: toLocalISO(new Date(Date.now() + 3600000))
     });
@@ -200,6 +200,7 @@ const AdminPanel = () => {
                 player3: '15%', player3Name: 'PLAYER 3',
                 player4: '10%', player4Name: 'PLAYER 4',
                 player5: '10%', player5Name: 'PLAYER 5',
+                rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
                 startTime: toLocalISO(new Date()),
                 endTime: toLocalISO(new Date(Date.now() + 3600000))
             });
@@ -705,7 +706,7 @@ const AdminPanel = () => {
                                             />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Slot Prize</label>
+                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Slot Fee (Deduction)</label>
                                             <input
                                                 type="text"
                                                 value={matchForm.slotPrize}

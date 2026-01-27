@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import ImageExtractorPage from './pages/ImageExtractorPage';
 import MatchesPage from './pages/MatchesPage';
 import WalletPage from './pages/WalletPage';
+import MvpPage from './pages/MvpPage';
 import bgMain from './assets/bg-main.jpg';
 
 function AppContent() {
@@ -37,6 +38,7 @@ function AppContent() {
                     <Route path="/extract" element={<ImageExtractorPage />} />
                     <Route path="/matches" element={<MatchesPage />} />
                     <Route path="/wallet" element={<WalletPage />} />
+                    <Route path="/mvp" element={<MvpPage />} />
                 </Routes>
             </main>
         </div>
