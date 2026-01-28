@@ -15,11 +15,14 @@ const ProfilePage = () => {
 
     // Form states
     const [ign, setIgn] = useState('');
+    const [inGameUid, setInGameUid] = useState('');
     const [team, setTeam] = useState('');
     const [role, setRole] = useState('');
     const [profilePicture, setProfilePicture] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [currentAvatar, setCurrentAvatar] = useState('');
+    const [walletBalance, setWalletBalance] = useState(0);
+
 
     useEffect(() => {
         checkUser();
@@ -46,10 +49,16 @@ const ProfilePage = () => {
             if (!playerError && playerData) {
                 setPlayerData(playerData);
                 setIgn(playerData.ign || '');
+                setInGameUid(playerData.in_game_uid || '');
                 setTeam(playerData.team || '');
                 setRole(playerData.role || '');
                 setCurrentAvatar(playerData.avatar || '');
                 setPreviewUrl(playerData.avatar || '');
+
+                if (playerData.in_game_uid) {
+                    const balance = Number(localStorage.getItem(`player_wallet_uid_${playerData.in_game_uid}`) || 0);
+                    setWalletBalance(balance);
+                }
             }
 
             setLoading(false);
@@ -123,6 +132,7 @@ const ProfilePage = () => {
                 .from('players')
                 .update({
                     ign: ign,
+                    in_game_uid: inGameUid,
                     team: team,
                     role: role,
                     avatar: avatarUrl
@@ -186,6 +196,31 @@ const ProfilePage = () => {
                     <p>Update your player information</p>
                 </div>
 
+                {/* Wallet Balance Display */}
+                {inGameUid && (
+                    <div className="mb-6 p-4 bg-gradient-to-r from-[#FBBC04]/10 to-[#F59E0B]/10 border border-[#FBBC04]/30 rounded-xl">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">Your Wallet Balance</div>
+                                <div className="text-3xl font-black italic text-[#FBBC04]">
+                                    ৳{walletBalance.toLocaleString()}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => navigate('/wallet')}
+                                className="px-4 py-2 bg-[#FBBC04]/20 hover:bg-[#FBBC04]/40 text-[#FBBC04] rounded-lg text-sm font-bold transition-all"
+                            >
+                                View Wallet
+                            </button>
+                        </div>
+                        {!localStorage.getItem(`player_wallet_uid_${inGameUid}`) && (
+                            <p className="text-xs text-gray-500 mt-2">
+                                Your wallet will be created after your first match distribution
+                            </p>
+                        )}
+                    </div>
+                )}
+
                 {error && <div className="profile-error">{error}</div>}
                 {success && <div className="profile-success">{success}</div>}
 
@@ -229,6 +264,20 @@ const ProfilePage = () => {
                                 required
                             />
                             <User className="profile-input-icon" size={18} />
+                        </div>
+                    </div>
+
+                    {/* In-Game UID */}
+                    <div className="profile-form-group">
+                        <label>Player In-Game UID</label>
+                        <div className="profile-input-wrapper">
+                            <input
+                                type="text"
+                                placeholder="Enter your in-game UID"
+                                value={inGameUid}
+                                onChange={(e) => setInGameUid(e.target.value)}
+                            />
+                            <Trophy className="profile-input-icon" size={18} />
                         </div>
                     </div>
 

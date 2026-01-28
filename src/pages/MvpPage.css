@@ -1,177 +1,272 @@
-.mvp-page-container {
-    padding: 100px 20px 40px;
+/* Scoped Wrapper for Page Background */
+.mvp-page-wrapper {
     min-height: 100vh;
-    position: relative;
-    max-width: 1200px;
-    margin: 0 auto;
+    background: radial-gradient(circle at top, #0c1426, #050814);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+    font-family: "Inter", system-ui, sans-serif;
 }
 
-.mvp-bg-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.05), transparent 40%),
-        radial-gradient(circle at bottom left, rgba(0, 240, 255, 0.05), transparent 40%);
-    pointer-events: none;
-    z-index: -1;
+/* ===== RESET (Scoped) ===== */
+.mvp-page-wrapper * {
+    box-sizing: border-box;
 }
 
+/* ===== CONTAINER ===== */
+.leaderboard {
+    width: 1100px;
+    max-width: 100%;
+}
+
+/* ===== HEADER ===== */
 .mvp-header {
-    margin-bottom: 40px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 20px;
+    text-align: center;
+    margin-bottom: 24px;
 }
 
-.mvp-grid {
+.mvp-header h1 {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+    .mvp-header h1 {
+        font-size: 46px;
+    }
+}
+
+.mvp-header h1 span {
+    color: #22e3ff;
+}
+
+.mvp-header p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #9fb2d1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===== FILTERS ===== */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.filter {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cdd9f1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.filter:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.filter.active {
+    background: #ff3b3b;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 59, 59, 0.3);
+}
+
+/* Specific colors for active states if needed, defaulting to red as per design */
+
+/* ===== TOP 3 ===== */
+.top3 {
     display: grid;
-    grid-template-columns: 350px 1fr;
-    gap: 30px;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 36px;
+    align-items: end;
 }
 
-@media (max-width: 900px) {
-    .mvp-grid {
-        grid-template-columns: 1fr;
+@media (min-width: 768px) {
+    .top3 {
+        grid-template-columns: 1fr 1.2fr 1fr;
     }
 }
 
 .mvp-card {
-    background: rgba(20, 20, 25, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 24px;
-    backdrop-filter: blur(10px);
-}
-
-.card-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--neon-cyan);
-    margin-bottom: 20px;
-}
-
-.input-group label {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-}
-
-.mvp-select {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    outline: none;
-    font-family: 'JetBrains Mono', monospace;
-    transition: all 0.3s ease;
-}
-
-.mvp-select:focus {
-    border-color: var(--neon-cyan);
-}
-
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-}
-
-.summary-item .val {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
-}
-
-/* Showcase Card */
-.showcase-card {
-    display: flex;
-    flex-direction: column;
-}
-
-.trophy-section {
-    text-align: center;
-    margin-bottom: 30px;
+    background: linear-gradient(180deg, #0f1a30, #090f1e);
+    border-radius: 18px;
     padding: 20px;
-    background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 215, 0, 0.2);
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s ease;
 }
 
-.mvp-table-container {
-    overflow-x: auto;
+.mvp-card:hover {
+    transform: translateY(-5px);
 }
 
-.mvp-table {
+.mvp-card.gold {
+    border: 2px solid #ffd24a;
+    box-shadow: 0 0 30px rgba(255, 210, 74, 0.3);
+    z-index: 10;
+}
+
+/* Order on mobile: Rank 1 first */
+@media (max-width: 768px) {
+    .mvp-card.gold {
+        order: -1;
+        margin-bottom: 20px;
+    }
+}
+
+.rank {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    font-size: 12px;
+    color: #9fb2d1;
+    background: #0f1a30;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.gold .rank {
+    color: #ffd24a;
+}
+
+.avatar {
+    width: 88px;
+    height: 88px;
+    margin: auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #444;
+    background: #1a1a2e;
+}
+
+.gold .avatar {
+    border-color: #ffd24a;
+    width: 100px;
+    height: 100px;
+}
+
+.avatar img {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
+    height: 100%;
+    object-fit: cover;
 }
 
-.mvp-table th {
-    text-align: left;
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #888;
+.name {
+    margin-top: 12px;
+    font-size: 18px;
     font-weight: 700;
-    padding: 0 16px;
-    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.mvp-table td {
-    background: rgba(255, 255, 255, 0.02);
-    padding: 16px;
+.gold .name {
+    font-size: 22px;
+}
+
+.team {
+    font-size: 11px;
+    color: #7e8fae;
+    text-transform: uppercase;
+}
+
+.value {
+    margin-top: 10px;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ff3b3b;
+}
+
+.gold .value {
+    color: #ffd24a;
+    font-size: 40px;
+}
+
+/* ===== TABLE ===== */
+.mvp-table {
+    margin-top: 36px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.mvp-row {
+    display: grid;
+    grid-template-columns: 50px 2fr 1fr 1fr 1fr 1fr 1fr;
+    padding: 14px 18px;
+    align-items: center;
     font-size: 13px;
-    font-family: 'JetBrains Mono', monospace;
+    transition: background 0.2s;
 }
 
-.mvp-table tr td:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
+.mvp-row:hover:not(.header) {
+    background: rgba(255, 255, 255, 0.03);
 }
 
-.mvp-table tr td:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+.mvp-row.header {
+    background: rgba(255, 255, 255, 0.06);
+    color: #9fb2d1;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.mvp-table tr:hover td {
-    background: rgba(255, 255, 255, 0.05);
+.mvp-row:not(.header) {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.rank-1 td {
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
-    border-top: 1px solid rgba(255, 215, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+.mvp-row .highlight-stat {
+    color: #ff3b3b;
+    font-weight: 700;
+    font-size: 15px;
 }
 
-.animate-bounce-slow {
-    animation: bounce 3s infinite;
+.muted {
+    color: #5f6f8f;
 }
 
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
+/* Mobile responsive table */
+@media (max-width: 768px) {
+    .mvp-row {
+        grid-template-columns: 40px 1fr 1fr;
     }
 
-    50% {
-        transform: translateY(-10px);
+    .mvp-row>div:nth-child(n+4) {
+        display: none;
     }
+
+    .filters {
+        gap: 6px;
+    }
+
+    .filter {
+        font-size: 10px;
+        padding: 5px 10px;
+    }
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 11px;
+    color: #6f7f9f;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }

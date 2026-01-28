@@ -23,7 +23,8 @@ const PlayersPage = () => {
                 // Map snake_case from DB to camelCase for UI
                 const formattedData = data.map(p => ({
                     ...p,
-                    mvpPoints: p.mvp_points
+                    mvpPoints: p.mvp_points,
+                    inGameUid: p.in_game_uid || `DEMO-UID-${String(p.id).padStart(6, '0')}`
                 }));
 
                 console.log('Formatted player data:', formattedData);
@@ -92,6 +93,23 @@ const PlayersPage = () => {
                                     <div className="player-name">{player.ign}</div>
                                     <div className="player-team">{player.team}</div>
                                     <div className="role">{player.role}</div>
+
+                                    {/* Player UID */}
+                                    <div className="player-uid" style={{
+                                        fontSize: '10px',
+                                        fontWeight: 'bold',
+                                        letterSpacing: '1px',
+                                        marginTop: '8px',
+                                        padding: '4px 8px',
+                                        borderRadius: '4px',
+                                        background: player.in_game_uid ? 'rgba(0, 240, 255, 0.1)' : 'rgba(255, 200, 0, 0.1)',
+                                        border: player.in_game_uid ? '1px solid rgba(0, 240, 255, 0.3)' : '1px dashed rgba(255, 200, 0, 0.3)',
+                                        color: player.in_game_uid ? 'var(--neon-cyan)' : '#ffc800',
+                                        textAlign: 'center',
+                                        fontFamily: 'monospace'
+                                    }}>
+                                        UID: {player.inGameUid}
+                                    </div>
 
                                     <div className="stats">
                                         <div className="stat-item">

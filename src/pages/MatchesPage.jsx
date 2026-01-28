@@ -6,19 +6,107 @@ import './MatchesPage.css';
 
 const MatchesPage = () => {
     const [matches, setMatches] = useState([]);
-    const [walletBalance, setWalletBalance] = useState(() => Number(localStorage.getItem('bloods_wallet_balance') || 0));
+    const [walletBalance, setWalletBalance] = useState(0);
     const [activeRosterId, setActiveRosterId] = useState(null);
     const [activePrizeMatchId, setActivePrizeMatchId] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [user, setUser] = useState(null);
+    const [playerUids, setPlayerUids] = useState({});
+    const [playerFullMap, setPlayerFullMap] = useState({}); // Stores full player info including user_id
+    const [currentUserUid, setCurrentUserUid] = useState(null);
 
-    // --- FETCH USER ---
+    // --- FETCH USER & BALANCE ---
     useEffect(() => {
         const getAuth = async () => {
             const { data: { user: u } } = await supabase.auth.getUser();
             setUser(u);
+
+            if (u) {
+                // 1. Get Player Profile
+                const { data: playerData } = await supabase
+                    .from('players')
+                    .select('in_game_uid')
+                    .eq('user_id', u.id)
+                    .single();
+
+                if (playerData) {
+                    setCurrentUserUid(playerData.in_game_uid);
+                }
+
+                // 2. Fetch REAL balance from 'users' table using ID (The Secure Way)
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('global_credit')
+                    .eq('id', u.id)
+                    .single();
+
+                if (userData) {
+                    const balance = Number(userData.global_credit || 0);
+                    console.log(`[Wallet] Synced with DB: ৳${balance}`);
+                    setWalletBalance(balance);
+
+                    // Sync localStorage only for backward compatibility, but DB is primary
+                    localStorage.setItem('bloods_wallet_balance', String(balance));
+                }
+            }
         };
         getAuth();
+
+        // Listen for direct wallet updates
+        const channel = supabase
+            .channel('wallet-sync')
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'users'
+            }, async (payload) => {
+                const { data: { user: cur } } = await supabase.auth.getUser();
+                if (cur && payload.new.id === cur.id) {
+                    setWalletBalance(Number(payload.new.global_credit || 0));
+                    localStorage.setItem('bloods_wallet_balance', String(payload.new.global_credit || 0));
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
+    // --- FETCH PLAYER UIDs ---
+    useEffect(() => {
+        const fetchPlayerUids = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('players')
+                    .select('ign, in_game_uid, user_id');
+
+                if (error) {
+                    console.error('Error fetching player UIDs:', error);
+                    return;
+                }
+
+                // Create a map of IGN -> User Info
+                const uidMap = {};
+                const fullMap = {};
+                data.forEach(player => {
+                    if (player.ign) {
+                        const key = player.ign.trim().toUpperCase();
+                        uidMap[key] = player.in_game_uid || 'N/A';
+                        fullMap[key] = {
+                            ign: player.ign,
+                            uid: player.in_game_uid,
+                            userId: player.user_id
+                        };
+                    }
+                });
+                setPlayerUids(uidMap);
+                setPlayerFullMap(fullMap);
+            } catch (err) {
+                console.error('Failed to fetch player UIDs:', err);
+            }
+        };
+        fetchPlayerUids();
     }, []);
 
     // --- REFRESH DATA ---
@@ -139,7 +227,7 @@ const MatchesPage = () => {
             payouts[payouts.length - 1].amount += remainder;
         }
 
-        // --- 5. USER CREDIT ---
+        // --- 5. USER INFO (for display only, no crediting yet) ---
         const userIGN = user?.user_metadata?.full_name || '';
         const myPayout = payouts.find(p => p.name.trim().toLowerCase() === userIGN.trim().toLowerCase());
         const creditingAmt = myPayout ? myPayout.amount : 0;
@@ -157,32 +245,11 @@ const MatchesPage = () => {
             hash: btoa(`${match.id}-${rank}-${rankPrize}-${Date.now()}`).slice(0, 18).toUpperCase()
         };
 
-        // --- 6. SAVE & UPDATE ---
+        // --- 6. SAVE RESULT (NO WALLET CREDITING) ---
         localStorage.setItem(`match_res_${match.id}`, JSON.stringify(result));
 
-        const newBalance = walletBalance + creditingAmt;
-        setWalletBalance(newBalance);
-        localStorage.setItem('bloods_wallet_balance', String(newBalance));
-
-        // --- 7. LEDGER ---
-        const txs = JSON.parse(localStorage.getItem('bloods_txs') || '[]');
-        txs.push({
-            id: `TX-${Date.now()}-${match.id}`,
-            matchId: match.id,
-            amount: creditingAmt,
-            type: 'TOURNAMENT_WIN',
-            ref: `Rank #${rank} Share (${myPayout?.percent || 0}%) in ${match.org_name}`,
-            date: new Date().toLocaleString()
-        });
-        localStorage.setItem('bloods_txs', JSON.stringify(txs));
-
-        if (creditingAmt > 0) {
-            alert(`Victory! Credited ৳${creditingAmt.toLocaleString()} to your wallet.`);
-        } else if (userIGN) {
-            alert(`Match settled. Squad won ৳${rankPrize.toLocaleString()}, but your IGN (${userIGN}) was not found in the roster.`);
-        } else {
-            alert(`Match settled. Squad won ৳${rankPrize.toLocaleString()}. Please sign in to claim shares.`);
-        }
+        // Show confirmation without crediting wallet
+        alert(`Match settled! Squad finished at Rank #${rank} and won ৳${rankPrize.toLocaleString()}.\n\nClick "DISTRIBUTE TO WALLET" to credit funds.`);
     };
 
     useEffect(() => {
@@ -329,69 +396,114 @@ const MatchesPage = () => {
                                             <div className="settled-sub">PAYOUT BREAKDOWN · PERFECT DISTRIBUTION</div>
 
                                             <div className="settled-list">
-                                                {savedRes.payouts.map((p, i) => (
-                                                    <div className="settled-row" key={i}>
-                                                        <div>{p.name.toUpperCase()} — {p.percent}%</div>
-                                                        <div className="settled-amount">৳{p.amount.toLocaleString()}</div>
-                                                    </div>
-                                                ))}
+                                                {savedRes.payouts.map((p, i) => {
+                                                    const playerKey = p.name.trim().toUpperCase();
+                                                    const uid = playerUids[playerKey];
+                                                    const isPlayer = !['MANAGEMENT', 'MVP BONUS', 'ORG RESERVE'].includes(playerKey);
+
+                                                    return (
+                                                        <div className="settled-row" key={i}>
+                                                            <div>
+                                                                <div>{p.name.toUpperCase()} — {p.percent}%</div>
+                                                                {isPlayer && uid && (
+                                                                    <div style={{
+                                                                        fontSize: '9px',
+                                                                        opacity: 0.5,
+                                                                        marginTop: '2px',
+                                                                        fontFamily: 'monospace',
+                                                                        letterSpacing: '0.5px'
+                                                                    }}>
+                                                                        UID: {uid}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="settled-amount">৳{p.amount.toLocaleString()}</div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
 
                                             <div className="settled-footer">
                                                 VERIFIED · SECURE · TOTAL 100%
                                                 <div className="mt-2 opacity-30 text-[8px] font-mono tracking-widest cursor-pointer hover:text-red-500 hover:opacity-100" onClick={() => {
                                                     localStorage.removeItem(`match_res_${match.id}`);
+                                                    localStorage.removeItem(`dist_done_${match.id}`);
                                                     window.location.reload();
                                                 }}>
                                                     {savedRes.hash} [RESET]
                                                 </div>
                                                 <button
-                                                    onClick={() => {
-                                                        let alreadyDistributed = localStorage.getItem(`dist_done_${match.id}`);
+                                                    onClick={async () => {
+                                                        const alreadyDistributed = localStorage.getItem(`dist_done_${match.id}`);
                                                         if (alreadyDistributed) {
                                                             alert("This match has already been distributed to wallets.");
                                                             return;
                                                         }
 
-                                                        const distributionLog = savedRes.payouts.map(p => {
-                                                            let target = 'Unknown';
-                                                            const nameTrimmed = (p.name || '').trim().toUpperCase();
-                                                            console.log(`Processing payout: "${p.name}" -> "${nameTrimmed}" = ৳${p.amount}`);
+                                                        const DIST_LOG = [];
 
+                                                        // Iterate Payouts and Credit via RPC
+                                                        for (const p of savedRes.payouts) {
+                                                            const nameTrimmed = (p.name || '').trim().toUpperCase();
+
+                                                            // Find Target User ID
+                                                            let targetUserId = null;
+
+                                                            // Deterministic UUIDs for Corporate Accounts (Synced with DB)
                                                             if (nameTrimmed === 'MANAGEMENT') {
-                                                                target = 'TBL (Management)';
-                                                                const cur = Number(localStorage.getItem('tbl_mgmt_bal') || 0);
-                                                                const newBal = cur + p.amount;
-                                                                localStorage.setItem('tbl_mgmt_bal', String(newBal));
-                                                                console.log(`✅ MANAGEMENT: ${cur} + ${p.amount} = ${newBal}`);
+                                                                targetUserId = '00000000-0000-0000-0000-000000000001';
                                                             } else if (nameTrimmed === 'MVP BONUS') {
-                                                                target = 'TBL RAHUL (MVP)';
-                                                                const cur = Number(localStorage.getItem('tbl_mvp_bal') || 0);
-                                                                const newBal = cur + p.amount;
-                                                                localStorage.setItem('tbl_mvp_bal', String(newBal));
-                                                                console.log(`✅ MVP BONUS: ${cur} + ${p.amount} = ${newBal}`);
+                                                                targetUserId = '00000000-0000-0000-0000-000000000002';
                                                             } else if (nameTrimmed === 'ORG RESERVE') {
-                                                                target = 'TBL (Org Reserve)';
-                                                                const cur = Number(localStorage.getItem('tbl_reserve_bal') || 0);
-                                                                const newBal = cur + p.amount;
-                                                                localStorage.setItem('tbl_reserve_bal', String(newBal));
-                                                                console.log(`✅ ORG RESERVE: ${cur} + ${p.amount} = ${newBal}`);
+                                                                targetUserId = '00000000-0000-0000-0000-000000000003';
                                                             } else {
-                                                                // Credit individual player wallets
-                                                                target = p.name;
-                                                                const playerKey = `player_wallet_${p.name.toLowerCase().replace(/\s+/g, '_')}`;
-                                                                const cur = Number(localStorage.getItem(playerKey) || 0);
-                                                                const newBal = cur + p.amount;
-                                                                localStorage.setItem(playerKey, String(newBal));
-                                                                console.log(`✅ PLAYER ${p.name}: ${cur} + ${p.amount} = ${newBal}`);
+                                                                const playerInfo = playerFullMap[nameTrimmed];
+                                                                if (playerInfo && playerInfo.userId) {
+                                                                    targetUserId = playerInfo.userId;
+                                                                } else if (user && (user.user_metadata?.full_name?.toUpperCase() === nameTrimmed || user.email?.split('@')[0].toUpperCase() === nameTrimmed)) {
+                                                                    targetUserId = user.id;
+                                                                }
                                                             }
-                                                            return `${target}: ৳${p.amount.toLocaleString()}`;
-                                                        }).join('\n');
+
+                                                            if (targetUserId) {
+                                                                try {
+                                                                    // DB Credit
+                                                                    const { error } = await supabase.rpc('admin_credit_user', {
+                                                                        p_user_id: targetUserId,
+                                                                        p_amount: p.amount
+                                                                    });
+
+                                                                    if (error) throw error;
+                                                                    DIST_LOG.push(`✅ ${p.name}: Credited ৳${p.amount}`);
+
+                                                                    // Local Storage Update (Redundancy/Immediate feedback for self)
+                                                                    if (user && user.id === targetUserId) {
+                                                                        const currentMainWallet = Number(localStorage.getItem('bloods_wallet_balance') || 0);
+                                                                        const newMainWallet = currentMainWallet + p.amount;
+                                                                        localStorage.setItem('bloods_wallet_balance', String(newMainWallet));
+
+                                                                        const txs = JSON.parse(localStorage.getItem('bloods_txs') || '[]');
+                                                                        txs.push({
+                                                                            id: `TX-${Date.now()}-${match.id}`,
+                                                                            matchId: match.id,
+                                                                            amount: p.amount,
+                                                                            type: 'TOURNAMENT_WIN',
+                                                                            ref: `Rank #${savedRes.rank} Share`,
+                                                                            date: new Date().toLocaleString()
+                                                                        });
+                                                                        localStorage.setItem('bloods_txs', JSON.stringify(txs));
+                                                                    }
+                                                                } catch (err) {
+                                                                    console.error(err);
+                                                                    DIST_LOG.push(`❌ ${p.name}: DB Error (${err.message})`);
+                                                                }
+                                                            } else {
+                                                                DIST_LOG.push(`⚠️ ${p.name}: No User ID found.`);
+                                                            }
+                                                        }
 
                                                         localStorage.setItem(`dist_done_${match.id}`, "true");
-                                                        alert(`DISTRIBUTION REPORT:\n------------------\n${distributionLog}\n\n✅ TBL Management & Player funds successfully credited.`);
-
-                                                        // Force page reload to show updated balances
+                                                        alert(`DISTRIBUTION REPORT:\n${DIST_LOG.join('\n')}`);
                                                         window.location.reload();
                                                     }}
                                                     className="mt-3 w-full py-2 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 font-bold text-[10px] hover:bg-emerald-500 hover:text-black transition-all"
@@ -429,16 +541,18 @@ const MatchesPage = () => {
                     );
                 })}
 
-                {matches.length === 0 && (
-                    <div className="lg:col-span-2 text-center py-32 opacity-30">
-                        <Gamepad2 size={48} className="mx-auto mb-6" />
-                        <h3 className="text-xl font-black italic uppercase tracking-[5px]">No Active Combat Zones</h3>
-                    </div>
-                )}
-            </main>
+                {
+                    matches.length === 0 && (
+                        <div className="lg:col-span-2 text-center py-32 opacity-30">
+                            <Gamepad2 size={48} className="mx-auto mb-6" />
+                            <h3 className="text-xl font-black italic uppercase tracking-[5px]">No Active Combat Zones</h3>
+                        </div>
+                    )
+                }
+            </main >
 
             {/* FOOTER TIMER */}
-            <div className="matches-footer-timer">
+            < div className="matches-footer-timer" >
                 <div className="flex items-center gap-3">
                     <Clock size={20} className="text-[var(--neon-cyan)]" />
                     <span className="footer-time">{currentTime.toLocaleTimeString()}</span>
@@ -447,8 +561,8 @@ const MatchesPage = () => {
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                     <span className="text-[10px] font-bold tracking-[3px] uppercase opacity-60">Neural Network Active</span>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

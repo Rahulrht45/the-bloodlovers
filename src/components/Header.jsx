@@ -57,7 +57,7 @@ const Header = () => {
                     {navItems.map((item) => {
                         const isPlayers = item === 'Players' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
                         const isAdmin = item === 'Admin Panel';
-                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : "/players"));
+                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/players")));
 
                         if (isPlayers || isAdmin) {
                             return (
@@ -140,7 +140,7 @@ const Header = () => {
                     {navItems.map((item) => {
                         const isInternalPage = item === 'Players' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
                         const isAdmin = item === 'Admin Panel';
-                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : "/players"));
+                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/players")));
 
                         if (isInternalPage || isAdmin) {
                             return (
