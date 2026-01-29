@@ -59,7 +59,9 @@ const HeroSection = () => {
 
                     <h1 className="hero-h1">
                         REIGN <span className="hero-accent">SUPREME.</span><br />
-                        DOMINATE.<span className="hero-muted-text">CONQUER.</span>REPEAT.
+                        DOMINATE.<br className="block sm:hidden" />
+                        <span className="hero-muted-text">CONQUER.</span><br className="block sm:hidden" />
+                        REPEAT.
                     </h1>
 
                     <p className="hero-desc">

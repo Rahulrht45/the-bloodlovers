@@ -434,14 +434,22 @@ body {
 
 .hero-h1 {
     font-family: var(--font-orbitron);
-    font-size: clamp(38px, 9vw, 84px);
-    line-height: 0.9;
+    font-size: clamp(28px, 8vw, 84px);
+    line-height: 1.1;
     margin-bottom: 25px;
     font-weight: 900;
     font-style: italic;
     color: #ffffff;
-    letter-spacing: -2px;
+    letter-spacing: -1px;
     text-transform: uppercase;
+    word-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+    .hero-h1 {
+        line-height: 1.2;
+        letter-spacing: 0;
+    }
 }
 
 .hero-accent {
