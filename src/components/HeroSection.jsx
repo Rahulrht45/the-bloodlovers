@@ -132,7 +132,7 @@ const HeroSection = () => {
                         </div>
                         <div className="hero-stats-item gold">
                             <strong>{stats.prizePool}</strong>
-                            <span>PRIZE POOLS</span>
+                            <span>TOTAL EARNED</span>
                         </div>
                     </div>
                 </div>
