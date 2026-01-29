@@ -515,29 +515,7 @@ body {
     display: flex;
     gap: clamp(20px, 5vw, 40px);
     flex-wrap: wrap;
-}
-
-.hero-stats-bottom-right {
-    position: absolute;
-    bottom: 40px;
-    right: 5vw;
-    z-index: 20;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 20px 30px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-@media (max-width: 1024px) {
-    .hero-stats-bottom-right {
-        position: static;
-        margin-top: 40px;
-        background: transparent;
-        padding: 0;
-        backdrop-filter: none;
-        border: none;
-    }
+    margin-top: 80px;
 }
 
 .hero-stats-item {
