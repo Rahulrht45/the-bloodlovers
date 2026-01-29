@@ -15,24 +15,28 @@ import logo from './assets/logo.png';
 function AppContent() {
     const location = useLocation();
     const isHomePage = location.pathname === '/';
+    const hideLogoPaths = ['/matches', '/mvp', '/players'];
+    const shouldShowLogo = !hideLogoPaths.includes(location.pathname);
 
     return (
         <div className="w-full min-h-screen text-white overflow-x-hidden relative">
             {/* Global Logo Background Watermark */}
-            <div
-                className="fixed inset-0 z-0 opacity-100 pointer-events-none flex items-center justify-center overflow-hidden"
-            >
+            {shouldShowLogo && (
                 <div
-                    style={{
-                        backgroundImage: `url(${logo})`,
-                        backgroundSize: 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        width: 'min(800px, 90vw)',
-                        height: 'min(800px, 90vw)',
-                    }}
-                />
-            </div>
+                    className="fixed inset-0 z-0 opacity-100 pointer-events-none flex items-center justify-center overflow-hidden"
+                >
+                    <div
+                        style={{
+                            backgroundImage: `url(${logo})`,
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            width: 'min(800px, 90vw)',
+                            height: 'min(800px, 90vw)',
+                        }}
+                    />
+                </div>
+            )}
             {isHomePage && <Header />}
             <main className={isHomePage ? "pt-[72px]" : "pt-0"}>
                 <Routes>
