@@ -20,14 +20,19 @@ function AppContent() {
         <div className="w-full min-h-screen text-white overflow-x-hidden relative">
             {/* Global Logo Background Watermark */}
             <div
-                className="fixed inset-0 z-0 opacity-60 pointer-events-none flex items-center justify-center overflow-hidden"
-                style={{
-                    backgroundImage: `url(${logo})`,
-                    backgroundSize: '800px',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                }}
-            ></div>
+                className="fixed inset-0 z-0 opacity-75 pointer-events-none flex items-center justify-center overflow-hidden"
+            >
+                <div
+                    style={{
+                        backgroundImage: `url(${logo})`,
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        width: 'min(800px, 90vw)',
+                        height: 'min(800px, 90vw)',
+                    }}
+                />
+            </div>
             {isHomePage && <Header />}
             <main className={isHomePage ? "pt-[72px]" : "pt-0"}>
                 <Routes>
