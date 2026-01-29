@@ -515,7 +515,7 @@ body {
     display: flex;
     gap: clamp(20px, 5vw, 40px);
     flex-wrap: wrap;
-    margin-top: 80px;
+    margin-top: 160px;
 }
 
 .hero-stats-item {
