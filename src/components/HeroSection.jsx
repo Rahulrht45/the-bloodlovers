@@ -7,12 +7,37 @@ const HeroSection = () => {
     const [topFragger, setTopFragger] = useState({ ign: 'LOADING...', kills: 0 });
     const [standings, setStandings] = useState([]);
     const [user, setUser] = useState(null);
+    const [stats, setStats] = useState({ players: '0', matches: '0', prizePool: '৳0' });
 
     useEffect(() => {
         const fetchData = async () => {
             // Fetch User Auth
             const { data: { user: currentUser } } = await supabase.auth.getUser();
             setUser(currentUser);
+
+            // Fetch Real Stats
+            const [playersRes, matchesRes] = await Promise.all([
+                supabase.from('players').select('*', { count: 'exact', head: true }),
+                supabase.from('match_settings').select('prize_pool', { count: 'exact' })
+            ]);
+
+            const pCount = playersRes.count || 0;
+            const mCount = matchesRes.count || 0;
+
+            // Calculate Total Prize Pool from the text field
+            let totalPrize = 0;
+            if (matchesRes.data) {
+                matchesRes.data.forEach(m => {
+                    const val = parseInt(String(m.prize_pool).replace(/[^\d]/g, '')) || 0;
+                    totalPrize += val;
+                });
+            }
+
+            setStats({
+                players: pCount >= 1000 ? `${(pCount / 1000).toFixed(1)}K+` : String(pCount),
+                matches: mCount >= 1000 ? `${(mCount / 1000).toFixed(1)}M` : String(mCount),
+                prizePool: `৳${totalPrize.toLocaleString()}`
+            });
 
             // Fetch Top Fragger
             const { data: topData, error: topError } = await supabase
@@ -98,15 +123,15 @@ const HeroSection = () => {
 
                     <div className="hero-stats-row">
                         <div className="hero-stats-item">
-                            <strong>50K+</strong>
+                            <strong>{stats.players}</strong>
                             <span>PLAYERS</span>
                         </div>
                         <div className="hero-stats-item">
-                            <strong>1.2M</strong>
+                            <strong>{stats.matches}</strong>
                             <span>MATCHES</span>
                         </div>
                         <div className="hero-stats-item gold">
-                            <strong>$500K</strong>
+                            <strong>{stats.prizePool}</strong>
                             <span>PRIZE POOLS</span>
                         </div>
                     </div>
