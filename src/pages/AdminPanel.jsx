@@ -1632,7 +1632,7 @@ const AdminPanel = () => {
 
                                                     {/* Balance */}
                                                     <div className="bg-gradient-to-r from-[#FBBC04]/10 to-[#F59E0B]/10 border border-[#FBBC04]/20 rounded-lg p-3 mb-3">
-                                                        <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Global Credit</div>
+                                                        <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">MY BALANCE</div>
                                                         {editingWallet === `db_${user.id}` ? (
                                                             <div className="flex items-center gap-2">
                                                                 <input

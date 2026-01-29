@@ -269,7 +269,7 @@ const MatchesPage = () => {
                     <Wallet size={20} />
                 </div>
                 <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Global Credits</span>
+                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">MY BALANCE</span>
                     <span className="font-black italic text-xl">৳{walletBalance.toLocaleString()}</span>
                 </div>
             </div>
