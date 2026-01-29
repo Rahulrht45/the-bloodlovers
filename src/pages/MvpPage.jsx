@@ -5,7 +5,7 @@ import './MvpPage.css'; // Import the specific CSS
 const MvpPage = () => {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [sortBy, setSortBy] = useState('kills');
+    const [sortBy, setSortBy] = useState('mvp_points');
 
     // Fetch Players
     useEffect(() => {
@@ -52,6 +52,7 @@ const MvpPage = () => {
 
     // Filter Tabs Configuration
     const filters = [
+        { id: 'mvp_points', label: 'MOST MVP' },
         { id: 'kills', label: 'MOST KILLS' },
         { id: 'damage', label: 'MOST DAMAGE' },
         { id: 'assists', label: 'ASSISTS' },
@@ -145,6 +146,7 @@ const MvpPage = () => {
                                 <div className="mvp-row header">
                                     <div>#</div>
                                     <div>PLAYER</div>
+                                    <div className={sortBy === 'mvp_points' ? 'highlight-stat' : ''}>MVP</div>
                                     <div className={sortBy === 'kills' ? 'highlight-stat' : ''}>KILLS</div>
                                     <div className={sortBy === 'damage' ? 'highlight-stat' : ''}>DAMAGE</div>
                                     <div className={sortBy === 'assists' ? 'highlight-stat' : ''}>ASSISTS</div>
@@ -156,6 +158,7 @@ const MvpPage = () => {
                                     <div key={player.id} className="mvp-row">
                                         <div>#{index + 4}</div>
                                         <div>{player.ign}</div>
+                                        {renderStatCell(player, 'mvp_points')}
                                         {renderStatCell(player, 'kills')}
                                         {renderStatCell(player, 'damage')}
                                         {renderStatCell(player, 'assists')}
