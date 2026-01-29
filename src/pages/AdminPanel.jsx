@@ -18,7 +18,8 @@ import {
     Wallet,
     Loader2,
     Crosshair,
-    Award
+    Award,
+    Clock
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import './AdminPanel.css';
@@ -682,6 +683,14 @@ const AdminPanel = () => {
                                     onClick={() => { setActiveTab('Wallets'); setSidebarOpen(false); }}
                                 >
                                     <Wallet size={20} /> Wallets
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className={`nav-link ${activeTab === 'History' ? 'active' : ''}`}
+                                    onClick={() => { setActiveTab('History'); setSidebarOpen(false); }}
+                                >
+                                    <Clock size={20} /> Match History
                                 </button>
                             </li>
                             <li style={{ marginTop: 'auto' }}>
@@ -1725,6 +1734,78 @@ const AdminPanel = () => {
                                                 ৳{dbUsers.reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {activeTab === 'History' && (
+                            <>
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-white mb-1">Combat History</h1>
+                                        <p className="text-sm text-gray-400">Review and verify every completed engagement</p>
+                                    </div>
+                                    <div className="bg-[var(--neon-cyan)]/10 px-4 py-2 rounded-lg border border-[var(--neon-cyan)]/20">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--neon-cyan)]">Archives Secured</span>
+                                    </div>
+                                </div>
+
+                                <div className="admin-content-box p-0 overflow-hidden">
+                                    <div className="table-container">
+                                        <table className="admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mission ID</th>
+                                                    <th>Operation Name</th>
+                                                    <th>Map / Terrain</th>
+                                                    <th>Prize Pool</th>
+                                                    <th>Status</th>
+                                                    <th>Date Completed</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {allMatches.filter(m => m.status === 'ENDED').length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="7" className="text-center py-20 opacity-30">
+                                                            <div className="flex flex-col items-center">
+                                                                <Clock size={48} className="mb-4" />
+                                                                <p className="font-black uppercase tracking-[3px] text-xs">No Archived Missions Found</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    allMatches.filter(m => m.status === 'ENDED').map(m => (
+                                                        <tr key={m.id} className="hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
+                                                            <td className="font-mono text-[var(--neon-cyan)] text-xs px-4 py-4">#{m.id}</td>
+                                                            <td className="font-bold text-white px-4 py-4">{m.org_name}</td>
+                                                            <td className="px-4 py-4">
+                                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{m.map_name || 'BERMUDA'}</span>
+                                                            </td>
+                                                            <td className="font-bold text-[#FBBC04] px-4 py-4">{m.prize_pool}</td>
+                                                            <td className="px-4 py-4">
+                                                                <span className="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-red-500/20">
+                                                                    {m.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="text-xs text-gray-400 px-4 py-4">
+                                                                {m.end_at ? new Date(m.end_at).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <button
+                                                                    onClick={() => handleEditMatch(m)}
+                                                                    className="p-2 hover:bg-[var(--neon-cyan)]/20 rounded-lg text-[var(--neon-cyan)] transition-colors"
+                                                                    title="View Details"
+                                                                >
+                                                                    <Search size={16} />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </>
