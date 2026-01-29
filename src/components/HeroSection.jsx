@@ -6,9 +6,14 @@ import logo from '../assets/logo.png';
 const HeroSection = () => {
     const [topFragger, setTopFragger] = useState({ ign: 'LOADING...', kills: 0 });
     const [standings, setStandings] = useState([]);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
+            // Fetch User Auth
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            setUser(currentUser);
+
             // Fetch Top Fragger
             const { data: topData, error: topError } = await supabase
                 .from('players')
@@ -39,6 +44,14 @@ const HeroSection = () => {
             }
         };
         fetchData();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     return (
@@ -67,12 +80,20 @@ const HeroSection = () => {
 
 
                     <div className="hero-buttons">
-                        <Link to="/signup" className="hero-btn hero-btn-primary">
-                            SIGN UP
-                        </Link>
-                        <Link to="/login" className="hero-btn hero-btn-ghost">
-                            LOG IN
-                        </Link>
+                        {user ? (
+                            <Link to="/matches" className="hero-btn hero-btn-primary">
+                                GET STARTED
+                            </Link>
+                        ) : (
+                            <>
+                                <Link to="/signup" className="hero-btn hero-btn-primary">
+                                    SIGN UP
+                                </Link>
+                                <Link to="/login" className="hero-btn hero-btn-ghost">
+                                    LOG IN
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     <div className="hero-stats-row">
