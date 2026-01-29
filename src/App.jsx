@@ -20,7 +20,7 @@ function AppContent() {
         <div className="w-full min-h-screen text-white overflow-x-hidden relative">
             {/* Global Logo Background Watermark */}
             <div
-                className="fixed inset-0 z-0 opacity-75 pointer-events-none flex items-center justify-center overflow-hidden"
+                className="fixed inset-0 z-0 opacity-100 pointer-events-none flex items-center justify-center overflow-hidden"
             >
                 <div
                     style={{
