@@ -16,27 +16,22 @@ const HeroSection = () => {
             setUser(currentUser);
 
             // Fetch Real Stats
-            const [playersRes, matchesRes] = await Promise.all([
+            const [playersRes, matchesRes, usersRes] = await Promise.all([
                 supabase.from('players').select('*', { count: 'exact', head: true }),
-                supabase.from('match_settings').select('prize_pool', { count: 'exact' })
+                supabase.from('match_settings').select('*', { count: 'exact', head: true }),
+                supabase.from('users').select('global_credit')
             ]);
 
             const pCount = playersRes.count || 0;
             const mCount = matchesRes.count || 0;
 
-            // Calculate Total Prize Pool from the text field
-            let totalPrize = 0;
-            if (matchesRes.data) {
-                matchesRes.data.forEach(m => {
-                    const val = parseInt(String(m.prize_pool).replace(/[^\d]/g, '')) || 0;
-                    totalPrize += val;
-                });
-            }
+            // Calculate Total Player Funds (TOTAL EARNED)
+            const totalFunds = usersRes.data ? usersRes.data.reduce((sum, u) => sum + Number(u.global_credit || 0), 0) : 0;
 
             setStats({
                 players: pCount >= 1000 ? `${(pCount / 1000).toFixed(1)}K+` : String(pCount),
                 matches: mCount >= 1000 ? `${(mCount / 1000).toFixed(1)}M` : String(mCount),
-                prizePool: `৳${totalPrize.toLocaleString()}`
+                prizePool: `৳${totalFunds.toLocaleString()}`
             });
 
             // Fetch Top Fragger
