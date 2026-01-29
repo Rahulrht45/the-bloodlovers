@@ -29,17 +29,12 @@
 
 body {
     background-color: var(--bg-dark);
-    background-image:
-        linear-gradient(rgba(2, 0, 20, 0.8), rgba(2, 0, 20, 0.9)),
-        url('./assets/bg-main.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
     color: var(--text-main);
     font-family: var(--font-inter);
     overflow-x: hidden;
     min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Scrollbar */
@@ -52,8 +47,9 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    border: 2px solid var(--bg-deep);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -554,22 +550,104 @@ body {
     }
 }
 
-/* Responsive Table utilities */
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 1rem;
-}
-
-@media (max-width: 640px) {
-    .admin-main {
-        padding: 20px 15px !important;
+/* Responsive Utility Classes */
+@media (max-width: 768px) {
+    .container-responsive {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
+    .text-title-responsive {
+        font-size: clamp(2rem, 10vw, 3.5rem) !important;
+    }
+
+    .hide-on-mobile {
+        display: none !important;
+    }
+}
+
+/* Base Adjustments */
+html,
+body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    position: relative;
+    scroll-behavior: smooth;
+}
+
+/* Button Refinement for Mobile */
+@media (max-width: 640px) {
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 20px;
+        font-size: 11px;
+    }
+
+    .glass-panel {
+        padding: 1.5rem !important;
+        border-radius: 12px;
+    }
+}
+
+/* Hero Gaps Fix (Android/Mobile) */
+@media (max-width: 1024px) {
+    .hero-h1 {
+        margin-bottom: 20px;
+        letter-spacing: -1px;
+    }
+
+    .hero-desc {
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+}
+
+/* Grid System for Mobile */
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 20px;
+}
+
+@media (max-width: 480px) {
+    .responsive-grid {
+        grid-template-columns: 1fr;
         gap: 15px;
+    }
+}
+
+/* Universal Fix for Admin/Pages Sidebar Padding */
+@media (max-width: 1024px) {
+
+    .admin-main,
+    .wallet-page-container,
+    .matches-page-container,
+    .mvp-page-wrapper {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-top: 80px !important;
+    }
+}
+
+/* Premium Mobile HUD spacing */
+@media (max-width: 640px) {
+    .hero-badge {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+
+    .hero-stats-row {
+        gap: 15px;
+    }
+
+    .hero-stats-item strong {
+        font-size: 24px;
+    }
+
+    .hero-stats-item span {
+        font-size: 10px;
     }
 }

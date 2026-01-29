@@ -3,7 +3,7 @@
 .image-extractor-page {
     position: relative;
     min-height: calc(100vh - 72px);
-    background: #020014;
+    background: transparent;
     color: #fff;
     display: flex;
     flex-direction: column;

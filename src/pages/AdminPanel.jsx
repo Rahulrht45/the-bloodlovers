@@ -647,7 +647,7 @@ const AdminPanel = () => {
                             <li>
                                 <button
                                     className={`nav-link ${activeTab === 'Dashboard' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('Dashboard')}
+                                    onClick={() => { setActiveTab('Dashboard'); setSidebarOpen(false); }}
                                 >
                                     <LayoutDashboard size={20} /> Dashboard
                                 </button>
@@ -655,7 +655,7 @@ const AdminPanel = () => {
                             <li>
                                 <button
                                     className={`nav-link ${activeTab === 'Players' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('Players')}
+                                    onClick={() => { setActiveTab('Players'); setSidebarOpen(false); }}
                                 >
                                     <Users size={20} /> Players
                                 </button>
@@ -663,7 +663,7 @@ const AdminPanel = () => {
                             <li>
                                 <button
                                     className={`nav-link ${activeTab === 'Teams' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('Teams')}
+                                    onClick={() => { setActiveTab('Teams'); setSidebarOpen(false); }}
                                 >
                                     <Shield size={20} /> Teams
                                 </button>
@@ -671,7 +671,7 @@ const AdminPanel = () => {
                             <li>
                                 <button
                                     className={`nav-link ${activeTab === 'Matches' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('Matches')}
+                                    onClick={() => { setActiveTab('Matches'); setSidebarOpen(false); }}
                                 >
                                     <Gamepad2 size={20} /> Matches
                                 </button>
@@ -679,7 +679,7 @@ const AdminPanel = () => {
                             <li>
                                 <button
                                     className={`nav-link ${activeTab === 'Wallets' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('Wallets')}
+                                    onClick={() => { setActiveTab('Wallets'); setSidebarOpen(false); }}
                                 >
                                     <Wallet size={20} /> Wallets
                                 </button>

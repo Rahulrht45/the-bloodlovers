@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabase';
+import logo from '../assets/logo.png';
 
 const HeroSection = () => {
     const [topFragger, setTopFragger] = useState({ ign: 'LOADING...', kills: 0 });
@@ -47,6 +48,8 @@ const HeroSection = () => {
             {/* User Custom Overlay - ensuring gradient matches request */}
             <div className="absolute inset-0 hero-overlay-gradient z-0 pointer-events-none"></div>
 
+
+
             {/* Main Content Container - Removed standard container class to allow custom pixel-perfect padding */}
             <div className="w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 lg:gap-12 items-center">
 
@@ -55,8 +58,8 @@ const HeroSection = () => {
                     <span className="hero-badge">🏆 MVP OF THE MONTH</span>
 
                     <h1 className="hero-h1">
-                        GAMING <span className="hero-accent">MVP</span><br />
-                        COMPETITIVE <span className="hero-muted-text">SYSTEM</span>
+                        REIGN <span className="hero-accent">SUPREME.</span><br />
+                        DOMINATE.<span className="hero-muted-text">CONQUER.</span>REPEAT.
                     </h1>
 
                     <p className="hero-desc">

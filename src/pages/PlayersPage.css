@@ -149,11 +149,45 @@
     box-shadow: 0 0 15px rgba(0, 234, 255, 0.4);
 }
 
-/* ================= FOOTER ================= */
-.players-footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 12px;
-    opacity: 0.5;
-    margin-top: 40px;
+@media (max-width: 768px) {
+    .players-page-container {
+        padding-top: 40px;
+    }
+
+    .page-title h1 {
+        font-size: 28px;
+    }
+
+    .page-title p {
+        font-size: 14px;
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 60px 20px;
+        padding: 40px 15px;
+    }
+
+    /* Disable 3D transform on mobile to prevent orientation issues */
+    .scene {
+        perspective: none;
+        height: 380px;
+    }
+
+    .card {
+        transform: none !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+}
+
+@media (max-width: 480px) {
+    .players-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .avatar-3d {
+        width: 100px;
+        height: 100px;
+        top: -40px;
+    }
 }

@@ -2,7 +2,7 @@
 
 .wallet-page-container {
     min-height: 100vh;
-    background: #020014;
+    background: transparent;
     color: #fff;
     padding-top: 100px;
     position: relative;
@@ -145,14 +145,56 @@
 @media (max-width: 640px) {
     .wallet-header {
         flex-direction: column;
-        gap: 20px;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .wallet-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .balance-card {
+        padding: 24px;
+        border-radius: 20px;
+        top: 0;
+    }
+
+    .balance-card h1 {
+        font-size: 3.5rem !important;
     }
 
     .tx-card {
-        padding: 15px;
+        padding: 12px 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
     }
 
-    .text-5xl {
-        font-size: 2.5rem;
+    .tx-card .text-right {
+        text-align: left;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        padding-top: 10px;
+    }
+
+    .ledger-header {
+        margin-bottom: 20px;
+    }
+
+    .stat-box {
+        padding: 10px;
+    }
+
+    .stat-box .font-black {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    .balance-card h1 {
+        font-size: 2.8rem !important;
     }
 }

@@ -10,22 +10,24 @@ import MatchesPage from './pages/MatchesPage';
 import WalletPage from './pages/WalletPage';
 import MvpPage from './pages/MvpPage';
 import bgMain from './assets/bg-main.jpg';
+import logo from './assets/logo.png';
 
 function AppContent() {
     const location = useLocation();
     const isHomePage = location.pathname === '/';
 
     return (
-        <div
-            className="w-full min-h-screen text-white overflow-x-hidden"
-            style={{
-                backgroundImage: `linear-gradient(rgba(2, 0, 20, 0.5), rgba(2, 0, 20, 0.7)), url(${bgMain})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed',
-                backgroundRepeat: 'no-repeat'
-            }}
-        >
+        <div className="w-full min-h-screen text-white overflow-x-hidden relative">
+            {/* Global Logo Background Watermark */}
+            <div
+                className="fixed inset-0 z-0 opacity-60 pointer-events-none flex items-center justify-center overflow-hidden"
+                style={{
+                    backgroundImage: `url(${logo})`,
+                    backgroundSize: '800px',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                }}
+            ></div>
             {isHomePage && <Header />}
             <main className={isHomePage ? "pt-[72px]" : "pt-0"}>
                 <Routes>
