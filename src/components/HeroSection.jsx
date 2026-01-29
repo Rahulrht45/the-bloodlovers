@@ -71,11 +71,11 @@ const HeroSection = () => {
                     </p>
 
                     <div className="hero-buttons">
-                        <Link to="/extract" className="hero-btn hero-btn-primary">
-                            📸 UPLOAD IMAGE →
+                        <Link to="/signup" className="hero-btn hero-btn-primary">
+                            SIGN UP
                         </Link>
-                        <Link to="/extract" className="hero-btn hero-btn-ghost">
-                            USE AI SCANNER
+                        <Link to="/login" className="hero-btn hero-btn-ghost">
+                            LOG IN
                         </Link>
                     </div>
 
