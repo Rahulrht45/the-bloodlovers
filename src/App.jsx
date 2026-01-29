@@ -11,6 +11,7 @@ import WalletPage from './pages/WalletPage';
 import MvpPage from './pages/MvpPage';
 import bgMain from './assets/bg-main.jpg';
 import logo from './assets/logo.png';
+import MonthlyMvpPopup from './components/MonthlyMvpPopup';
 
 function AppContent() {
     const location = useLocation();
@@ -56,9 +57,11 @@ function AppContent() {
     );
 }
 
+
 function App() {
     return (
         <Router>
+            <MonthlyMvpPopup />
             <AppContent />
         </Router>
     );

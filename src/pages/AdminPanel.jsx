@@ -607,6 +607,42 @@ const AdminPanel = () => {
         }
 
         try {
+            // 1. Find the Monthly MVP Winner
+            const { data: topPlayers, error: fetchError } = await supabase
+                .from('players')
+                .select('*')
+                .order('mvp_points_monthly', { ascending: false })
+                .limit(1);
+
+            if (fetchError) throw fetchError;
+
+            // 2. Save Winner to History
+            if (topPlayers && topPlayers.length > 0) {
+                const winner = topPlayers[0];
+                if (winner.mvp_points_monthly > 0) {
+                    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    const currentMonth = monthNames[new Date().getMonth()];
+                    const currentYear = new Date().getFullYear();
+
+                    const { error: historyError } = await supabase
+                        .from('mvp_history')
+                        .insert([{
+                            player_id: winner.id,
+                            ign: winner.ign,
+                            avatar: winner.avatar,
+                            month: currentMonth,
+                            year: currentYear,
+                            points: winner.mvp_points_monthly
+                        }]);
+
+                    if (historyError) {
+                        console.error('Failed to save history', historyError);
+                        if (!confirm("⚠ Failed to save Winner History. Continue with Reset anyway?")) return;
+                    }
+                }
+            }
+
+            // 3. Reset Points
             const { error } = await supabase
                 .from('players')
                 .update({ mvp_points_monthly: 0 })
@@ -614,7 +650,7 @@ const AdminPanel = () => {
 
             if (error) throw error;
 
-            alert("✅ SUCCESS: Monthly MVP Leaderboard has been reset.");
+            alert("✅ SUCCESS: Winner Announced & Monthly MVP Leaderboard has been reset.");
             fetchAdminData();
 
         } catch (err) {
@@ -692,10 +728,10 @@ const AdminPanel = () => {
                             </li>
                             <li>
                                 <button
-                                    className={`nav-link ${activeTab === 'Players' ? 'active' : ''}`}
-                                    onClick={() => { setActiveTab('Players'); setSidebarOpen(false); }}
+                                    className={`nav-link ${activeTab === 'Members' ? 'active' : ''}`}
+                                    onClick={() => { setActiveTab('Members'); setSidebarOpen(false); }}
                                 >
-                                    <Users size={20} /> Players
+                                    <Users size={20} /> Members
                                 </button>
                             </li>
                             <li>
@@ -759,7 +795,7 @@ const AdminPanel = () => {
                             <div className="admin-card">
                                 <div className="admin-card-icon"><Users size={24} /></div>
                                 <div className="admin-card-info">
-                                    <h3>Total Players</h3>
+                                    <h3>Total Members</h3>
                                     <div className="card-value">{players.length}</div>
                                 </div>
                             </div>
@@ -789,7 +825,7 @@ const AdminPanel = () => {
                                     <Wallet size={24} />
                                 </div>
                                 <div className="admin-card-info">
-                                    <h3>Total Player Funds</h3>
+                                    <h3>Total Member Funds</h3>
                                     <div className="card-value text-[#FBBC04] italic">
                                         ৳{(() => {
                                             const corpIds = [
@@ -892,7 +928,7 @@ const AdminPanel = () => {
                                                 <Gamepad2 className="mx-auto mb-2" />
                                                 <span className="text-[10px] font-bold uppercase tracking-widest text-white">Match Config</span>
                                             </button>
-                                            <button onClick={() => setActiveTab('Players')} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-all text-center">
+                                            <button onClick={() => setActiveTab('Members')} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-all text-center">
                                                 <Users className="mx-auto mb-2" />
                                                 <span className="text-[10px] font-bold uppercase tracking-widest text-white">Manage Roster</span>
                                             </button>
@@ -902,12 +938,12 @@ const AdminPanel = () => {
                             </>
                         )}
 
-                        {activeTab === 'Players' && (
+                        {activeTab === 'Members' && (
                             <>
                                 {/* Header with Search and Actions */}
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                     <div>
-                                        <h1 className="text-2xl font-bold text-white mb-1">Player Roster</h1>
+                                        <h1 className="text-2xl font-bold text-white mb-1">Member Roster</h1>
                                         <p className="text-sm text-gray-400">Manage your team members and their statistics</p>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -922,7 +958,7 @@ const AdminPanel = () => {
                                             className="btn-primary flex items-center gap-2"
                                         >
                                             {isAddingPlayer ? <X size={16} /> : <Users size={16} />}
-                                            {isAddingPlayer ? 'Cancel' : 'Add New Player'}
+                                            {isAddingPlayer ? 'Cancel' : 'Add New Member'}
                                         </button>
                                     </div>
                                 </div>
@@ -1015,7 +1051,7 @@ const AdminPanel = () => {
                                             <Search className="search-icon" size={18} />
                                             <input
                                                 type="text"
-                                                placeholder="Search players by name, team, or role..."
+                                                placeholder="Search members by name, team, or role..."
                                                 className="w-full"
                                                 value={playerSearch}
                                                 onChange={(e) => setPlayerSearch(e.target.value)}
@@ -1061,7 +1097,7 @@ const AdminPanel = () => {
                                             >
                                                 <div className="flex flex-col gap-3 h-full">
                                                     <div className="flex items-center justify-between mb-2">
-                                                        <h3 className="text-sm font-bold text-[#6ea8ff] uppercase tracking-wider">Edit Player</h3>
+                                                        <h3 className="text-sm font-bold text-[#6ea8ff] uppercase tracking-wider">Edit Member</h3>
                                                         <button onClick={handleCancelEdit} className="text-gray-500 hover:text-white"><X size={16} /></button>
                                                     </div>
 

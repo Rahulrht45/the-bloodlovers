@@ -185,7 +185,7 @@ const MvpPage = () => {
                             <div className="mvp-table">
                                 <div className="mvp-row header">
                                     <div>#</div>
-                                    <div>PLAYER</div>
+                                    <div>MEMBER</div>
                                     <div className={sortBy === 'mvp_points_monthly' ? 'highlight-stat' : ''}>M. MVP</div>
                                     <div className={sortBy === 'mvp_points' ? 'highlight-stat' : ''}>T. MVP</div>
                                     <div className={sortBy === 'kills' ? 'highlight-stat' : ''}>KILLS</div>

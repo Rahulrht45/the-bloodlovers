@@ -39,7 +39,7 @@ const Header = () => {
         navigate('/');
     };
 
-    const navItems = ['Matches', 'Wallet', 'Players', 'Leaderboard', 'MVP', 'Admin Panel'];
+    const navItems = ['Matches', 'Wallet', 'Members', 'Leaderboard', 'MVP', 'Admin Panel'];
 
     return (
         <header
@@ -55,11 +55,11 @@ const Header = () => {
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-8 bg-white/5 border border-white/10 rounded-full px-10 py-4 backdrop-blur-md shadow-lg shadow-black/20">
                     {navItems.map((item) => {
-                        const isPlayers = item === 'Players' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
+                        const isInternalPage = item === 'Members' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
                         const isAdmin = item === 'Admin Panel';
                         const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/players")));
 
-                        if (isPlayers || isAdmin) {
+                        if (isInternalPage || isAdmin) {
                             return (
                                 <Link
                                     key={item}
@@ -138,7 +138,7 @@ const Header = () => {
                 {/* Mobile Fullscreen Menu */}
                 <div className={`fixed inset-0 bg-[#020014] z-40 flex flex-col items-center justify-center gap-8 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                     {navItems.map((item) => {
-                        const isInternalPage = item === 'Players' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
+                        const isInternalPage = item === 'Members' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
                         const isAdmin = item === 'Admin Panel';
                         const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/players")));
 
