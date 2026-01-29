@@ -465,6 +465,7 @@ const AdminPanel = () => {
             kills: player.kills || 0,
             wins: player.wins || 0,
             mvp_points: player.mvp_points || 0,
+            mvp_points_monthly: player.mvp_points_monthly || 0,
             assists: player.assists || 0,
             damage: player.damage || 0,
             survival_time: player.survival_time || '00:00'
@@ -486,6 +487,7 @@ const AdminPanel = () => {
                     kills: editValues.kills,
                     wins: editValues.wins,
                     mvp_points: editValues.mvp_points,
+                    mvp_points_monthly: editValues.mvp_points_monthly,
                     assists: editValues.assists,
                     damage: editValues.damage,
                     survival_time: editValues.survival_time
@@ -514,16 +516,24 @@ const AdminPanel = () => {
         const currentValue = player[field] || 0;
         const newValue = currentValue + amount;
 
+        const updatePayload = { [field]: newValue };
+
+        // Auto-update MONTHLY MVP if updating general MVP points
+        if (type === 'MVP') {
+            const currentMonthly = player.mvp_points_monthly || 0;
+            updatePayload['mvp_points_monthly'] = currentMonthly + amount;
+        }
+
         // Optimistic Update
         setPlayers(prev => prev.map(p =>
-            p.id === player.id ? { ...p, [field]: newValue } : p
+            p.id === player.id ? { ...p, ...updatePayload } : p
         ));
 
         // DB Update
         try {
             const { error } = await supabase
                 .from('players')
-                .update({ [field]: newValue })
+                .update(updatePayload)
                 .eq('id', player.id);
 
             if (error) throw error;
@@ -583,6 +593,33 @@ const AdminPanel = () => {
         if (longPressTimer.current) {
             clearTimeout(longPressTimer.current);
             longPressTimer.current = null;
+        }
+    };
+
+    // --- MONTHLY RESET ---
+    const handleResetMonthlyMvp = async () => {
+        const confirmCode = Math.floor(1000 + Math.random() * 9000);
+        const input = prompt(`⚠ DANGER ZONE: This will reset ALL Monthly MVP points to 0.\nThis action cannot be undone.\n\nType "${confirmCode}" to confirm:`);
+
+        if (input !== String(confirmCode)) {
+            if (input !== null) alert("Incorrect confirmation code. Reset cancelled.");
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('players')
+                .update({ mvp_points_monthly: 0 })
+                .gt('id', 0); // Updates all players (assuming IDs are > 0)
+
+            if (error) throw error;
+
+            alert("✅ SUCCESS: Monthly MVP Leaderboard has been reset.");
+            fetchAdminData();
+
+        } catch (err) {
+            console.error("Reset failed:", err);
+            alert("Reset failed: " + err.message);
         }
     };
 
@@ -873,13 +910,21 @@ const AdminPanel = () => {
                                         <h1 className="text-2xl font-bold text-white mb-1">Player Roster</h1>
                                         <p className="text-sm text-gray-400">Manage your team members and their statistics</p>
                                     </div>
-                                    <button
-                                        onClick={() => setIsAddingPlayer(!isAddingPlayer)}
-                                        className="btn-primary flex items-center gap-2"
-                                    >
-                                        {isAddingPlayer ? <X size={16} /> : <Users size={16} />}
-                                        {isAddingPlayer ? 'Cancel' : 'Add New Player'}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-2 rounded-full font-bold uppercase tracking-wider text-[10px] hover:bg-red-500 hover:text-white transition-all"
+                                            onClick={handleResetMonthlyMvp}
+                                        >
+                                            Reset Monthly MVP
+                                        </button>
+                                        <button
+                                            onClick={() => setIsAddingPlayer(!isAddingPlayer)}
+                                            className="btn-primary flex items-center gap-2"
+                                        >
+                                            {isAddingPlayer ? <X size={16} /> : <Users size={16} />}
+                                            {isAddingPlayer ? 'Cancel' : 'Add New Player'}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {isAddingPlayer && (
@@ -1064,6 +1109,15 @@ const AdminPanel = () => {
                                                                     type="number"
                                                                     value={editValues.mvp_points}
                                                                     onChange={(e) => setEditValues({ ...editValues, mvp_points: parseInt(e.target.value) || 0 })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-center text-[#f5c451] focus:border-[#f5c451] outline-none"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">M. MVP</label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={editValues.mvp_points_monthly}
+                                                                    onChange={(e) => setEditValues({ ...editValues, mvp_points_monthly: parseInt(e.target.value) || 0 })}
                                                                     className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-center text-[#f5c451] focus:border-[#f5c451] outline-none"
                                                                 />
                                                             </div>

@@ -5,7 +5,7 @@ import './MvpPage.css'; // Import the specific CSS
 const MvpPage = () => {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [sortBy, setSortBy] = useState('mvp_points');
+    const [sortBy, setSortBy] = useState('mvp_points_monthly');
 
     // Fetch Players
     useEffect(() => {
@@ -50,9 +50,37 @@ const MvpPage = () => {
     const top3 = sortedPlayers.slice(0, 3);
     const rest = sortedPlayers.slice(3);
 
+    // Countdown Timer State
+    const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const now = new Date();
+            // Get the 1st day of the NEXT month
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const difference = endOfMonth - now;
+
+            if (difference > 0) {
+                setTimeLeft({
+                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                    minutes: Math.floor((difference / 1000 / 60) % 60),
+                });
+            } else {
+                setTimeLeft({ days: 0, hours: 0, minutes: 0 });
+            }
+        };
+
+        calculateTimeLeft(); // Initial call
+        const timer = setInterval(calculateTimeLeft, 60000); // Update every minute
+
+        return () => clearInterval(timer);
+    }, []);
+
     // Filter Tabs Configuration
     const filters = [
-        { id: 'mvp_points', label: 'MOST MVP' },
+        { id: 'mvp_points_monthly', label: 'MONTHLY MVP' },
+        { id: 'mvp_points', label: 'ALL-TIME MVP' },
         { id: 'kills', label: 'MOST KILLS' },
         { id: 'damage', label: 'MOST DAMAGE' },
         { id: 'assists', label: 'ASSISTS' },
@@ -79,6 +107,18 @@ const MvpPage = () => {
                 {/* HEADER */}
                 <div className="mvp-header">
                     <h1>MVP <span>LEADERBOARD</span></h1>
+
+                    {sortBy === 'mvp_points_monthly' && (
+                        <div className="monthly-countdown">
+                            <span className="countdown-label">NEXT RESET IN:</span>
+                            <div className="countdown-timer">
+                                <span className="time-unit">{timeLeft.days}d</span> :
+                                <span className="time-unit">{timeLeft.hours}h</span> :
+                                <span className="time-unit">{timeLeft.minutes}m</span>
+                            </div>
+                        </div>
+                    )}
+
                     <p>Ranking based on raw data • {filters.find(f => f.id === sortBy)?.label}</p>
 
                     <div className="filters">
@@ -116,7 +156,7 @@ const MvpPage = () => {
                             {/* RANK 1 (GOLD) */}
                             {top3[0] && (
                                 <div className="mvp-card gold">
-                                    <div className="rank">#1 • MVP</div>
+                                    <div className="rank">#1 • {sortBy.includes('monthly') ? 'MONTHLY' : 'ALL-TIME'}</div>
                                     <div className="avatar">
                                         <img src={top3[0].avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${top3[0].ign}`} alt="" />
                                     </div>
@@ -146,7 +186,8 @@ const MvpPage = () => {
                                 <div className="mvp-row header">
                                     <div>#</div>
                                     <div>PLAYER</div>
-                                    <div className={sortBy === 'mvp_points' ? 'highlight-stat' : ''}>MVP</div>
+                                    <div className={sortBy === 'mvp_points_monthly' ? 'highlight-stat' : ''}>M. MVP</div>
+                                    <div className={sortBy === 'mvp_points' ? 'highlight-stat' : ''}>T. MVP</div>
                                     <div className={sortBy === 'kills' ? 'highlight-stat' : ''}>KILLS</div>
                                     <div className={sortBy === 'damage' ? 'highlight-stat' : ''}>DAMAGE</div>
                                     <div className={sortBy === 'assists' ? 'highlight-stat' : ''}>ASSISTS</div>
@@ -158,6 +199,7 @@ const MvpPage = () => {
                                     <div key={player.id} className="mvp-row">
                                         <div>#{index + 4}</div>
                                         <div>{player.ign}</div>
+                                        {renderStatCell(player, 'mvp_points_monthly')}
                                         {renderStatCell(player, 'mvp_points')}
                                         {renderStatCell(player, 'kills')}
                                         {renderStatCell(player, 'damage')}

@@ -53,6 +53,53 @@
     letter-spacing: 0.5px;
 }
 
+/* ===== COUNTDOWN ===== */
+.monthly-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0 5px 0;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.countdown-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #ff3b3b;
+    font-weight: 800;
+    margin-bottom: 2px;
+    text-shadow: 0 0 10px rgba(255, 59, 59, 0.4);
+}
+
+.countdown-timer {
+    font-family: 'Orbitron', monospace;
+    /* Assuming Orbitron is imported globally or fallback to mono */
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(255, 59, 59, 0.1);
+    padding: 4px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 59, 59, 0.3);
+    box-shadow: 0 0 15px rgba(255, 59, 59, 0.1);
+}
+
+.time-unit {
+    color: #ffd24a;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ===== FILTERS ===== */
 .filters {
     display: flex;
@@ -207,7 +254,8 @@
 
 .mvp-row {
     display: grid;
-    grid-template-columns: 50px 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    /* Updated for 9 columns: #, Player, M.MVP, T.MVP, Kills, Dmg, Ast, Time, Wins */
+    grid-template-columns: 50px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     padding: 14px 18px;
     align-items: center;
     font-size: 13px;
@@ -247,8 +295,14 @@
         grid-template-columns: 40px 1fr 1fr;
     }
 
-    .mvp-row>div:nth-child(n+4) {
+    /* Hide all columns from 3rd onwards by default */
+    .mvp-row>div:nth-child(n+3) {
         display: none;
+    }
+
+    /* Only show the column that is highlighted (active filter) */
+    .mvp-row>div.highlight-stat {
+        display: block;
     }
 
     .filters {
