@@ -75,20 +75,6 @@ const HeroSection = () => {
                         </Link>
                     </div>
 
-                    <div className="hero-stats-row">
-                        <div className="hero-stats-item">
-                            <strong>50K+</strong>
-                            <span>PLAYERS</span>
-                        </div>
-                        <div className="hero-stats-item">
-                            <strong>1.2M</strong>
-                            <span>MATCHES</span>
-                        </div>
-                        <div className="hero-stats-item gold">
-                            <strong>$500K</strong>
-                            <span>PRIZE POOLS</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Column: Visuals / Cards */}
@@ -130,6 +116,22 @@ const HeroSection = () => {
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            {/* Bottom Right Stats Row */}
+            <div className="hero-stats-row hero-stats-bottom-right">
+                <div className="hero-stats-item">
+                    <strong>50K+</strong>
+                    <span>PLAYERS</span>
+                </div>
+                <div className="hero-stats-item">
+                    <strong>1.2M</strong>
+                    <span>MATCHES</span>
+                </div>
+                <div className="hero-stats-item gold">
+                    <strong>$500K</strong>
+                    <span>PRIZE POOLS</span>
                 </div>
             </div>
         </section>
