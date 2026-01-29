@@ -64,11 +64,7 @@ const HeroSection = () => {
                         REPEAT.
                     </h1>
 
-                    <p className="hero-desc">
-                        Upload match screenshots, auto-scan kills with AI,
-                        track player stats, and crown monthly MVP champions.
-                        The ultimate infrastructure for elite tournaments.
-                    </p>
+
 
                     <div className="hero-buttons">
                         <Link to="/signup" className="hero-btn hero-btn-primary">
