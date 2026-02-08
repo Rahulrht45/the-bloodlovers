@@ -85,8 +85,8 @@ const Header = () => {
                     })}
                 </nav>
 
-                {/* Actions (Desktop) */}
-                <div className="hidden md:flex items-center gap-8">
+                {/* Actions (Desktop & Mobile Profile) */}
+                <div className={`${user ? 'flex' : 'hidden md:flex'} items-center gap-2 md:gap-8`}>
                     {user ? (
                         <div className="flex items-center gap-4">
                             <Link
