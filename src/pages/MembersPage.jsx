@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import './PlayersPage.css';
+import { ArrowRight } from 'lucide-react';
+import './MembersPage.css';
 
-const PlayersPage = () => {
-    const [players, setPlayers] = useState([]);
+const MembersPage = () => {
+    const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchPlayers = async () => {
+        const fetchMembers = async () => {
             try {
                 const { data, error } = await supabase
                     .from('players')
@@ -18,26 +19,23 @@ const PlayersPage = () => {
 
                 if (error) throw error;
 
-                console.log('Raw player data from database:', data);
-
                 // Map snake_case from DB to camelCase for UI
-                const formattedData = data.map(p => ({
-                    ...p,
-                    mvpPoints: p.mvp_points,
-                    inGameUid: p.in_game_uid || `DEMO-UID-${String(p.id).padStart(6, '0')}`
+                const formattedData = data.map(m => ({
+                    ...m,
+                    mvpPoints: m.mvp_points,
+                    inGameUid: m.in_game_uid || `DEMO-UID-${String(m.id).padStart(6, '0')}`
                 }));
 
-                console.log('Formatted player data:', formattedData);
-                setPlayers(formattedData);
+                setMembers(formattedData);
             } catch (err) {
-                console.error('Error fetching players:', err);
+                console.error('Error fetching members:', err);
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPlayers();
+        fetchMembers();
     }, []);
 
     const handleMouseMove = (e) => {
@@ -55,13 +53,13 @@ const PlayersPage = () => {
     };
 
     return (
-        <div className="players-page-container">
+        <div className="members-page-container">
             <section className="page-title">
                 <h1>Meet the Legends</h1>
                 <p>Top professional members dominating the competitive arena</p>
             </section>
 
-            <section className="players-grid">
+            <section className="members-grid">
                 {loading ? (
                     <div className="col-span-full h-40 flex items-center justify-center text-xl font-orbitron text-[var(--neon-cyan)] animate-pulse">
                         Synchronizing with Neural Net...
@@ -70,7 +68,7 @@ const PlayersPage = () => {
                     <div className="col-span-full text-red-500 text-center py-10 font-orbitron">
                         Connection Error: {error}
                     </div>
-                ) : players.length === 0 ? (
+                ) : members.length === 0 ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-20 text-center opacity-80">
                         <div className="text-4xl mb-4">👑</div>
                         <h2 className="font-orbitron text-2xl text-[var(--neon-cyan)] mb-2 uppercase tracking-widest">No Members Yet</h2>
@@ -80,48 +78,48 @@ const PlayersPage = () => {
                         </Link>
                     </div>
                 ) : (
-                    players.map((player) => (
+                    members.map((member) => (
                         <div
                             className="scene"
-                            key={player.id}
+                            key={member.id}
                             onMouseMove={handleMouseMove}
                             onMouseLeave={handleMouseLeave}
                         >
                             <div className="card">
-                                <img className="avatar-3d" src={player.avatar} alt={player.ign} />
+                                <img className="avatar-3d" src={member.avatar} alt={member.ign} />
                                 <div className="card-content">
-                                    <div className="player-name">{player.ign}</div>
-                                    <div className="player-team">{player.team}</div>
-                                    <div className="role">{player.role}</div>
+                                    <div className="member-name text-white font-bold">{member.ign}</div>
+                                    <div className="member-team text-gray-400 text-sm">{member.team}</div>
+                                    <div className="role text-[var(--neon-cyan)] text-xs uppercase tracking-widest mt-1">{member.role}</div>
 
-                                    {/* Player UID */}
-                                    <div className="player-uid" style={{
+                                    {/* Member UID */}
+                                    <div className="member-uid" style={{
                                         fontSize: '10px',
                                         fontWeight: 'bold',
                                         letterSpacing: '1px',
                                         marginTop: '8px',
                                         padding: '4px 8px',
                                         borderRadius: '4px',
-                                        background: player.in_game_uid ? 'rgba(0, 240, 255, 0.1)' : 'rgba(255, 200, 0, 0.1)',
-                                        border: player.in_game_uid ? '1px solid rgba(0, 240, 255, 0.3)' : '1px dashed rgba(255, 200, 0, 0.3)',
-                                        color: player.in_game_uid ? 'var(--neon-cyan)' : '#ffc800',
+                                        background: member.in_game_uid ? 'rgba(0, 240, 255, 0.1)' : 'rgba(255, 200, 0, 0.1)',
+                                        border: member.in_game_uid ? '1px solid rgba(0, 240, 255, 0.3)' : '1px dashed rgba(255, 200, 0, 0.3)',
+                                        color: member.in_game_uid ? 'var(--neon-cyan)' : '#ffc800',
                                         textAlign: 'center',
                                         fontFamily: 'monospace'
                                     }}>
-                                        UID: {player.inGameUid}
+                                        UID: {member.inGameUid}
                                     </div>
 
                                     <div className="stats">
                                         <div className="stat-item">
-                                            {player.kills}
+                                            {member.kills}
                                             <small>KILLS</small>
                                         </div>
                                         <div className="stat-item">
-                                            {player.wins || 0}
+                                            {member.wins || 0}
                                             <small>WINS</small>
                                         </div>
                                         <div className="stat-item">
-                                            {player.mvpPoints}
+                                            {member.mvpPoints}
                                             <small>MVP</small>
                                         </div>
                                     </div>
@@ -136,4 +134,4 @@ const PlayersPage = () => {
     );
 };
 
-export default PlayersPage;
+export default MembersPage;

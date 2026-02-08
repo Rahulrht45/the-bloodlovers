@@ -1,5 +1,5 @@
 /* ================= LAYOUT ================= */
-.players-page-container {
+.members-page-container {
     background: transparent;
     color: #fff;
     min-height: calc(100vh - 72px);
@@ -27,7 +27,7 @@
 }
 
 /* ================= GRID ================= */
-.players-grid {
+.members-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 60px 40px;
@@ -150,7 +150,7 @@
 }
 
 @media (max-width: 768px) {
-    .players-page-container {
+    .members-page-container {
         padding-top: 40px;
     }
 
@@ -162,7 +162,7 @@
         font-size: 14px;
     }
 
-    .players-grid {
+    .members-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 60px 20px;
         padding: 40px 15px;
@@ -181,7 +181,7 @@
 }
 
 @media (max-width: 480px) {
-    .players-grid {
+    .members-grid {
         grid-template-columns: 1fr;
     }
 

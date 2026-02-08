@@ -39,7 +39,7 @@ const Header = () => {
         navigate('/');
     };
 
-    const navItems = ['Matches', 'Wallet', 'Members', 'Leaderboard', 'MVP', 'Admin Panel'];
+    const navItems = ['Matches', 'Wallet', 'Members', 'MVP', 'Admin Panel'];
 
     return (
         <header
@@ -57,7 +57,7 @@ const Header = () => {
                     {navItems.map((item) => {
                         const isInternalPage = item === 'Members' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
                         const isAdmin = item === 'Admin Panel';
-                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/players")));
+                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/members")));
 
                         if (isInternalPage || isAdmin) {
                             return (
@@ -140,7 +140,7 @@ const Header = () => {
                     {navItems.map((item) => {
                         const isInternalPage = item === 'Members' || item === 'Leaderboard' || item === 'MVP' || item === 'Matches' || item === 'Wallet';
                         const isAdmin = item === 'Admin Panel';
-                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/players")));
+                        const linkTo = isAdmin ? "/admin" : (item === 'Matches' ? "/matches" : (item === 'Wallet' ? "/wallet" : (item === 'MVP' ? "/mvp" : "/members")));
 
                         if (isInternalPage || isAdmin) {
                             return (

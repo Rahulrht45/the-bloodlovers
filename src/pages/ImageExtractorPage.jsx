@@ -38,7 +38,6 @@ const ImageExtractorPage = () => {
                 body: JSON.stringify({ text })
             });
             const data = await res.json();
-            console.log("Memory updated:", data);
         } catch (error) {
             console.error("Failed to upload text to memory:", error);
             // Non-critical if chat is not used immediately

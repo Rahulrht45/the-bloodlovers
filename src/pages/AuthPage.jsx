@@ -69,6 +69,12 @@ const AuthPage = () => {
         setSuccess('');
 
         try {
+            if (!isLogin) {
+                if (!/^\d{11}$/.test(phoneNumber)) {
+                    throw new Error('bKash number must be exactly 11 digits (e.g., 01XXXXXXXXX).');
+                }
+            }
+
             if (isLogin) {
                 // Login Logic
                 const { data, error: loginError } = await supabase.auth.signInWithPassword({
@@ -244,7 +250,8 @@ const AuthPage = () => {
                                         type="tel"
                                         placeholder="01XXXXXXXXX"
                                         value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                                        maxLength={11}
                                         required={!isLogin}
                                     />
                                     <Smartphone className="auth-input-icon" size={18} />

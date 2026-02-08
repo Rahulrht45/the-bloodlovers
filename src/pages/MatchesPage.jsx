@@ -42,7 +42,6 @@ const MatchesPage = () => {
 
                 if (userData) {
                     const balance = Number(userData.global_credit || 0);
-                    console.log(`[Wallet] Synced with DB: ৳${balance}`);
                     setWalletBalance(balance);
 
                     // Sync localStorage only for backward compatibility, but DB is primary
@@ -276,7 +275,7 @@ const MatchesPage = () => {
 
             <div className="matches-header">
                 <div className="matches-subtitle">Operational Hub // System Active</div>
-                <h1 className="matches-title">Global <br /> Tournaments</h1>
+                <h1 className="matches-title">TBL TOurnament</h1>
             </div>
 
             <main className="matches-main-grid">

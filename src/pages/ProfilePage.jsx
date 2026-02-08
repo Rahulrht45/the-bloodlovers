@@ -58,8 +58,14 @@ const ProfilePage = () => {
                 setPreviewUrl(playerData.avatar || '');
 
                 if (playerData.in_game_uid) {
-                    const balance = Number(localStorage.getItem(`player_wallet_uid_${playerData.in_game_uid}`) || 0);
-                    setWalletBalance(balance);
+                    // Fetch source of truth balance instead of localStorage
+                    const { data: userData } = await supabase
+                        .from('users')
+                        .select('global_credit')
+                        .eq('id', user.id)
+                        .single();
+
+                    setWalletBalance(Number(userData?.global_credit || 0));
                 }
             }
 
@@ -112,6 +118,12 @@ const ProfilePage = () => {
         setSaving(true);
         setError('');
         setSuccess('');
+
+        if (phone && !/^\d{11}$/.test(phone)) {
+            setError('bKash number must be exactly 11 digits (e.g., 01XXXXXXXXX).');
+            setSaving(false);
+            return;
+        }
 
         try {
             let avatarUrl = currentAvatar;
@@ -329,7 +341,8 @@ const ProfilePage = () => {
                                 type="tel"
                                 placeholder="01XXXXXXXXX"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                maxLength={11}
                             />
                             <Smartphone className="profile-input-icon" size={18} />
                         </div>

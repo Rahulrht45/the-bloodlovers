@@ -119,7 +119,7 @@ const HeroSection = () => {
                     <div className="hero-stats-row">
                         <div className="hero-stats-item">
                             <strong>{stats.players}</strong>
-                            <span>PLAYERS</span>
+                            <span>MEMBERS</span>
                         </div>
                         <div className="hero-stats-item">
                             <strong>{stats.matches}</strong>

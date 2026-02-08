@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
-import PlayersPage from './pages/PlayersPage';
+import MembersPage from './pages/MembersPage';
 import AdminPanel from './pages/AdminPanel';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
@@ -15,8 +15,8 @@ import MonthlyMvpPopup from './components/MonthlyMvpPopup';
 
 function AppContent() {
     const location = useLocation();
-    const isHomePage = location.pathname === '/';
-    const hideLogoPaths = ['/matches', '/mvp', '/players'];
+    const isAdminPage = location.pathname === '/admin';
+    const hideLogoPaths = ['/matches', '/mvp', '/members'];
     const shouldShowLogo = !hideLogoPaths.includes(location.pathname);
 
     return (
@@ -38,11 +38,11 @@ function AppContent() {
                     />
                 </div>
             )}
-            {isHomePage && <Header />}
-            <main className={isHomePage ? "pt-[72px]" : "pt-0"}>
+            {!isAdminPage && <Header />}
+            <main className={!isAdminPage ? "pt-[72px]" : "pt-0"}>
                 <Routes>
                     <Route path="/" element={<HeroSection />} />
-                    <Route path="/players" element={<PlayersPage />} />
+                    <Route path="/members" element={<MembersPage />} />
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/login" element={<AuthPage />} />
                     <Route path="/signup" element={<AuthPage />} />

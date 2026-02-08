@@ -16,15 +16,34 @@ import {
     Check,
     X,
     Wallet,
-    Loader2,
     Crosshair,
     Award,
-    Clock
+    Clock,
+    Target,
+    Smartphone,
+    Hash,
+    Loader2
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
+    // --- UTILITIES ---
+    const formatSurvivalTime = (t) => {
+        const timeStr = String(t || '00:00');
+        const [m, s] = timeStr.includes(':') ? timeStr.split(':').map(Number) : [Number(timeStr), 0];
+        const total = (m * 60) + (s || 0);
+        const h = Math.floor(total / 3600);
+        const min = Math.floor((total % 3600) / 60);
+        return h > 0 ? `${h}h ${min}m` : `${min}m`;
+    };
+
+    const parseTimeToSeconds = (t) => {
+        const timeStr = String(t || '00:00');
+        const [m, s] = timeStr.includes(':') ? timeStr.split(':').map(Number) : [Number(timeStr), 0];
+        return (m * 60) + (s || 0);
+    };
+
     const [isLoggedIn, setIsLoggedIn] = useState(sessionStorage.getItem('isAdminLoggedIn') === 'true');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -397,6 +416,12 @@ const AdminPanel = () => {
 
     const handleSaveNewPlayer = async (e) => {
         e.preventDefault();
+
+        if (newPlayerForm.phone && !/^\d{11}$/.test(newPlayerForm.phone)) {
+            alert('bKash number must be exactly 11 digits.');
+            return;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('players')
@@ -486,6 +511,11 @@ const AdminPanel = () => {
     };
 
     const handleSaveEdit = async (id) => {
+        if (editValues.phone && !/^\d{11}$/.test(editValues.phone)) {
+            alert('bKash number must be exactly 11 digits.');
+            return;
+        }
+
         try {
             const { error } = await supabase
                 .from('players')
@@ -520,17 +550,35 @@ const AdminPanel = () => {
 
     // --- QUICK ACTION HANDLERS ---
     const handleQuickStatUpdate = async (player, type, amount = 1) => {
-        const isKill = type === 'KILL';
-        const field = isKill ? 'kills' : 'mvp_points';
-        const currentValue = player[field] || 0;
-        const newValue = currentValue + amount;
+        const isTime = type === 'TIME';
 
-        const updatePayload = { [field]: newValue };
+        let field = '';
+        switch (type) {
+            case 'KILL': field = 'kills'; break;
+            case 'MVP': field = 'mvp_points'; break;
+            case 'TIME': field = 'survival_time'; break;
+            case 'ASSIST': field = 'assists'; break;
+            case 'DAMAGE': field = 'damage'; break;
+            case 'MATCH': field = 'wins'; break;
+            default: return;
+        }
 
-        // Auto-update MONTHLY MVP if updating general MVP points
-        if (type === 'MVP') {
-            const currentMonthly = player.mvp_points_monthly || 0;
-            updatePayload['mvp_points_monthly'] = currentMonthly + amount;
+        const currentValue = player[field] || (isTime ? '00:00' : 0);
+        let updatePayload = {};
+
+        if (isTime) {
+            const totalSeconds = Math.max(0, parseTimeToSeconds(currentValue) + (amount * 60));
+            const newM = Math.floor(totalSeconds / 60);
+            const newS = totalSeconds % 60;
+            updatePayload = { [field]: `${String(newM).padStart(2, '0')}:${String(newS).padStart(2, '0')}` };
+        } else {
+            const newValue = Math.max(0, Number(currentValue) + amount);
+            updatePayload = { [field]: newValue };
+
+            if (type === 'MVP') {
+                const currentMonthly = player.mvp_points_monthly || 0;
+                updatePayload['mvp_points_monthly'] = Math.max(0, currentMonthly + amount);
+            }
         }
 
         // Optimistic Update
@@ -559,7 +607,16 @@ const AdminPanel = () => {
     // Right-click handler for custom amount
     const handleCustomAdd = (e, player, type) => {
         if (e && e.preventDefault) e.preventDefault(); // Block default context menu
-        const input = prompt(`Enter number of ${type === 'KILL' ? 'Kills' : 'MVP Points'} to ADD to ${player.ign}:`);
+        const labels = {
+            'KILL': 'Kills',
+            'MVP': 'MVP Points',
+            'TIME': 'Minutes',
+            'ASSIST': 'Assists',
+            'DAMAGE': 'Damage',
+            'MATCH': 'Matches'
+        };
+        const label = labels[type] || type;
+        const input = prompt(`Enter number of ${label} to ADD to ${player.ign}:`);
         if (!input) return;
 
         const amount = parseInt(input);
@@ -799,64 +856,44 @@ const AdminPanel = () => {
                             </div>
                         </header>
 
-                        {/* CARDS */}
-                        <div className="admin-cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                            <div className="admin-card">
-                                <div className="admin-card-icon"><Users size={24} /></div>
-                                <div className="admin-card-info">
-                                    <h3>Total Members</h3>
-                                    <div className="card-value">{players.length}</div>
-                                </div>
-                            </div>
-                            <div className="admin-card">
-                                <div className="admin-card-icon" style={{ background: 'rgba(0, 240, 255, 0.15)', color: 'var(--neon-cyan)' }}>
-                                    <ShieldCheck size={24} />
-                                </div>
-                                <div className="admin-card-info">
-                                    <h3>Total Corporate Funds</h3>
-                                    <div className="card-value text-[var(--neon-cyan)] italic">
-                                        ৳{(() => {
-                                            const ids = [
-                                                '00000000-0000-0000-0000-000000000001', // Mgmt
-                                                '00000000-0000-0000-0000-000000000002', // MVP
-                                                '00000000-0000-0000-0000-000000000003'  // Reserve
-                                            ];
-                                            return dbUsers
-                                                .filter(u => ids.includes(u.id))
-                                                .reduce((sum, u) => sum + Number(u.global_credit || 0), 0)
-                                                .toLocaleString();
-                                        })()}
+                        {/* DASHBOARD CARDS */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                            {[
+                                { label: 'Total Members', val: players.length, icon: <Users size={20} />, color: 'from-blue-600 to-indigo-600' },
+                                {
+                                    label: 'Corporate Funds',
+                                    val: `৳${dbUsers.filter(u => ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'].includes(u.id)).reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}`,
+                                    icon: <ShieldCheck size={20} />,
+                                    color: 'from-cyan-600 to-blue-600',
+                                    isCurrency: true
+                                },
+                                {
+                                    label: 'Member Funds',
+                                    val: `৳${dbUsers.filter(u => !['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'].includes(u.id)).reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}`,
+                                    icon: <Wallet size={20} />,
+                                    color: 'from-amber-600 to-orange-600',
+                                    isCurrency: true
+                                },
+                                { label: 'Active Matches', val: allMatches.length, icon: <TrendingUp size={20} />, color: 'from-emerald-600 to-teal-600' }
+                            ].map((card, i) => (
+                                <div key={i} className="relative group overflow-hidden rounded-[32px] p-6 text-white transition-all duration-300 hover:-translate-y-1"
+                                    style={{
+                                        background: 'linear-gradient(145deg, #111d35 0%, #080e1a 100%)',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)'
+                                    }}
+                                >
+                                    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-[0.05] rounded-bl-[100px] transition-opacity group-hover:opacity-[0.1]`}></div>
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className={`p-3 rounded-2xl bg-gradient-to-br ${card.color} shadow-lg shadow-black/20`}>
+                                            {card.icon}
+                                        </div>
+                                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[2px]">{card.label}</h3>
+                                    </div>
+                                    <div className={`text-3xl font-black ${card.isCurrency ? 'text-white' : 'text-white'} leading-none`}>
+                                        {card.val}
                                     </div>
                                 </div>
-                            </div>
-                            <div className="admin-card">
-                                <div className="admin-card-icon" style={{ background: 'rgba(251, 188, 4, 0.15)', color: '#FBBC04' }}>
-                                    <Wallet size={24} />
-                                </div>
-                                <div className="admin-card-info">
-                                    <h3>Total Member Funds</h3>
-                                    <div className="card-value text-[#FBBC04] italic">
-                                        ৳{(() => {
-                                            const corpIds = [
-                                                '00000000-0000-0000-0000-000000000001',
-                                                '00000000-0000-0000-0000-000000000002',
-                                                '00000000-0000-0000-0000-000000000003'
-                                            ];
-                                            return dbUsers
-                                                .filter(u => !corpIds.includes(u.id))
-                                                .reduce((sum, u) => sum + Number(u.global_credit || 0), 0)
-                                                .toLocaleString();
-                                        })()}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="admin-card">
-                                <div className="admin-card-icon"><TrendingUp size={24} /></div>
-                                <div className="admin-card-info">
-                                    <h3>Active Matches</h3>
-                                    <div className="card-value">{allMatches.length}</div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
 
                         {/* CONTENT AREA */}
@@ -1049,7 +1086,8 @@ const AdminPanel = () => {
                                                 <input
                                                     type="text"
                                                     value={newPlayerForm.phone}
-                                                    onChange={(e) => setNewPlayerForm({ ...newPlayerForm, phone: e.target.value })}
+                                                    onChange={(e) => setNewPlayerForm({ ...newPlayerForm, phone: e.target.value.replace(/\D/g, '') })}
+                                                    maxLength={11}
                                                     placeholder="01XXXXXXXXX"
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
                                                 />
@@ -1064,40 +1102,40 @@ const AdminPanel = () => {
                                 )}
 
                                 {/* Search and Filter Bar */}
-                                <div className="admin-content-box mb-6">
-                                    <div className="flex flex-col md:flex-row gap-4">
-                                        <div className="flex-1 search-bar">
-                                            <Search className="search-icon" size={18} />
-                                            <input
-                                                type="text"
-                                                placeholder="Search members by name, team, or role..."
-                                                className="w-full"
-                                                value={playerSearch}
-                                                onChange={(e) => setPlayerSearch(e.target.value)}
-                                            />
+                                <div className="mb-10 p-6 rounded-[32px] bg-white/[0.02] border border-white/5 backdrop-blur-xl">
+                                    <div className="flex flex-col lg:flex-row gap-6 items-center">
+                                        <div className="relative flex-1 group w-full">
+                                            <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                                            <div className="relative flex items-center bg-black/40 border border-white/10 rounded-2xl px-5 py-3 group-focus-within:border-blue-500/50 transition-all">
+                                                <Search className="text-white/20 group-focus-within:text-blue-400 transition-colors" size={20} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search members by name, team, or role..."
+                                                    className="w-full bg-transparent border-none outline-none px-4 text-white text-base placeholder:text-white/20"
+                                                    value={playerSearch}
+                                                    onChange={(e) => setPlayerSearch(e.target.value)}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <select
-                                                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm outline-none focus:border-blue-500"
-                                                value={teamFilter}
-                                                onChange={(e) => setTeamFilter(e.target.value)}
-                                            >
-                                                <option value="" className="bg-[#0b101b]">All Teams</option>
-                                                <option value="THE BLOODLOVERS" className="bg-[#0b101b]">TBL</option>
-                                                <option value="BLOODLOVERS" className="bg-[#0b101b]">Bloodlovers (Alt)</option>
-                                                <option value="FREE AGENT" className="bg-[#0b101b]">Free Agent</option>
-                                            </select>
-                                            <select
-                                                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm outline-none focus:border-blue-500"
-                                                value={roleFilter}
-                                                onChange={(e) => setRoleFilter(e.target.value)}
-                                            >
-                                                <option value="" className="bg-[#0b101b]">All Roles</option>
-                                                <option value="Assaulter" className="bg-[#0b101b]">Assaulter</option>
-                                                <option value="Support" className="bg-[#0b101b]">Support</option>
-                                                <option value="Sniper" className="bg-[#0b101b]">Sniper</option>
-                                                <option value="IGL" className="bg-[#0b101b]">IGL</option>
-                                            </select>
+
+                                        <div className="flex gap-3 w-full lg:w-auto">
+                                            {[
+                                                { val: teamFilter, set: setTeamFilter, options: [{ l: 'All Teams', v: '' }, { l: 'TBL', v: 'THE BLOODLOVERS' }, { l: 'Free Agent', v: 'FREE AGENT' }], icon: <Shield size={14} /> },
+                                                { val: roleFilter, set: setRoleFilter, options: [{ l: 'All Roles', v: '' }, { l: 'Assaulter', v: 'Assaulter' }, { l: 'Support', v: 'Support' }, { l: 'Sniper', v: 'Sniper' }, { l: 'IGL', v: 'IGL' }], icon: <Target size={14} /> }
+                                            ].map((f, i) => (
+                                                <div key={i} className="relative flex-1 lg:flex-none min-w-[140px]">
+                                                    <select
+                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm outline-none hover:border-white/20 focus:border-blue-500/50 appearance-none cursor-pointer transition-all"
+                                                        value={f.val}
+                                                        onChange={(e) => f.set(e.target.value)}
+                                                    >
+                                                        {f.options.map(opt => <option key={opt.v} value={opt.v} className="bg-[#0b101b]">{opt.l}</option>)}
+                                                    </select>
+                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+                                                        {f.icon}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -1108,264 +1146,175 @@ const AdminPanel = () => {
                                     {filteredPlayers.map((player) => (
                                         editingId === player.id ? (
                                             /* EDIT MODE CARD */
-                                            <div key={player.id} className="relative group rounded-[20px] p-[20px] text-white"
-                                                style={{
-                                                    background: 'linear-gradient(180deg, #0f1c33, #060c18)',
-                                                    boxShadow: '0 0 20px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05)'
-                                                }}
+                                            <div key={player.id} className="relative group rounded-[32px] p-6 text-white overflow-hidden shadow-2xl border border-blue-500/30"
+                                                style={{ background: 'linear-gradient(180deg, #162447 0%, #0c1222 100%)' }}
                                             >
-                                                <div className="flex flex-col gap-3 h-full">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h3 className="text-sm font-bold text-[#6ea8ff] uppercase tracking-wider">Edit Member</h3>
-                                                        <button onClick={handleCancelEdit} className="text-gray-500 hover:text-white"><X size={16} /></button>
-                                                    </div>
+                                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
 
-                                                    <div className="space-y-3 flex-1">
-                                                        <div>
-                                                            <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">IGN</label>
-                                                            <input
-                                                                type="text"
-                                                                value={editValues.ign}
-                                                                onChange={(e) => setEditValues({ ...editValues, ign: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white focus:border-[#3b6cff] outline-none"
-                                                            />
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <div>
+                                                        <h3 className="text-lg font-black text-white leading-none">Modify Agent</h3>
+                                                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1">Status: Operational</p>
+                                                    </div>
+                                                    <button onClick={handleCancelEdit} className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all">
+                                                        <X size={16} className="text-white/40" />
+                                                    </button>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="col-span-2">
+                                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-1.5 block">Full Code Name</label>
+                                                            <input type="text" value={editValues.ign} onChange={(e) => setEditValues({ ...editValues, ign: e.target.value })}
+                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all" />
                                                         </div>
                                                         <div>
-                                                            <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">UID</label>
-                                                            <input
-                                                                type="text"
-                                                                value={editValues.in_game_uid}
-                                                                onChange={(e) => setEditValues({ ...editValues, in_game_uid: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white focus:border-[#3b6cff] outline-none"
-                                                            />
+                                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-1.5 block">Access UID</label>
+                                                            <input type="text" value={editValues.in_game_uid} onChange={(e) => setEditValues({ ...editValues, in_game_uid: e.target.value })}
+                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all" />
                                                         </div>
                                                         <div>
-                                                            <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">bKash Number</label>
-                                                            <input
-                                                                type="text"
-                                                                value={editValues.phone}
-                                                                onChange={(e) => setEditValues({ ...editValues, phone: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white focus:border-[#3b6cff] outline-none"
-                                                            />
-                                                        </div>
-                                                        <div className="grid grid-cols-3 gap-2">
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Kills</label>
-                                                                <input
-                                                                    type="number"
-                                                                    value={editValues.kills}
-                                                                    onChange={(e) => setEditValues({ ...editValues, kills: parseInt(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white text-center focus:border-[#3b6cff] outline-none"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Wins</label>
-                                                                <input
-                                                                    type="number"
-                                                                    value={editValues.wins}
-                                                                    onChange={(e) => setEditValues({ ...editValues, wins: parseInt(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white text-center focus:border-[#3b6cff] outline-none"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">MVP</label>
-                                                                <input
-                                                                    type="number"
-                                                                    value={editValues.mvp_points}
-                                                                    onChange={(e) => setEditValues({ ...editValues, mvp_points: parseInt(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-center text-[#f5c451] focus:border-[#f5c451] outline-none"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">M. MVP</label>
-                                                                <input
-                                                                    type="number"
-                                                                    value={editValues.mvp_points_monthly}
-                                                                    onChange={(e) => setEditValues({ ...editValues, mvp_points_monthly: parseInt(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-center text-[#f5c451] focus:border-[#f5c451] outline-none"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Assists</label>
-                                                                <input
-                                                                    type="number"
-                                                                    value={editValues.assists}
-                                                                    onChange={(e) => setEditValues({ ...editValues, assists: parseInt(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white text-center focus:border-[#3b6cff] outline-none"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Damage</label>
-                                                                <input
-                                                                    type="number"
-                                                                    value={editValues.damage}
-                                                                    onChange={(e) => setEditValues({ ...editValues, damage: parseFloat(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white text-center focus:border-[#3b6cff] outline-none"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Time</label>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="00:00"
-                                                                    value={editValues.survival_time}
-                                                                    onChange={(e) => setEditValues({ ...editValues, survival_time: e.target.value })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white text-center focus:border-[#3b6cff] outline-none"
-                                                                />
-                                                            </div>
+                                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-1.5 block">bKash Linked</label>
+                                                            <input type="text" value={editValues.phone} onChange={(e) => setEditValues({ ...editValues, phone: e.target.value.replace(/\D/g, '') })} maxLength={11}
+                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all" />
                                                         </div>
                                                     </div>
 
-                                                    <div className="grid grid-cols-2 gap-3 mt-2">
-                                                        <button onClick={() => handleSaveEdit(player.id)} className="bg-[#3b6cff] hover:bg-blue-600 text-white font-bold py-2 rounded text-xs uppercase tracking-wider transition-colors">
-                                                            Save Changes
+                                                    <div className="p-4 rounded-2xl bg-black/40 border border-white/5">
+                                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-3 block">Combat Statistics</label>
+                                                        <div className="grid grid-cols-3 gap-3">
+                                                            {[
+                                                                { l: 'Kills', v: editValues.kills, k: 'kills', c: 'text-white' },
+                                                                { l: 'Matches', v: editValues.wins, k: 'wins', c: 'text-white' },
+                                                                { l: 'MVP', v: editValues.mvp_points, k: 'mvp_points', c: 'text-yellow-400' },
+                                                                { l: 'Assists', v: editValues.assists, k: 'assists', c: 'text-white' },
+                                                                { l: 'Damage', v: editValues.damage, k: 'damage', c: 'text-red-400' },
+                                                                { l: 'Time', v: editValues.survival_time, k: 'survival_time', c: 'text-emerald-400', isTime: true }
+                                                            ].map((f, i) => (
+                                                                <div key={i}>
+                                                                    <label className="text-[8px] font-bold text-white/20 uppercase mb-1 block text-center tracking-tighter">{f.l}</label>
+                                                                    <input
+                                                                        type={f.isTime ? 'text' : 'number'}
+                                                                        value={f.v}
+                                                                        onChange={(e) => setEditValues({ ...editValues, [f.k]: f.isTime ? e.target.value : (parseFloat(e.target.value) || 0) })}
+                                                                        className={`w-full bg-white/[0.03] border border-white/5 rounded-lg py-1.5 text-center text-xs outline-none focus:border-blue-500/50 ${f.c}`}
+                                                                    />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-3 pt-2">
+                                                        <button onClick={() => handleSaveEdit(player.id)} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95">
+                                                            Commit Changes
                                                         </button>
-                                                        <button onClick={handleCancelEdit} className="bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold py-2 rounded text-xs uppercase tracking-wider transition-colors">
-                                                            Cancel
+                                                        <button onClick={handleCancelEdit} className="bg-white/5 hover:bg-white/10 text-white/40 hover:text-white px-4 rounded-2xl transition-all">
+                                                            <X size={16} />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         ) : (
                                             /* VIEW MODE CARD */
-                                            <div key={player.id} className="relative group rounded-[20px] p-[20px] text-white transition-all duration-300 hover:-translate-y-1"
+                                            <div key={player.id} className="relative group rounded-[24px] p-5 text-white transition-all duration-500 hover:-translate-y-2"
                                                 style={{
-                                                    background: 'linear-gradient(180deg, #0f1c33, #060c18)',
-                                                    boxShadow: '0 0 20px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05)'
+                                                    background: 'linear-gradient(165deg, #111d35 0%, #080e1a 100%)',
+                                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)'
                                                 }}
                                             >
-
-                                                {/* TOP ACTIONS (Edit/Delete - Absolute Positioned) */}
-                                                <div className="absolute top-3 right-3 flex gap-2 z-20 opacity-0 group-hover:opacity-100 transition-all">
-                                                    <button onClick={() => handleEditPlayer(player)} className="h-7 w-7 rounded-lg bg-white/5 hover:bg-blue-500 hover:text-white flex items-center justify-center backdrop-blur text-gray-400 transition-all border border-white/5">
-                                                        <Edit size={12} />
+                                                {/* TOP ACTIONS */}
+                                                <div className="absolute top-4 right-4 flex gap-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                                                    <button onClick={() => handleEditPlayer(player)} className="h-8 w-8 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white flex items-center justify-center backdrop-blur transition-all border border-blue-500/20">
+                                                        <Edit size={14} />
                                                     </button>
-                                                    <button onClick={() => handleDeletePlayer(player.id)} className="h-7 w-7 rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white flex items-center justify-center backdrop-blur text-red-500 transition-all border border-red-500/20">
-                                                        <Trash2 size={12} />
+                                                    <button onClick={() => handleDeletePlayer(player.id)} className="h-8 w-8 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white flex items-center justify-center backdrop-blur transition-all border border-red-500/20">
+                                                        <Trash2 size={14} />
                                                     </button>
                                                 </div>
 
-                                                {/* HEADER */}
-                                                <div className="flex gap-4 items-center mb-6">
-                                                    {/* AVATAR */}
-                                                    <div className="relative w-[84px] h-[84px] rounded-full overflow-hidden shrink-0 border-[3px] border-[#3b6cff] shadow-[0_0_15px_rgba(59,108,255,0.4)]">
-                                                        <img
-                                                            src={player.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${player.ign}`}
-                                                            alt={player.ign}
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                {/* HEADER SECTION */}
+                                                <div className="flex gap-4 items-start mb-6">
+                                                    <div className="relative shrink-0">
+                                                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full blur opacity-25 group-hover:opacity-50 transition-opacity"></div>
+                                                        <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 ring-4 ring-black/20 shadow-xl">
+                                                            <img
+                                                                src={player.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${player.ign}`}
+                                                                alt={player.ign}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
                                                     </div>
 
-                                                    {/* INFO */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="text-[10px] font-bold tracking-[1px] text-[#6ea8ff] uppercase mb-1 flex items-center gap-1">
-                                                            <Shield size={10} />
-                                                            {player.team || 'FREE AGENT'} • {player.role || 'PLAYER'}
+                                                    <div className="flex-1 min-w-0 pt-1">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-[9px] font-black text-blue-400 border border-blue-500/20 uppercase tracking-wider">
+                                                                {player.role || 'Player'}
+                                                            </span>
+                                                            <span className="text-[10px] font-bold text-white/30 truncate">
+                                                                {player.team || 'The Bloodlovers'}
+                                                            </span>
                                                         </div>
-                                                        <h3 className="text-[24px] font-bold text-white leading-tight truncate mb-1" style={{ fontFamily: "'Segoe UI', sans-serif" }}>
+                                                        <h3 className="text-xl font-black text-white leading-none truncate mb-2">
                                                             {player.ign}
                                                         </h3>
-                                                        <div className="text-[10px] text-[#8a9bb5] font-mono flex flex-wrap gap-2">
-                                                            <span>UID: {player.in_game_uid || '---'}</span>
-                                                            <span className="opacity-50">|</span>
-                                                            <span>PH: {player.phone || '---'}</span>
-                                                            <span className="opacity-50">|</span>
-                                                            <span>ID: #{player.id}</span>
+                                                        <div className="flex gap-3 mt-1">
+                                                            <div className="flex items-center gap-1 text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20">
+                                                                <Hash size={10} className="text-blue-400" /> {player.in_game_uid || 'NO UID'}
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[10px] font-mono bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                                <Smartphone size={10} className="text-emerald-400" /> {player.phone || 'NO PHONE'}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* STATS GRID (6 Grid Layout) */}
-                                                <div className="grid grid-cols-3 gap-3 mb-5">
-
-                                                    {/* KILLS */}
-                                                    <div className="bg-white/[0.04] rounded-[14px] p-2.5 text-center relative overflow-hidden group/stat border border-white/5">
-                                                        <div className="text-sm mb-1">🔫</div>
-                                                        <div className="text-[9px] text-[#8fa3bf] tracking-widest font-bold">KILLS</div>
-                                                        <div className="text-[18px] font-bold text-white mt-0.5">
-                                                            {player.kills || 0}
-                                                        </div>
+                                                {/* PROFESSIONAL METRICS GRID */}
+                                                <div className="mb-6 p-4 rounded-[24px] bg-black/30 border border-white/5 backdrop-blur-md">
+                                                    <div className="grid grid-cols-3 gap-y-4 gap-x-2">
+                                                        {[
+                                                            { label: 'Kills', val: player.kills || 0, icon: <Crosshair size={10} />, color: 'text-white' },
+                                                            { label: 'Assists', val: player.assists || 0, icon: <Users size={10} />, color: 'text-white/50' },
+                                                            { label: 'Damage', val: player.damage || 0, icon: <Zap size={10} />, color: 'text-orange-500' },
+                                                            { label: 'Matches', val: player.wins || 0, icon: <Gamepad2 size={10} />, color: 'text-white/50' },
+                                                            { label: 'Survival', val: formatSurvivalTime(player.survival_time), icon: <Clock size={10} />, color: 'text-cyan-400' },
+                                                            { label: 'MVP', val: player.mvp_points || 0, icon: <Trophy size={10} />, color: 'text-yellow-500' }
+                                                        ].map((s, i) => (
+                                                            <div key={i} className="flex flex-col items-center text-center group/m">
+                                                                <div className="flex items-center gap-1 mb-1.5">
+                                                                    <span className="text-white/20 group-hover/m:text-white/40 transition-colors">{s.icon}</span>
+                                                                    <span className="text-[8px] font-black text-white/30 uppercase tracking-[1px]">{s.label}</span>
+                                                                </div>
+                                                                <span className={`text-[13px] font-black tracking-tight ${s.color}`}>
+                                                                    {s.val}
+                                                                </span>
+                                                            </div>
+                                                        ))}
                                                     </div>
-
-                                                    {/* ASSISTS */}
-                                                    <div className="bg-white/[0.04] rounded-[14px] p-2.5 text-center relative overflow-hidden group/stat border border-white/5">
-                                                        <div className="text-sm mb-1">🤝</div>
-                                                        <div className="text-[9px] text-[#8fa3bf] tracking-widest font-bold">ASSISTS</div>
-                                                        <div className="text-[18px] font-bold text-white mt-0.5">
-                                                            {player.assists || 0}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* DAMAGE */}
-                                                    <div className="bg-white/[0.04] rounded-[14px] p-2.5 text-center relative overflow-hidden group/stat border border-white/5">
-                                                        <div className="text-sm mb-1">💥</div>
-                                                        <div className="text-[9px] text-[#8fa3bf] tracking-widest font-bold">DAMAGE</div>
-                                                        <div className="text-[18px] font-bold text-[#ff4d4d] mt-0.5 text-shadow-[0_0_10px_rgba(255,77,77,0.4)]">
-                                                            {player.damage || '0'}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* WINS */}
-                                                    <div className="bg-white/[0.04] rounded-[14px] p-2.5 text-center relative overflow-hidden group/stat border border-white/5">
-                                                        <div className="text-sm mb-1">🏆</div>
-                                                        <div className="text-[9px] text-[#8fa3bf] tracking-widest font-bold">WINS</div>
-                                                        <div className="text-[18px] font-bold text-white mt-0.5">
-                                                            {player.wins || 0}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* SURVIVAL */}
-                                                    <div className="bg-white/[0.04] rounded-[14px] p-2.5 text-center relative overflow-hidden group/stat border border-white/5">
-                                                        <div className="text-sm mb-1">⏱</div>
-                                                        <div className="text-[9px] text-[#8fa3bf] tracking-widest font-bold">TIME</div>
-                                                        <div className="text-[16px] font-bold text-[#4dffb8] mt-1 shrink-0">
-                                                            {player.survival_time || '00:00'}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* MVP - Special Styling */}
-                                                    <div className="rounded-[14px] p-2.5 text-center relative overflow-hidden group/stat border border-[#f5c451]/20"
-                                                        style={{
-                                                            background: 'linear-gradient(180deg, rgba(58, 43, 0, 0.6), rgba(26, 18, 0, 0.6))',
-                                                            boxShadow: '0 0 15px rgba(245, 196, 81, 0.1)'
-                                                        }}
-                                                    >
-                                                        <div className="text-sm mb-1">⭐</div>
-                                                        <div className="text-[9px] text-[#f5c451] tracking-widest font-bold opacity-80">MVP</div>
-                                                        <div className="text-[18px] font-bold text-[#f5c451] mt-0.5 drop-shadow-[0_0_10px_rgba(245,196,81,0.6)]">
-                                                            {player.mvp_points || 0}
-                                                        </div>
-                                                    </div>
-
                                                 </div>
 
-                                                {/* ACTION FOOTER */}
-                                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            if (!isLongPress.current) handleQuickStatUpdate(player, 'KILL', 1);
-                                                        }}
-                                                        onContextMenu={(e) => handleCustomAdd(e, player, 'KILL')}
-                                                        onTouchStart={() => handleTouchStart(player, 'KILL')}
-                                                        onTouchEnd={(e) => handleTouchEnd(e, player, 'KILL')}
-                                                        onTouchMove={handleTouchMove}
-                                                        className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-[10px] font-bold uppercase tracking-wider transition-all select-none border border-red-500/20"
-                                                    >
-                                                        <Crosshair size={12} /> + Kill
-                                                    </button>
-
-                                                    <button
-                                                        onClick={(e) => {
-                                                            if (!isLongPress.current) handleQuickStatUpdate(player, 'MVP', 1);
-                                                        }}
-                                                        onContextMenu={(e) => handleCustomAdd(e, player, 'MVP')}
-                                                        onTouchStart={() => handleTouchStart(player, 'MVP')}
-                                                        onTouchEnd={(e) => handleTouchEnd(e, player, 'MVP')}
-                                                        onTouchMove={handleTouchMove}
-                                                        className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500 hover:text-black text-yellow-500 text-[10px] font-bold uppercase tracking-wider transition-all select-none border border-yellow-500/20"
-                                                    >
-                                                        <Award size={12} /> + MVP
-                                                    </button>
+                                                {/* QUICK ACTIONS REDESIGNED */}
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {[
+                                                        { t: 'KILL', i: <Crosshair size={12} />, c: 'bg-red-500' },
+                                                        { t: 'ASSIST', i: <Users size={12} />, c: 'bg-blue-500' },
+                                                        { t: 'DAMAGE', i: <Zap size={11} />, c: 'bg-orange-500', a: 100 },
+                                                        { t: 'MATCH', i: <Gamepad2 size={11} />, c: 'bg-emerald-500' },
+                                                        { t: 'MVP', i: <Trophy size={11} />, c: 'bg-yellow-500' },
+                                                        { t: 'TIME', i: <Clock size={11} />, c: 'bg-cyan-500' }
+                                                    ].map((btn, i) => (
+                                                        <button
+                                                            key={i}
+                                                            onClick={(e) => { if (!isLongPress.current) handleQuickStatUpdate(player, btn.t, btn.a || 1); }}
+                                                            onContextMenu={(e) => handleCustomAdd(e, player, btn.t)}
+                                                            onTouchStart={() => handleTouchStart(player, btn.t)}
+                                                            onTouchEnd={(e) => handleTouchEnd(e, player, btn.t)}
+                                                            onTouchMove={handleTouchMove}
+                                                            className={`flex items-center justify-center h-9 rounded-xl ${btn.c}/10 hover:${btn.c} text-${btn.c.split('-')[1]}-400 hover:text-black border border-${btn.c.split('-')[1]}-500/20 transition-all active:scale-95`}
+                                                            title={`Add ${btn.t}`}
+                                                        >
+                                                            {btn.i}
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             </div>
                                         )

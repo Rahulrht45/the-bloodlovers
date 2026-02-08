@@ -35,13 +35,18 @@ const MvpPage = () => {
     // Sorting Helper
     const getSortedPlayers = () => {
         return [...players].sort((a, b) => {
+            if (sortBy === 'survival_time') {
+                const parseTime = (val) => {
+                    if (typeof val === 'string' && val.includes(':')) {
+                        const [m, s] = val.split(':').map(Number);
+                        return (m * 60) + (s || 0);
+                    }
+                    return parseFloat(val) || 0;
+                };
+                return parseTime(b[sortBy]) - parseTime(a[sortBy]);
+            }
             const valA = a[sortBy] || 0;
             const valB = b[sortBy] || 0;
-            if (sortBy === 'survival_time' && typeof valA === 'string' && valA.includes(':')) {
-                const [mA, sA] = valA.split(':').map(Number);
-                const [mB, sB] = valB.split(':').map(Number);
-                return ((mB * 60) + sB) - ((mA * 60) + sA);
-            }
             return (Number(valB) || 0) - (Number(valA) || 0);
         });
     };
@@ -91,7 +96,17 @@ const MvpPage = () => {
     // Helper to render a stat cell
     const renderStatCell = (player, statKey) => {
         const isActive = sortBy === statKey;
-        const value = player[statKey] || (statKey === 'survival_time' ? '00:00' : 0);
+        let value = player[statKey] || (statKey === 'survival_time' ? '00:00' : 0);
+
+        if (statKey === 'survival_time') {
+            const [m, s] = String(value).includes(':') ? value.split(':').map(Number) : [Number(value), 0];
+            const totalSecs = (m * 60) + (s || 0);
+            const hrs = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+
+            if (hrs > 0) value = `${hrs} hour ${mins} min`;
+            else value = `${mins} min`;
+        }
 
         return (
             <div className={isActive ? 'highlight-stat' : 'muted'}>
@@ -149,7 +164,16 @@ const MvpPage = () => {
                                     </div>
                                     <div className="name">{top3[1].ign}</div>
                                     <div className="team">{top3[1].team || 'The Bloodlovers'}</div>
-                                    <div className="value">{top3[1][sortBy] || 0}</div>
+                                    <div className="value">
+                                        {sortBy === 'survival_time' ? (() => {
+                                            const time = top3[1][sortBy] || '00:00';
+                                            const [m, s] = String(time).includes(':') ? time.split(':').map(Number) : [Number(time), 0];
+                                            const totalSecs = (m * 60) + (s || 0);
+                                            const hrs = Math.floor(totalSecs / 3600);
+                                            const mins = Math.floor((totalSecs % 3600) / 60);
+                                            return hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+                                        })() : (top3[1][sortBy] || 0)}
+                                    </div>
                                 </div>
                             )}
 
@@ -162,7 +186,16 @@ const MvpPage = () => {
                                     </div>
                                     <div className="name">{top3[0].ign}</div>
                                     <div className="team">{top3[0].team || 'The Bloodlovers'}</div>
-                                    <div className="value">{top3[0][sortBy] || 0}</div>
+                                    <div className="value">
+                                        {sortBy === 'survival_time' ? (() => {
+                                            const time = top3[0][sortBy] || '00:00';
+                                            const [m, s] = String(time).includes(':') ? time.split(':').map(Number) : [Number(time), 0];
+                                            const totalSecs = (m * 60) + (s || 0);
+                                            const hrs = Math.floor(totalSecs / 3600);
+                                            const mins = Math.floor((totalSecs % 3600) / 60);
+                                            return hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+                                        })() : (top3[0][sortBy] || 0)}
+                                    </div>
                                 </div>
                             )}
 
@@ -175,7 +208,16 @@ const MvpPage = () => {
                                     </div>
                                     <div className="name">{top3[2].ign}</div>
                                     <div className="team">{top3[2].team || 'The Bloodlovers'}</div>
-                                    <div className="value">{top3[2][sortBy] || 0}</div>
+                                    <div className="value">
+                                        {sortBy === 'survival_time' ? (() => {
+                                            const time = top3[2][sortBy] || '00:00';
+                                            const [m, s] = String(time).includes(':') ? time.split(':').map(Number) : [Number(time), 0];
+                                            const totalSecs = (m * 60) + (s || 0);
+                                            const hrs = Math.floor(totalSecs / 3600);
+                                            const mins = Math.floor((totalSecs % 3600) / 60);
+                                            return hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+                                        })() : (top3[2][sortBy] || 0)}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -191,7 +233,7 @@ const MvpPage = () => {
                                     <div className={sortBy === 'kills' ? 'highlight-stat' : ''}>KILLS</div>
                                     <div className={sortBy === 'damage' ? 'highlight-stat' : ''}>DAMAGE</div>
                                     <div className={sortBy === 'assists' ? 'highlight-stat' : ''}>ASSISTS</div>
-                                    <div className={sortBy === 'survival_time' ? 'highlight-stat' : ''}>TIME</div>
+                                    <div className={sortBy === 'survival_time' ? 'highlight-stat' : ''}>SURV. TIME</div>
                                     <div className={sortBy === 'wins' ? 'highlight-stat' : ''}>WINS</div>
                                 </div>
 
