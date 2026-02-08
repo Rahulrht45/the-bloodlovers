@@ -25,7 +25,7 @@ import { supabase } from '../supabase';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(sessionStorage.getItem('isAdminLoggedIn') === 'true');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [players, setPlayers] = useState([]);
@@ -74,6 +74,7 @@ const AdminPanel = () => {
         team: 'THE BLOODLOVERS',
         role: 'Assaulter',
         avatar: '',
+        phone: '',
         userId: ''
     });
     const [playerSearch, setPlayerSearch] = useState('');
@@ -379,6 +380,8 @@ const AdminPanel = () => {
             (trimmedUsername === "rahul" && trimmedPassword === "Rahul123")
         ) {
             setIsLoggedIn(true);
+            sessionStorage.setItem('isAdminLoggedIn', 'true');
+            sessionStorage.setItem('adminUsername', trimmedUsername);
         } else {
             alert("Wrong Username or Password");
         }
@@ -386,6 +389,8 @@ const AdminPanel = () => {
 
     const handleLogout = () => {
         setIsLoggedIn(false);
+        sessionStorage.removeItem('isAdminLoggedIn');
+        sessionStorage.removeItem('adminUsername');
         setUsername('');
         setPassword('');
     };
@@ -401,6 +406,7 @@ const AdminPanel = () => {
                     team: newPlayerForm.team,
                     role: newPlayerForm.role,
                     avatar: newPlayerForm.avatar,
+                    phone: newPlayerForm.phone,
                     user_id: newPlayerForm.userId || null,
                     kills: 0,
                     wins: 0,
@@ -422,6 +428,7 @@ const AdminPanel = () => {
                 team: 'THE BLOODLOVERS',
                 role: 'Assaulter',
                 avatar: '',
+                phone: '',
                 userId: ''
             });
             alert('New player recruited successfully!');
@@ -468,7 +475,8 @@ const AdminPanel = () => {
             mvp_points_monthly: player.mvp_points_monthly || 0,
             assists: player.assists || 0,
             damage: player.damage || 0,
-            survival_time: player.survival_time || '00:00'
+            survival_time: player.survival_time || '00:00',
+            phone: player.phone || ''
         });
     };
 
@@ -490,7 +498,8 @@ const AdminPanel = () => {
                     mvp_points_monthly: editValues.mvp_points_monthly,
                     assists: editValues.assists,
                     damage: editValues.damage,
-                    survival_time: editValues.survival_time
+                    survival_time: editValues.survival_time,
+                    phone: editValues.phone
                 })
                 .eq('id', id);
 
@@ -1035,6 +1044,16 @@ const AdminPanel = () => {
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
                                                 />
                                             </div>
+                                            <div>
+                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">bKash Number (Personal)</label>
+                                                <input
+                                                    type="text"
+                                                    value={newPlayerForm.phone}
+                                                    onChange={(e) => setNewPlayerForm({ ...newPlayerForm, phone: e.target.value })}
+                                                    placeholder="01XXXXXXXXX"
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
+                                                />
+                                            </div>
                                             <div className="md:col-span-2 lg:col-span-3">
                                                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-lg uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(59,108,255,0.3)]">
                                                     Deploy Agent to Roster
@@ -1117,6 +1136,15 @@ const AdminPanel = () => {
                                                                 type="text"
                                                                 value={editValues.in_game_uid}
                                                                 onChange={(e) => setEditValues({ ...editValues, in_game_uid: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white focus:border-[#3b6cff] outline-none"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">bKash Number</label>
+                                                            <input
+                                                                type="text"
+                                                                value={editValues.phone}
+                                                                onChange={(e) => setEditValues({ ...editValues, phone: e.target.value })}
                                                                 className="w-full bg-white/5 border border-white/10 rounded px-2 py-1.5 text-sm text-white focus:border-[#3b6cff] outline-none"
                                                             />
                                                         </div>
@@ -1239,6 +1267,8 @@ const AdminPanel = () => {
                                                         </h3>
                                                         <div className="text-[10px] text-[#8a9bb5] font-mono flex flex-wrap gap-2">
                                                             <span>UID: {player.in_game_uid || '---'}</span>
+                                                            <span className="opacity-50">|</span>
+                                                            <span>PH: {player.phone || '---'}</span>
                                                             <span className="opacity-50">|</span>
                                                             <span>ID: #{player.id}</span>
                                                         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Upload, Shield, Trophy, Mail, ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { User, Upload, Shield, Trophy, Mail, ArrowLeft, Save, Loader2, Smartphone } from 'lucide-react';
 import { supabase } from '../supabase';
 import './ProfilePage.css';
 
@@ -18,6 +18,7 @@ const ProfilePage = () => {
     const [inGameUid, setInGameUid] = useState('');
     const [team, setTeam] = useState('');
     const [role, setRole] = useState('');
+    const [phone, setPhone] = useState('');
     const [profilePicture, setProfilePicture] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [currentAvatar, setCurrentAvatar] = useState('');
@@ -52,6 +53,7 @@ const ProfilePage = () => {
                 setInGameUid(playerData.in_game_uid || '');
                 setTeam(playerData.team || '');
                 setRole(playerData.role || '');
+                setPhone(playerData.phone || '');
                 setCurrentAvatar(playerData.avatar || '');
                 setPreviewUrl(playerData.avatar || '');
 
@@ -135,6 +137,7 @@ const ProfilePage = () => {
                     in_game_uid: inGameUid,
                     team: team,
                     role: role,
+                    phone: phone,
                     avatar: avatarUrl
                 })
                 .eq('user_id', user.id);
@@ -315,6 +318,20 @@ const ProfilePage = () => {
                                 <option value="ANALYST">ANALYST</option>
                             </select>
                             <User className="profile-input-icon" size={18} />
+                        </div>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="profile-form-group">
+                        <label>bKash (Personal)</label>
+                        <div className="profile-input-wrapper">
+                            <input
+                                type="tel"
+                                placeholder="01XXXXXXXXX"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                            />
+                            <Smartphone className="profile-input-icon" size={18} />
                         </div>
                     </div>
 

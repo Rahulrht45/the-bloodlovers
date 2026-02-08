@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight, Loader2, Zap, Upload, Shield, Trophy, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, Zap, Upload, Shield, Trophy, Eye, EyeOff, Smartphone } from 'lucide-react';
 import { supabase } from '../supabase';
 import './AuthPage.css';
 
@@ -20,6 +20,8 @@ const AuthPage = () => {
     const [teamName, setTeamName] = useState('');
     const [teamRole, setTeamRole] = useState('');
     const [tournamentExperience, setTournamentExperience] = useState('');
+    const [inGameUid, setInGameUid] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [profilePicture, setProfilePicture] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
@@ -74,7 +76,12 @@ const AuthPage = () => {
                     password,
                 });
 
-                if (loginError) throw loginError;
+                if (loginError) {
+                    if (loginError.message.includes('Email not confirmed')) {
+                        throw new Error('Please confirm your email before logging in. Check your inbox (and spam folder) for the verification link.');
+                    }
+                    throw loginError;
+                }
 
                 setSuccess('Authentication successful! Establishing neural link...');
                 setTimeout(() => navigate('/'), 1500);
@@ -89,54 +96,42 @@ const AuthPage = () => {
                             team_name: teamName,
                             team_role: teamRole,
                             tournament_experience: tournamentExperience,
+                            in_game_uid: inGameUid,
+                            phone: phoneNumber,
                         }
                     }
                 });
 
                 if (signUpError) throw signUpError;
 
-                let avatarUrl = null;
-
-                // Upload profile picture if provided
-                // Note: Upload works with the service role key, doesn't require active session
+                // Handle profile picture if provided
                 if (profilePicture && data.user) {
                     try {
-                        avatarUrl = await uploadProfilePicture(data.user.id);
-                        console.log('Profile picture uploaded:', avatarUrl);
+                        // If we have a session (auto-confirm is on), we can use the regular upload
+                        // If we don't have a session (confirmation required), this might fail without proper bucket policies
+                        const avatarUrl = await uploadProfilePicture(data.user.id);
 
-                        // Update user metadata with avatar URL
+                        // Sync to players table (Trigger might have already run)
                         if (avatarUrl) {
-                            const { error: updateError } = await supabase.auth.updateUser({
-                                data: {
-                                    avatar_url: avatarUrl
-                                }
-                            });
+                            const { error: playerUpdateError } = await supabase
+                                .from('players')
+                                .update({ avatar: avatarUrl })
+                                .eq('user_id', data.user.id);
 
-                            if (updateError) {
-                                console.error('Failed to update user metadata:', updateError);
-                            } else {
-                                console.log('User metadata updated with avatar URL');
-
-                                // FORCE SYNC to players table (since trigger ran before upload)
-                                const { error: playerUpdateError } = await supabase
-                                    .from('players')
-                                    .update({ avatar: avatarUrl })
-                                    .eq('user_id', data.user.id);
-
-                                if (playerUpdateError) console.error('Failed to sync avatar to players table:', playerUpdateError);
-                                else console.log('Players table synced with avatar URL');
-                            }
+                            if (playerUpdateError) console.error('Failed to sync avatar:', playerUpdateError);
                         }
                     } catch (uploadError) {
                         console.error('Profile picture upload failed:', uploadError);
-                        // Don't fail registration if upload fails
+                        // Don't fail registration
                     }
                 }
 
-                // Note: Player profile is automatically created by database trigger
-                // when a new user is created in auth.users table
-
-                setSuccess('Registration successful! Check your email for verification.');
+                if (data?.session) {
+                    setSuccess('Registration successful! Access granted.');
+                    setTimeout(() => navigate('/'), 1500);
+                } else {
+                    setSuccess('Registration successful! Please check your email to confirm your account and enable login.');
+                }
             }
         } catch (err) {
             setError(err.message || 'An error occurred during authentication.');
@@ -223,6 +218,36 @@ const AuthPage = () => {
                                         required={!isLogin}
                                     />
                                     <User className="auth-input-icon" size={18} />
+                                </div>
+                            </div>
+
+                            {/* In-Game UID */}
+                            <div className="auth-form-group">
+                                <label>In-Game UID</label>
+                                <div className="auth-input-wrapper">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter your game UID"
+                                        value={inGameUid}
+                                        onChange={(e) => setInGameUid(e.target.value)}
+                                        required={!isLogin}
+                                    />
+                                    <Trophy className="auth-input-icon" size={18} />
+                                </div>
+                            </div>
+
+                            {/* bKash Number */}
+                            <div className="auth-form-group">
+                                <label>bKash Number (Personal)</label>
+                                <div className="auth-input-wrapper">
+                                    <input
+                                        type="tel"
+                                        placeholder="01XXXXXXXXX"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        required={!isLogin}
+                                    />
+                                    <Smartphone className="auth-input-icon" size={18} />
                                 </div>
                             </div>
 
