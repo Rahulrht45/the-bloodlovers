@@ -338,14 +338,23 @@ const AdminPanel = () => {
                     hasUserAccount: hasValidAccount,
                     // Store the actual user ID even if unverified (for debugging/admin potential future use)
                     // but logic elsewhere relies on hasUserAccount to enable actions
-                    actualUserId: finalUserEntry?.id
+                    // Store the actual user ID even if unverified (for debugging/admin potential future use)
+                    // but logic elsewhere relies on hasUserAccount to enable actions
+                    actualUserId: finalUserEntry?.id,
+                    email: finalUserEntry?.email || 'N/A' // Added email field
                 };
             });
 
             // 4. Also find any USERS who aren't in the roster (but exclude corporate)
             const corporateIds = ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'];
+            const bannedIds = [
+                'b05ede29-1622-46b4-8716-8070dee39085', // TBL-BLECH (Hyphen) - Removed by request
+                '32bc6489-b3f7-40b0-9dfc-5b798feb2a95'  // TBL•BLECH (Bullet) - Removed by request
+            ];
+
             const unassignedUsers = (usersData || [])
                 .filter(u => !corporateIds.includes(u.id))
+                .filter(u => !bannedIds.includes(u.id))
                 .filter(u => !rosterData.some(m => m.user_id === u.id || m.ign?.toLowerCase() === u.name?.toLowerCase()))
                 .map(u => ({
                     id: u.id,
@@ -357,7 +366,10 @@ const AdminPanel = () => {
                     team: 'Unknown',
                     isRostered: false,
                     hasUserAccount: true,
-                    actualUserId: u.id
+                    isRostered: false,
+                    hasUserAccount: true,
+                    actualUserId: u.id,
+                    email: u.email || 'N/A' // Added email field
                 }));
 
             setDbUsers([...membersWithWallets, ...unassignedUsers]);
@@ -1759,6 +1771,10 @@ const AdminPanel = () => {
                                                                 {!user.hasUserAccount && (
                                                                     <span className="bg-red-500/10 text-red-500 border border-red-500/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">NO ACCOUNT</span>
                                                                 )}
+                                                            </div>
+                                                            {/* User Email Display */}
+                                                            <div className="text-[10px] text-gray-500 font-mono truncate mb-1">
+                                                                {user.email !== 'N/A' ? user.email : ''}
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-[10px] text-gray-400 uppercase tracking-wider">UID:</span>
