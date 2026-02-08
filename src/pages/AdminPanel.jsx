@@ -289,72 +289,102 @@ const AdminPanel = () => {
 
     const fetchDbUsers = async () => {
         try {
-            // 1. Fetch Players (Source of Truth for Roster)
-            const { data: playersData, error: playersError } = await supabase
+            // 1. Fetch ALL Members (Roster)
+            const { data: rosterData, error: rosterError } = await supabase
                 .from('players')
-                .select('*');
+                .select('*')
+                .order('ign', { ascending: true });
 
-            if (playersError) throw playersError;
+            if (rosterError) throw rosterError;
 
             // 2. Fetch ALL Database Users (Source of Truth for Funds)
             const { data: usersData, error: usersError } = await supabase
                 .from('users')
                 .select('*');
 
-            if (usersError) {
-                if (usersError.code === 'PGRST116' || usersError.message?.includes('not found')) {
-                    console.warn("Public users table not found.");
-                } else {
-                    throw usersError;
-                }
-            }
+            if (usersError) throw usersError;
 
-            // 3. Create map of Roster Info
-            const rosterMap = {};
-            if (playersData) {
-                playersData.forEach(p => {
-                    if (p.user_id) rosterMap[p.user_id] = p;
+            const usersMap = {};
+            if (usersData) {
+                usersData.forEach(u => {
+                    usersMap[u.id] = u;
                 });
             }
 
-            // 4. Map EVERY database user to a display object
-            const allDbUsers = (usersData || []).map(u => {
-                const rosterInfo = rosterMap[u.id];
-                // Fallback: If no roster link yet, try matching by name (IGN)
-                let matchedRoster = rosterInfo;
-                if (!matchedRoster && u.name) {
-                    matchedRoster = playersData.find(p => p.ign?.toLowerCase() === u.name?.toLowerCase());
+            // 3. Map EVERY roster member to a display object
+            const membersWithWallets = rosterData.map(member => {
+                const userEntry = member.user_id ? usersMap[member.user_id] : null;
+
+                // If not found by user_id, try matching by name
+                let finalUserEntry = userEntry;
+                if (!finalUserEntry && member.ign) {
+                    finalUserEntry = usersData?.find(u => u.name?.toLowerCase() === member.ign?.toLowerCase());
                 }
 
+                // CHECK EMAIL VERIFICATION (Safe fallback: if column missing, treat as verified)
+                const isVerified = finalUserEntry?.is_email_verified !== false;
+                const hasValidAccount = !!finalUserEntry && isVerified;
+
                 return {
-                    id: u.id,
-                    ign: matchedRoster?.ign || u.name || 'System User',
-                    displayName: matchedRoster?.ign || u.name || 'Anonymous',
-                    in_game_uid: matchedRoster?.in_game_uid || '---',
-                    global_credit: Number(u.global_credit || 0),
-                    avatar: matchedRoster?.avatar,
-                    team: matchedRoster?.team || 'N/A',
-                    isRostered: !!matchedRoster
+                    id: member.user_id || `temp_${member.id}`,
+                    ign: member.ign,
+                    displayName: member.ign,
+                    in_game_uid: member.in_game_uid || '---',
+                    // Only show balance if verified account exists
+                    global_credit: hasValidAccount ? Number(finalUserEntry?.global_credit || 0) : 0,
+                    avatar: member.avatar,
+                    team: member.team || 'None',
+                    isRostered: true,
+                    hasUserAccount: hasValidAccount,
+                    // Store the actual user ID even if unverified (for debugging/admin potential future use)
+                    // but logic elsewhere relies on hasUserAccount to enable actions
+                    actualUserId: finalUserEntry?.id
                 };
             });
 
-            // 5. Build Final Managed List (Uniquely merging Users + Roster)
-            setDbUsers(allDbUsers.sort((a, b) => (a.ign || '').localeCompare(b.ign || '')));
+            // 4. Also find any USERS who aren't in the roster (but exclude corporate)
+            const corporateIds = ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'];
+            const unassignedUsers = (usersData || [])
+                .filter(u => !corporateIds.includes(u.id))
+                .filter(u => !rosterData.some(m => m.user_id === u.id || m.ign?.toLowerCase() === u.name?.toLowerCase()))
+                .map(u => ({
+                    id: u.id,
+                    ign: u.name || 'External User',
+                    displayName: u.name || 'Anonymous',
+                    in_game_uid: '---',
+                    global_credit: Number(u.global_credit || 0),
+                    avatar: null,
+                    team: 'Unknown',
+                    isRostered: false,
+                    hasUserAccount: true,
+                    actualUserId: u.id
+                }));
+
+            setDbUsers([...membersWithWallets, ...unassignedUsers]);
         } catch (err) {
             console.error("Error fetching balance data:", err);
         }
     };
 
-    const handleUpdateDbBalance = async (userId) => {
-        const input = document.getElementById(`edit_db_${userId}`);
+    const handleUpdateDbBalance = async (targetId) => {
+        const input = document.getElementById(`edit_db_${targetId}`);
         if (!input) return;
         const newBal = parseFloat(input.value);
         if (isNaN(newBal)) return;
 
+        // Find the actual DB user ID if this is a temp ID
+        const userObj = dbUsers.find(u => u.id === targetId);
+        const actualId = userObj?.actualUserId || targetId;
+
+        if (!actualId || String(actualId).startsWith('temp_')) {
+            alert('Cannot set balance for a member without a linked user account.');
+            return;
+        }
+
         try {
             // 1. Primary Method: Use Secure RPC
             const { error: rpcError } = await supabase.rpc('admin_set_user_balance', {
-                p_user_id: userId,
+                p_user_id: actualId,
                 p_new_balance: newBal
             });
 
@@ -859,39 +889,66 @@ const AdminPanel = () => {
                         {/* DASHBOARD CARDS */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                             {[
-                                { label: 'Total Members', val: players.length, icon: <Users size={20} />, color: 'from-blue-600 to-indigo-600' },
+                                { label: 'Total Members', val: players.length, icon: <Users size={24} />, color: 'var(--neon-cyan)', glow: 'rgba(0, 240, 255, 0.4)' },
                                 {
                                     label: 'Corporate Funds',
                                     val: `৳${dbUsers.filter(u => ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'].includes(u.id)).reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}`,
-                                    icon: <ShieldCheck size={20} />,
-                                    color: 'from-cyan-600 to-blue-600',
-                                    isCurrency: true
+                                    icon: <ShieldCheck size={24} />,
+                                    color: 'var(--neon-purple)',
+                                    glow: 'rgba(176, 38, 255, 0.4)'
                                 },
                                 {
                                     label: 'Member Funds',
                                     val: `৳${dbUsers.filter(u => !['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'].includes(u.id)).reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}`,
-                                    icon: <Wallet size={20} />,
-                                    color: 'from-amber-600 to-orange-600',
-                                    isCurrency: true
+                                    icon: <Wallet size={24} />,
+                                    color: '#FBBC04',
+                                    glow: 'rgba(251, 188, 4, 0.4)'
                                 },
-                                { label: 'Active Matches', val: allMatches.length, icon: <TrendingUp size={20} />, color: 'from-emerald-600 to-teal-600' }
+                                { label: 'Active Matches', val: allMatches.length, icon: <TrendingUp size={24} />, color: 'var(--neon-green)', glow: 'rgba(57, 255, 20, 0.4)' }
                             ].map((card, i) => (
-                                <div key={i} className="relative group overflow-hidden rounded-[32px] p-6 text-white transition-all duration-300 hover:-translate-y-1"
+                                <div key={i} className="relative group overflow-hidden rounded-[24px] p-6 text-white transition-all duration-300 hover:-translate-y-2"
                                     style={{
-                                        background: 'linear-gradient(145deg, #111d35 0%, #080e1a 100%)',
-                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)'
+                                        background: 'rgba(15, 22, 41, 0.6)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: `1px solid ${card.color}22`,
+                                        boxShadow: `0 10px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.03)`
                                     }}
                                 >
-                                    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-[0.05] rounded-bl-[100px] transition-opacity group-hover:opacity-[0.1]`}></div>
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className={`p-3 rounded-2xl bg-gradient-to-br ${card.color} shadow-lg shadow-black/20`}>
+                                    {/* Abstract background shape */}
+                                    <div
+                                        className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500"
+                                        style={{ background: card.color }}
+                                    ></div>
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div
+                                            className="p-3 rounded-xl border transition-all duration-300 group-hover:scale-110"
+                                            style={{
+                                                background: `${card.color}11`,
+                                                borderColor: `${card.color}33`,
+                                                color: card.color,
+                                                boxShadow: `0 0 20px ${card.color}11`
+                                            }}
+                                        >
                                             {card.icon}
                                         </div>
-                                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[2px]">{card.label}</h3>
+                                        <div className="h-1 w-8 rounded-full opacity-20" style={{ background: card.color }}></div>
                                     </div>
-                                    <div className={`text-3xl font-black ${card.isCurrency ? 'text-white' : 'text-white'} leading-none`}>
-                                        {card.val}
+
+                                    <div>
+                                        <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[2px] mb-1">{card.label}</h3>
+                                        <div className="text-2xl font-black italic tracking-tighter" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                                            {card.val}
+                                        </div>
                                     </div>
+
+                                    {/* Hover Glow Effect */}
+                                    <div
+                                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                                        style={{
+                                            background: `radial-gradient(circle at top right, ${card.color}0a, transparent 70%)`
+                                        }}
+                                    ></div>
                                 </div>
                             ))}
                         </div>
@@ -1669,7 +1726,7 @@ const AdminPanel = () => {
                                             Player Wallets (Secure Database)
                                         </h2>
                                         <div className="text-sm text-gray-400">
-                                            Total Users: <span className="text-white font-bold">{dbUsers.length}</span>
+                                            Total Wallets: <span className="text-white font-bold">{dbUsers.length}</span> (Members + External)
                                         </div>
                                     </div>
 
@@ -1687,7 +1744,7 @@ const AdminPanel = () => {
                                                         {/* Avatar */}
                                                         <div className="w-12 h-12 rounded-full border-2 border-[var(--neon-cyan)]/30 overflow-hidden flex-shrink-0">
                                                             <img
-                                                                src={user.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.ign}`}
+                                                                src={user.avatar || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.ign || 'User'}`}
                                                                 alt={user.ign}
                                                                 className="w-full h-full object-cover"
                                                             />
@@ -1695,14 +1752,19 @@ const AdminPanel = () => {
 
                                                         {/* Info */}
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="text-base font-bold text-white truncate mb-1">
-                                                                {user.ign}
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <div className="text-base font-bold text-white truncate">
+                                                                    {user.ign || 'Unnamed Player'}
+                                                                </div>
+                                                                {!user.hasUserAccount && (
+                                                                    <span className="bg-red-500/10 text-red-500 border border-red-500/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">NO ACCOUNT</span>
+                                                                )}
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">UID:</span>
-                                                                <span className="text-xs text-[#00ff88] font-mono font-semibold">{user.in_game_uid}</span>
+                                                                <span className="text-[10px] text-gray-400 uppercase tracking-wider">UID:</span>
+                                                                <span className="text-xs text-[#00ff88] font-mono font-semibold">{user.in_game_uid || '---'}</span>
                                                                 <span className="text-[9px] text-gray-600">|</span>
-                                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">TEAM:</span>
+                                                                <span className="text-[10px] text-gray-400 uppercase tracking-wider">TEAM:</span>
                                                                 <span className="text-xs text-[#FBBC04] font-mono font-semibold truncate max-w-[60px]">{user.team || 'None'}</span>
                                                             </div>
                                                         </div>
@@ -1710,7 +1772,7 @@ const AdminPanel = () => {
 
                                                     {/* Balance */}
                                                     <div className="bg-gradient-to-r from-[#FBBC04]/10 to-[#F59E0B]/10 border border-[#FBBC04]/20 rounded-lg p-3 mb-3">
-                                                        <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">MY BALANCE</div>
+                                                        <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">CURRENT BALANCE</div>
                                                         {editingWallet === `db_${user.id}` ? (
                                                             <div className="flex items-center gap-2">
                                                                 <input
@@ -1725,35 +1787,41 @@ const AdminPanel = () => {
                                                             </div>
                                                         ) : (
                                                             <div className="text-2xl font-black italic text-[#FBBC04]">
-                                                                ৳{Number(user.global_credit).toLocaleString()}
+                                                                ৳{Number(user.global_credit || 0).toLocaleString()}
                                                             </div>
                                                         )}
                                                     </div>
 
                                                     {/* Actions */}
                                                     <div className="flex gap-2">
-                                                        {editingWallet === `db_${user.id}` ? (
-                                                            <>
+                                                        {user.hasUserAccount ? (
+                                                            editingWallet === `db_${user.id}` ? (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => handleUpdateDbBalance(user.id)}
+                                                                        className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all"
+                                                                    >
+                                                                        ✓ Save
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => setEditingWallet(null)}
+                                                                        className="flex-1 bg-red-500/80 hover:bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all"
+                                                                    >
+                                                                        ✕ Cancel
+                                                                    </button>
+                                                                </>
+                                                            ) : (
                                                                 <button
-                                                                    onClick={() => handleUpdateDbBalance(user.id)}
-                                                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all"
+                                                                    onClick={() => setEditingWallet(`db_${user.id}`)}
+                                                                    className="w-full bg-[#FBBC04]/20 hover:bg-[#FBBC04]/40 text-[#FBBC04] px-3 py-2 rounded-lg text-xs font-bold transition-all"
                                                                 >
-                                                                    ✓ Save
+                                                                    ✎ Set Balance
                                                                 </button>
-                                                                <button
-                                                                    onClick={() => setEditingWallet(null)}
-                                                                    className="flex-1 bg-red-500/80 hover:bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all"
-                                                                >
-                                                                    ✕ Cancel
-                                                                </button>
-                                                            </>
+                                                            )
                                                         ) : (
-                                                            <button
-                                                                onClick={() => setEditingWallet(`db_${user.id}`)}
-                                                                className="w-full bg-[#FBBC04]/20 hover:bg-[#FBBC04]/40 text-[#FBBC04] px-3 py-2 rounded-lg text-xs font-bold transition-all"
-                                                            >
-                                                                ✎ Set Balance
-                                                            </button>
+                                                            <div className="w-full text-center py-2 text-[10px] text-red-500/60 font-bold uppercase italic border border-dashed border-red-500/20 rounded-lg">
+                                                                No Account Linked
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>

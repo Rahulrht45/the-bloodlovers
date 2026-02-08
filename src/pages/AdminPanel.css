@@ -338,9 +338,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dashboard-header h1 {
@@ -507,35 +507,24 @@
 
 /* ==================== CONTENT BOXES ==================== */
 .admin-content-box {
-    background: linear-gradient(135deg, rgba(15, 22, 41, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
+    background: rgba(15, 22, 41, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
     padding: 24px;
     margin-bottom: 24px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     position: relative;
-}
-
-.admin-content-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-    opacity: 0.3;
+    overflow: hidden;
 }
 
 .admin-content-box h2 {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 20px 0;
-    background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0 0 24px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 /* ==================== ACTIVITY CHART ==================== */
@@ -549,17 +538,35 @@
 
 .chart-bar {
     flex: 1;
-    background: linear-gradient(180deg, #5B8DEF 0%, #0063F7 100%);
-    border-radius: 8px 8px 0 0;
-    min-height: 40px;
-    transition: all 0.3s ease;
+    background: linear-gradient(180deg, var(--neon-cyan) 0%, rgba(0, 240, 255, 0.1) 100%);
+    border-radius: 6px 6px 2px 2px;
+    min-height: 4px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
+    border: 1px solid rgba(0, 240, 255, 0.2);
 }
 
 .chart-bar:hover {
-    opacity: 0.8;
-    transform: translateY(-4px);
+    filter: brightness(1.2);
+    transform: translateY(-8px) scaleX(1.1);
+    box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2);
+}
+
+.chart-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.chart-bar:hover::after {
+    opacity: 1;
 }
 
 /* ==================== RECENT ACTIONS ==================== */
