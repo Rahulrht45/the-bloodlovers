@@ -22,7 +22,8 @@ import {
     Target,
     Smartphone,
     Hash,
-    Loader2
+    Loader2,
+    ArrowUpRight
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import './AdminPanel.css';
@@ -56,7 +57,9 @@ const AdminPanel = () => {
     const [walletRefresh, setWalletRefresh] = useState(0);
 
     const [allMatches, setAllMatches] = useState([]);
-    const [achievements, setAchievements] = useState([]); // New State
+    const [achievements, setAchievements] = useState([]);
+    const [withdrawals, setWithdrawals] = useState([]);
+    const [isWithdrawalLoading, setIsWithdrawalLoading] = useState(false);
 
     // Achievement Form State
     const [achievementForm, setAchievementForm] = useState({
@@ -149,6 +152,87 @@ const AdminPanel = () => {
             }
         } catch (error) {
             console.error('Error fetching achievements', error);
+        }
+    };
+
+    const fetchWithdrawals = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('withdrawal_requests')
+                .select('*, users(name, email)')
+                .order('created_at', { ascending: false });
+
+            if (data) setWithdrawals(data);
+        } catch (error) {
+            console.error('Error fetching withdrawals:', error);
+        }
+    };
+
+    const handleApproveWithdrawal = async (requestId) => {
+        try {
+            const { error } = await supabase
+                .from('withdrawal_requests')
+                .update({ status: 'approved' })
+                .eq('id', requestId);
+
+            if (error) throw error;
+            alert('Withdrawal marked as APPROVED.');
+            fetchWithdrawals();
+        } catch (err) {
+            console.error('Approval failed:', err);
+            alert('Failed to approve.');
+        }
+    };
+
+    const handleRejectWithdrawal = async (request) => {
+        if (!confirm(`Reject request and REFUND ৳${request.amount} to ${request.users?.name}?`)) return;
+
+        try {
+            // 1. Mark as rejected
+            const { error: updateError } = await supabase
+                .from('withdrawal_requests')
+                .update({ status: 'rejected' })
+                .eq('id', request.id);
+
+            if (updateError) throw updateError;
+
+            // 2. Refund money
+            const { data: userData } = await supabase
+                .from('users')
+                .select('global_credit')
+                .eq('id', request.user_id)
+                .single();
+
+            const currentBal = Number(userData?.global_credit || 0);
+
+            const { error: refundError } = await supabase.rpc('admin_set_user_balance', {
+                p_user_id: request.user_id,
+                p_new_balance: currentBal + Number(request.amount)
+            });
+
+            if (refundError) {
+                // Fallback
+                await supabase
+                    .from('users')
+                    .update({ global_credit: currentBal + Number(request.amount) })
+                    .eq('id', request.user_id);
+            }
+
+            // 3. Record Refund Transaction
+            await supabase.from('transactions').insert([{
+                user_id: request.user_id,
+                amount: Number(request.amount),
+                type: 'credit',
+                source: 'refund',
+                note: `Withdrawal Refund - ID: ${request.id.slice(0, 8)}`
+            }]);
+
+            alert('Request REJECTED and funds REFUNDED.');
+            fetchWithdrawals();
+            fetchDbUsers(); // Refresh wallet balances
+        } catch (err) {
+            console.error('Rejection failed:', err);
+            alert('Failed to reject.');
         }
     };
 
@@ -348,6 +432,9 @@ const AdminPanel = () => {
 
             // Fetch Achievements
             await fetchAchievements();
+
+            // Fetch Withdrawals
+            await fetchWithdrawals();
         } catch (err) {
             console.error('Error fetching admin data:', err);
         }
@@ -1039,6 +1126,14 @@ const AdminPanel = () => {
                                     onClick={() => { setActiveTab('Achievements'); setSidebarOpen(false); }}
                                 >
                                     <Award size={20} /> Achievements
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    className={`nav-link ${activeTab === 'Withdrawals' ? 'active' : ''}`}
+                                    onClick={() => { setActiveTab('Withdrawals'); setSidebarOpen(false); }}
+                                >
+                                    <ArrowUpRight size={20} /> Withdrawals
                                 </button>
                             </li>
                             <li style={{ marginTop: 'auto' }}>
@@ -2376,6 +2471,100 @@ const AdminPanel = () => {
                                             <p className="uppercase font-bold tracking-widest">No Achievements Displayed</p>
                                         </div>
                                     )}
+                                </div>
+                            </>
+                        )}
+                        {activeTab === 'Withdrawals' && (
+                            <>
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-white mb-1">Withdrawal Requests</h1>
+                                        <p className="text-sm text-gray-400">Review and verify payout requests from agents</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="px-3 py-1 bg-yellow-500/10 text-yellow-500 text-[10px] font-black uppercase rounded-full border border-yellow-500/20">
+                                            {withdrawals.filter(w => w.status === 'pending').length} Pending
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="admin-content-box p-0 overflow-hidden">
+                                    <div className="table-container">
+                                        <table className="admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>User / Agent</th>
+                                                    <th>Contact / Email</th>
+                                                    <th>Amount Requested</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {withdrawals.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="6" className="text-center py-20 opacity-30">
+                                                            <div className="flex flex-col items-center">
+                                                                <ArrowUpRight size={48} className="mb-4" />
+                                                                <p className="font-black uppercase tracking-[3px] text-xs">No Withdrawal Requests Found</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    withdrawals.map(req => (
+                                                        <tr key={req.id} className="hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
+                                                            <td className="px-4 py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-black text-xs">
+                                                                        {req.users?.name ? req.users.name[0] : '?'}
+                                                                    </div>
+                                                                    <div className="font-bold text-white">{req.users?.name || 'Unknown User'}</div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <div className="text-xs text-gray-400">{req.users?.email || 'No Email'}</div>
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <div className="font-black text-red-500 italic">৳{Number(req.amount).toLocaleString()}</div>
+                                                            </td>
+                                                            <td className="px-4 py-4 text-xs text-gray-500">
+                                                                {new Date(req.created_at).toLocaleDateString()}
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${req.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                                                        req.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                                            'bg-red-500/10 text-red-500 border-red-500/20'
+                                                                    }`}>
+                                                                    {req.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-4">
+                                                                {req.status === 'pending' && (
+                                                                    <div className="flex gap-2">
+                                                                        <button
+                                                                            onClick={() => handleApproveWithdrawal(req.id)}
+                                                                            className="h-8 w-8 rounded-lg bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-black flex items-center justify-center transition-all border border-green-500/20"
+                                                                            title="Mark as Completed"
+                                                                        >
+                                                                            <Check size={14} />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleRejectWithdrawal(req)}
+                                                                            className="h-8 w-8 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-all border border-red-500/20"
+                                                                            title="Reject and Refund"
+                                                                        >
+                                                                            <X size={14} />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </>
                         )}

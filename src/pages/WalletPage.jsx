@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, ArrowDownLeft, Clock, Search, Filter, TrendingUp, ShieldCheck, User, Loader2 } from 'lucide-react';
+import { Wallet, ArrowDownLeft, ArrowUpRight, Clock, Search, Filter, TrendingUp, ShieldCheck, User, Loader2, Send } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 import './WalletPage.css';
@@ -14,6 +14,11 @@ const WalletPage = () => {
         balance: 0
     });
     const [transactions, setTransactions] = useState([]);
+    const [withdrawals, setWithdrawals] = useState([]);
+    const [activeTab, setActiveTab] = useState('earnings'); // 'earnings' or 'withdrawals'
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchWalletData = async () => {
@@ -49,9 +54,8 @@ const WalletPage = () => {
                     name: userData?.name || playerData?.ign || 'Operator',
                     balance: Number(userData?.global_credit || 0)
                 });
-
-                // 4. Fetch Transactions History (transactions table)
-                const { data: txList, error: txError } = await supabase
+                // 4. Fetch Transactions
+                const { data: txList } = await supabase
                     .from('transactions')
                     .select('*')
                     .eq('user_id', authUser.id)
@@ -70,6 +74,17 @@ const WalletPage = () => {
                         date: new Date(tx.created_at).toLocaleDateString()
                     }));
                     setTransactions(formattedTxs);
+                }
+
+                // 5. Fetch Withdrawal Requests
+                const { data: withdrawList } = await supabase
+                    .from('withdrawal_requests')
+                    .select('*')
+                    .eq('user_id', authUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (withdrawList) {
+                    setWithdrawals(withdrawList);
                 }
 
             } catch (err) {
@@ -103,6 +118,94 @@ const WalletPage = () => {
         };
 
     }, []);
+
+    const handleWithdrawRequest = async () => {
+        if (!withdrawAmount || isNaN(withdrawAmount) || Number(withdrawAmount) <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+
+        if (Number(withdrawAmount) > walletData.balance) {
+            alert("Insufficient balance.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            // 1. Deduct money immediately from the users table
+            const { error: balanceError } = await supabase.rpc('admin_set_user_balance', {
+                p_user_id: user.id,
+                p_new_balance: walletData.balance - Number(withdrawAmount)
+            });
+
+            if (balanceError) {
+                // Fallback to direct update if RPC fails
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ global_credit: walletData.balance - Number(withdrawAmount) })
+                    .eq('id', user.id);
+
+                if (updateError) throw updateError;
+            }
+
+            // 2. Create Transaction Record
+            await supabase.from('transactions').insert([{
+                user_id: user.id,
+                amount: Number(withdrawAmount),
+                type: 'debit',
+                source: 'withdrawal',
+                note: `Withdrawal Request - ${new Date().toLocaleDateString()}`
+            }]);
+
+            // 3. Save request to Supabase
+            const { data, error } = await supabase
+                .from('withdrawal_requests')
+                .insert([
+                    {
+                        user_id: user.id,
+                        amount: Number(withdrawAmount),
+                        status: 'pending'
+                    }
+                ])
+                .select();
+
+            if (error) throw error;
+
+            // 2. Prepare WhatsApp Message
+            const whatsappNumber = "8801310383515";
+            const message = `*Withdrawal Request*\n\n` +
+                `*User:* ${walletData.name}\n` +
+                `*UID:* ${walletData.uid}\n` +
+                `*Amount:* ৳${Number(withdrawAmount).toLocaleString()}\n` +
+                `*Email:* ${user.email}\n` +
+                `*Status:* Pending Verification`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+            // 3. Open WhatsApp
+            window.open(whatsappUrl, '_blank');
+
+            // 4. Update local state
+            setWithdrawals([{
+                id: data?.[0]?.id || Math.random().toString(),
+                amount: Number(withdrawAmount),
+                status: 'pending',
+                created_at: new Date().toISOString()
+            }, ...withdrawals]);
+
+            // 5. Reset and Close
+            setWithdrawAmount('');
+            setIsWithdrawModalOpen(false);
+            alert("Withdrawal request sent! Please wait for admin confirmation on WhatsApp.");
+
+        } catch (err) {
+            console.error("Error processing withdrawal:", err);
+            alert("Failed to process request. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -203,6 +306,14 @@ const WalletPage = () => {
                                         <span className="font-black italic">VERIFIED OPERATOR</span>
                                     </div>
                                 </div>
+
+                                <button
+                                    onClick={() => setIsWithdrawModalOpen(true)}
+                                    className="withdraw-btn"
+                                >
+                                    <ArrowUpRight size={18} />
+                                    Withdraw Money
+                                </button>
                             </div>
                         </div>
 
@@ -223,9 +334,21 @@ const WalletPage = () => {
                     {/* RIGHT: LEDGER (Kept for visual balance, showing network activity or history) */}
                     <div className="ledger-section">
                         <div className="ledger-header mb-6 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <Clock className="text-gray-500" size={18} />
-                                <h2 className="text-lg font-black uppercase tracking-widest italic">Recent Activity</h2>
+                            <div className="flex items-center gap-6">
+                                <div
+                                    className={`flex items-center gap-2 cursor-pointer transition-all ${activeTab === 'earnings' ? 'text-[var(--neon-cyan)] opacity-100' : 'text-gray-500 opacity-50 hover:opacity-80'}`}
+                                    onClick={() => setActiveTab('earnings')}
+                                >
+                                    <Clock size={18} />
+                                    <h2 className="text-lg font-black uppercase tracking-widest italic">Earnings</h2>
+                                </div>
+                                <div
+                                    className={`flex items-center gap-2 cursor-pointer transition-all ${activeTab === 'withdrawals' ? 'text-[var(--neon-cyan)] opacity-100' : 'text-gray-500 opacity-50 hover:opacity-80'}`}
+                                    onClick={() => setActiveTab('withdrawals')}
+                                >
+                                    <ArrowUpRight size={18} />
+                                    <h2 className="text-lg font-black uppercase tracking-widest italic">Withdrawals</h2>
+                                </div>
                             </div>
                             <div className="flex gap-2">
                                 <button className="ledger-tool-btn"><Search size={16} /></button>
@@ -233,38 +356,138 @@ const WalletPage = () => {
                         </div>
 
                         <div className="ledger-list space-y-3">
-                            {transactions.length > 0 ? (
-                                transactions.slice().reverse().map((tx) => (
-                                    <div key={tx.id} className="tx-card group hover:bg-white/5 transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="tx-icon-box group-hover:bg-[#00ff88]/20 transition-all">
-                                                <ArrowDownLeft size={18} className="text-[#00ff88]" />
+                            {activeTab === 'earnings' ? (
+                                transactions.length > 0 ? (
+                                    transactions.slice().reverse().map((tx) => (
+                                        <div key={tx.id} className="tx-card group hover:bg-white/5 transition-all">
+                                            <div className="flex items-center gap-4">
+                                                <div className="tx-icon-box group-hover:bg-[#00ff88]/20 transition-all">
+                                                    {tx.type === 'debit' ? (
+                                                        <ArrowUpRight size={18} className="text-red-500" />
+                                                    ) : (
+                                                        <ArrowDownLeft size={18} className="text-[#00ff88]" />
+                                                    )}
+                                                </div>
+                                                <div className="tx-info">
+                                                    <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[var(--neon-cyan)] transition-colors">{tx.ref || 'Tournament Reward'}</h4>
+                                                    <div className="flex items-center gap-2 mt-0.5 opacity-40">
+                                                        <span className="text-[10px] font-bold">{tx.date}</span>
+                                                        <span className="text-[10px]">•</span>
+                                                        <span className="text-[10px] uppercase font-bold tracking-widest">ID: {tx.matchId}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="tx-info">
-                                                <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[var(--neon-cyan)] transition-colors">{tx.ref || 'Tournament Reward'}</h4>
-                                                <div className="flex items-center gap-2 mt-0.5 opacity-40">
-                                                    <span className="text-[10px] font-bold">{tx.date}</span>
-                                                    <span className="text-[10px]">•</span>
-                                                    <span className="text-[10px] uppercase font-bold tracking-widest">ID: {tx.matchId}</span>
+                                            <div className="text-right">
+                                                <div className={`font-black italic text-lg ${tx.type === 'debit' ? 'text-red-500' : 'text-[#00ff88]'}`}>
+                                                    {tx.type === 'debit' ? '-' : '+'} ৳{tx.amount.toLocaleString()}
+                                                </div>
+                                                <div className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+                                                    {tx.type === 'debit' ? 'Debited' : 'Received'}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-[#00ff88] font-black italic text-lg">+ ৳{tx.amount.toLocaleString()}</div>
-                                            <div className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Received</div>
-                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="py-20 text-center opacity-20">
+                                        <Clock size={48} className="mx-auto mb-4" />
+                                        <p className="text-sm font-black uppercase tracking-widest">No earnings history found</p>
                                     </div>
-                                ))
+                                )
                             ) : (
-                                <div className="py-20 text-center opacity-20">
-                                    <Clock size={48} className="mx-auto mb-4" />
-                                    <p className="text-sm font-black uppercase tracking-widest">No transaction history found</p>
-                                </div>
+                                withdrawals.length > 0 ? (
+                                    withdrawals.map((req) => (
+                                        <div key={req.id} className="tx-card group hover:bg-white/5 transition-all">
+                                            <div className="flex items-center gap-4">
+                                                <div className="tx-icon-box group-hover:bg-red-500/20 transition-all !bg-red-500/5">
+                                                    <ArrowUpRight size={18} className="text-red-500" />
+                                                </div>
+                                                <div className="tx-info">
+                                                    <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[var(--neon-cyan)] transition-colors">
+                                                        Withdrawal Request
+                                                    </h4>
+                                                    <div className="flex items-center gap-2 mt-0.5 opacity-40">
+                                                        <span className="text-[10px] font-bold">{new Date(req.created_at).toLocaleDateString()}</span>
+                                                        <span className="text-[10px]">•</span>
+                                                        <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${req.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
+                                                            req.status === 'approved' ? 'bg-green-500/10 text-green-500' :
+                                                                'bg-red-500/10 text-red-500'
+                                                            }`}>
+                                                            {req.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-red-500 font-black italic text-lg">- ৳{req.amount.toLocaleString()}</div>
+                                                <div className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Requested</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="py-20 text-center opacity-20">
+                                        <ArrowUpRight size={48} className="mx-auto mb-4" />
+                                        <p className="text-sm font-black uppercase tracking-widest">No withdrawal requests found</p>
+                                    </div>
+                                )
                             )}
                         </div>
                     </div>
                 </div>
             </main >
+
+            {/* WITHDRAWAL MODAL */}
+            {isWithdrawModalOpen && (
+                <div className="modal-overlay">
+                    <div className="withdraw-modal">
+                        <div className="flex justify-between items-start">
+                            <h2>Request Withdrawal</h2>
+                        </div>
+
+                        <div className="amount-input-group">
+                            <label>Amount to Withdraw</label>
+                            <div className="amount-input-wrapper">
+                                <span className="currency-symbol">৳</span>
+                                <input
+                                    type="number"
+                                    className="amount-input"
+                                    placeholder="0"
+                                    value={withdrawAmount}
+                                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="flex justify-between mt-2 px-1">
+                                <span className="text-[10px] text-gray-500 font-bold uppercase">Min: ৳500</span>
+                                <span className="text-[10px] text-gray-500 font-bold uppercase">Balance: ৳{walletData.balance.toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button
+                                className="modal-btn cancel"
+                                onClick={() => setIsWithdrawModalOpen(false)}
+                                disabled={isSubmitting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="modal-btn confirm"
+                                onClick={handleWithdrawRequest}
+                                disabled={isSubmitting || !withdrawAmount || Number(withdrawAmount) < 500}
+                            >
+                                {isSubmitting ? 'Processing...' : 'Send Request'}
+                            </button>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
+                            <Send size={16} className="text-blue-500" />
+                            <p className="text-[10px] text-gray-400 font-bold uppercase leading-relaxed">
+                                You will be redirected to WhatsApp to complete the verification process.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

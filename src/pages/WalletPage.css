@@ -202,3 +202,142 @@
         font-size: 2.8rem !important;
     }
 }
+
+/* Withdrawal Styles */
+.withdraw-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.withdraw-btn:hover {
+    background: var(--neon-cyan);
+    color: black;
+    box-shadow: 0 0 20px var(--neon-cyan);
+    border-color: transparent;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.withdraw-modal {
+    background: #0a0a0f;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 30px;
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.1);
+}
+
+.withdraw-modal h2 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-style: italic;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.amount-input-group {
+    margin-bottom: 30px;
+}
+
+.amount-input-group label {
+    display: block;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #666;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 20px;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--neon-cyan);
+}
+
+.amount-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px 20px 20px 50px;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 900;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.amount-input:focus {
+    border-color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.05);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.modal-btn.cancel {
+    background: transparent;
+    border: 1px solid #333;
+    color: #666;
+}
+
+.modal-btn.confirm {
+    background: var(--neon-cyan);
+    border: none;
+    color: black;
+}
+
+.modal-btn.confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
