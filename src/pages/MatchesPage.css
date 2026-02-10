@@ -166,41 +166,63 @@
     position: absolute;
     top: 25px;
     right: 25px;
-    background: rgba(2, 0, 20, 0.6);
-    backdrop-filter: blur(8px);
-    padding: 6px 16px;
+    background: rgba(0, 0, 15, 0.9);
+    backdrop-filter: blur(12px);
+    padding: 8px 20px;
     border-radius: 100px;
-    font-size: 0.65rem;
-    font-weight: 900;
+    font-size: 0.75rem;
+    font-weight: 950;
     text-transform: uppercase;
     letter-spacing: 2px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     gap: 8px;
     z-index: 20;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 10px currentColor;
 }
 
 .status-LIVE {
-    color: #ff3e3e;
-    border-color: rgba(255, 62, 62, 0.3);
-    box-shadow: 0 0 15px rgba(255, 62, 62, 0.2);
-    animation: pulse-red 2s infinite;
+    color: #ff2a2a;
+    border-color: rgba(255, 42, 42, 0.6);
+    box-shadow: 0 0 20px rgba(255, 42, 42, 0.4), inset 0 0 10px rgba(255, 42, 42, 0.1);
+    animation: pulse-red-intense 1.5s infinite;
 }
 
 .status-SETTLED {
     color: #00ff88;
-    border-color: rgba(0, 255, 136, 0.3);
+    border-color: rgba(0, 255, 136, 0.6);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
 }
 
 .status-UPCOMING {
     color: #00f0ff;
-    border-color: rgba(0, 240, 255, 0.3);
+    border-color: rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
 }
 
 .status-LOCKED {
     color: #ffc800;
-    border-color: rgba(255, 200, 0, 0.3);
+    border-color: rgba(255, 200, 0, 0.6);
+    box-shadow: 0 0 15px rgba(255, 200, 0, 0.2);
+}
+
+@keyframes pulse-red-intense {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 42, 42, 0.4);
+        background: rgba(255, 42, 42, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(255, 42, 42, 0.6);
+        background: rgba(255, 42, 42, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 10px rgba(255, 42, 42, 0.4);
+        background: rgba(255, 42, 42, 0.1);
+    }
 }
 
 @keyframes pulse-red {
@@ -262,18 +284,21 @@
 }
 
 .stat-box-label {
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
     text-transform: uppercase;
     font-weight: 800;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     display: block;
+    letter-spacing: 1px;
 }
 
 .stat-box-value {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 800;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 .clickable-stat {
@@ -566,10 +591,10 @@
 
 .settled-label {
     font-size: 11px;
-    color: #8b94b8;
+    color: #aeb9e1;
     letter-spacing: 1px;
     text-transform: uppercase;
-    font-weight: 400;
+    font-weight: 700;
 }
 
 .settled-value {

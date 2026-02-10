@@ -56,6 +56,17 @@ const AdminPanel = () => {
     const [walletRefresh, setWalletRefresh] = useState(0);
 
     const [allMatches, setAllMatches] = useState([]);
+    const [achievements, setAchievements] = useState([]); // New State
+
+    // Achievement Form State
+    const [achievementForm, setAchievementForm] = useState({
+        title: '',
+        image: null,
+        preview: ''
+    });
+    const [isAddingAchievement, setIsAddingAchievement] = useState(false);
+    const [uploadingAchievement, setUploadingAchievement] = useState(false);
+
     const toLocalISO = (date) => {
         const tzoffset = date.getTimezoneOffset() * 60000;
         return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
@@ -77,6 +88,13 @@ const AdminPanel = () => {
         player4: '15%', player4Name: 'PLAYER 4',
         player5: '15%', player5Name: 'PLAYER 5',
         rank1: '৳200', rank2: '৳100', rank3: '৳75', rank4: '৳25',
+        rank5: '৳0', rank6: '৳0', rank7: '৳0', rank8: '৳0',
+        rank9: '৳0', rank10: '৳0', rank11: '৳0', rank12: '৳0',
+        tourType: 'SCRIM TOUR',
+        subType: 'SCRIM TOUR',
+        currentRound: 1,
+        qualificationStatus: 'PENDING',
+        nextRoundAt: '',
         startTime: toLocalISO(new Date()),
         endTime: toLocalISO(new Date(Date.now() + 3600000))
     });
@@ -94,11 +112,13 @@ const AdminPanel = () => {
         role: 'Assaulter',
         avatar: '',
         phone: '',
-        userId: ''
+        userId: '',
+        lineup: 'member' // Added lineup field
     });
     const [playerSearch, setPlayerSearch] = useState('');
     const [teamFilter, setTeamFilter] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
+    const [lineupFilter, setLineupFilter] = useState(''); // Added lineup filter state
 
     const fetchMatchSettings = async () => {
         try {
@@ -114,6 +134,21 @@ const AdminPanel = () => {
             }
         } catch (error) {
             console.error('Error fetching match settings', error);
+        }
+    };
+
+    const fetchAchievements = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('achievements')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                setAchievements(data);
+            }
+        } catch (error) {
+            console.error('Error fetching achievements', error);
         }
     };
 
@@ -144,6 +179,19 @@ const AdminPanel = () => {
             rank2: match.rank2_percent || '৳0',
             rank3: match.rank3_percent || '৳0',
             rank4: match.rank4_percent || '৳0',
+            rank5: match.rank5_percent || '৳0',
+            rank6: match.rank6_percent || '৳0',
+            rank7: match.rank7_percent || '৳0',
+            rank8: match.rank8_percent || '৳0',
+            rank9: match.rank9_percent || '৳0',
+            rank10: match.rank10_percent || '৳0',
+            rank11: match.rank11_percent || '৳0',
+            rank12: match.rank12_percent || '৳0',
+            tourType: match.tour_type || 'SCRIM TOUR',
+            subType: match.sub_type || 'SCRIM TOUR',
+            currentRound: match.current_round || 1,
+            qualificationStatus: match.qualification_status || 'PENDING',
+            nextRoundAt: match.next_round_at ? toLocalISO(match.next_round_at) : '',
             startTime: toLocalISO(match.start_at),
             endTime: toLocalISO(match.end_at)
         });
@@ -180,7 +228,11 @@ const AdminPanel = () => {
         };
 
         const getVal = (v) => parseInt(String(v).replace(/[৳₹,]/g, '')) || 0;
-        const totalPrizesSum = getVal(matchForm.rank1) + getVal(matchForm.rank2) + getVal(matchForm.rank3) + getVal(matchForm.rank4);
+        const rankCount = (matchForm.tourType === 'BLAST TOUR' || matchForm.subType === 'BLAST TOUR') ? 12 : 4;
+        let totalPrizesSum = 0;
+        for (let i = 1; i <= rankCount; i++) {
+            totalPrizesSum += getVal(matchForm[`rank${i}`]);
+        }
         const expectedPool = getVal(matchForm.prizePool);
 
         if (totalPrizesSum !== expectedPool && expectedPool > 0) {
@@ -208,6 +260,19 @@ const AdminPanel = () => {
                 rank2_percent: ensureCurrency(matchForm.rank2),
                 rank3_percent: ensureCurrency(matchForm.rank3),
                 rank4_percent: ensureCurrency(matchForm.rank4),
+                rank5_percent: ensureCurrency(matchForm.rank5),
+                rank6_percent: ensureCurrency(matchForm.rank6),
+                rank7_percent: ensureCurrency(matchForm.rank7),
+                rank8_percent: ensureCurrency(matchForm.rank8),
+                rank9_percent: ensureCurrency(matchForm.rank9),
+                rank10_percent: ensureCurrency(matchForm.rank10),
+                rank11_percent: ensureCurrency(matchForm.rank11),
+                rank12_percent: ensureCurrency(matchForm.rank12),
+                tour_type: matchForm.tourType || 'SCRIM TOUR',
+                sub_type: matchForm.subType || 'SCRIM TOUR',
+                current_round: parseInt(matchForm.currentRound) || 1,
+                qualification_status: matchForm.qualificationStatus || 'PENDING',
+                next_round_at: matchForm.nextRoundAt ? new Date(matchForm.nextRoundAt).toISOString() : null,
                 start_at: new Date(matchForm.startTime).toISOString(),
                 end_at: new Date(matchForm.endTime).toISOString()
             };
@@ -280,6 +345,9 @@ const AdminPanel = () => {
 
             // --- NEW: FETCH DB USERS ---
             await fetchDbUsers();
+
+            // Fetch Achievements
+            await fetchAchievements();
         } catch (err) {
             console.error('Error fetching admin data:', err);
         }
@@ -338,8 +406,6 @@ const AdminPanel = () => {
                     hasUserAccount: hasValidAccount,
                     // Store the actual user ID even if unverified (for debugging/admin potential future use)
                     // but logic elsewhere relies on hasUserAccount to enable actions
-                    // Store the actual user ID even if unverified (for debugging/admin potential future use)
-                    // but logic elsewhere relies on hasUserAccount to enable actions
                     actualUserId: finalUserEntry?.id,
                     email: finalUserEntry?.email || 'N/A' // Added email field
                 };
@@ -364,8 +430,6 @@ const AdminPanel = () => {
                     global_credit: Number(u.global_credit || 0),
                     avatar: null,
                     team: 'Unknown',
-                    isRostered: false,
-                    hasUserAccount: true,
                     isRostered: false,
                     hasUserAccount: true,
                     actualUserId: u.id,
@@ -475,6 +539,7 @@ const AdminPanel = () => {
                     avatar: newPlayerForm.avatar,
                     phone: newPlayerForm.phone,
                     user_id: newPlayerForm.userId || null,
+                    lineup: newPlayerForm.lineup || 'member', // Add lineup
                     kills: 0,
                     wins: 0,
                     mvp_points: 0,
@@ -496,7 +561,8 @@ const AdminPanel = () => {
                 role: 'Assaulter',
                 avatar: '',
                 phone: '',
-                userId: ''
+                userId: '',
+                lineup: 'member'
             });
             alert('New player recruited successfully!');
         } catch (err) {
@@ -513,8 +579,9 @@ const AdminPanel = () => {
 
         const matchesTeam = !teamFilter || p.team === teamFilter;
         const matchesRole = !roleFilter || p.role === roleFilter;
+        const matchesLineup = !lineupFilter || p.lineup === lineupFilter;
 
-        return matchesSearch && matchesTeam && matchesRole;
+        return matchesSearch && matchesTeam && matchesRole && matchesLineup;
     });
 
     const handleDeletePlayer = async (id) => {
@@ -543,7 +610,8 @@ const AdminPanel = () => {
             assists: player.assists || 0,
             damage: player.damage || 0,
             survival_time: player.survival_time || '00:00',
-            phone: player.phone || ''
+            phone: player.phone || '',
+            lineup: player.lineup || 'member' // Added
         });
     };
 
@@ -571,7 +639,8 @@ const AdminPanel = () => {
                     assists: editValues.assists,
                     damage: editValues.damage,
                     survival_time: editValues.survival_time,
-                    phone: editValues.phone
+                    phone: editValues.phone,
+                    lineup: editValues.lineup // Added
                 })
                 .eq('id', id);
 
@@ -767,6 +836,96 @@ const AdminPanel = () => {
         }
     };
 
+    // --- ACHIEVEMENT HANDLERS ---
+    const handleAchievementImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAchievementForm({
+                ...achievementForm,
+                image: file,
+                preview: URL.createObjectURL(file)
+            });
+        }
+    };
+
+    const handleSaveAchievement = async (e) => {
+        e.preventDefault();
+        setUploadingAchievement(true);
+
+        try {
+            let imageUrl = '';
+
+            // 1. Upload Image if exists
+            if (achievementForm.image) {
+                const fileExt = achievementForm.image.name.split('.').pop();
+                const fileName = `${Date.now()}.${fileExt}`;
+                const filePath = `achievements/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('images') // Reverted to use 'images'
+                    .upload(filePath, achievementForm.image);
+
+                if (uploadError) throw uploadError;
+
+                const { data: publicUrlData } = supabase.storage
+                    .from('images') // Reverted to use 'images'
+                    .getPublicUrl(filePath);
+
+                imageUrl = publicUrlData.publicUrl;
+            }
+
+            // 2. Insert into DB
+            const { error: dbError } = await supabase
+                .from('achievements')
+                .insert([{
+                    title: achievementForm.title,
+                    image_url: imageUrl
+                }]);
+
+            if (dbError) throw dbError;
+
+            alert('Achievement Added Successfully!');
+            setIsAddingAchievement(false);
+            setAchievementForm({ title: '', image: null, preview: '' });
+            fetchAchievements();
+
+        } catch (err) {
+            console.error('Error adding achievement:', err);
+            alert('Failed to add achievement: ' + err.message);
+        } finally {
+            setUploadingAchievement(false);
+        }
+    };
+
+    const handleDeleteAchievement = async (id, imageUrl) => {
+        if (!confirm('Are you sure you want to delete this achievement?')) return;
+
+        try {
+            // 1. Delete DB Entry
+            const { error: dbError } = await supabase
+                .from('achievements')
+                .delete()
+                .eq('id', id);
+
+            if (dbError) throw dbError;
+
+            // 2. Delete Image (Optional but good for cleanup)
+            if (imageUrl) {
+                const path = imageUrl.split('/storage/v1/object/public/images/')[1];
+                if (path) {
+                    await supabase.storage.from('images').remove([path]);
+                }
+            }
+
+            setAchievements(achievements.filter(a => a.id !== id));
+            alert('Achievement Deleted.');
+        } catch (err) {
+            console.error('Error deleting achievement:', err);
+            alert('Failed to delete.');
+        }
+    };
+
+
     if (!isLoggedIn) {
         return (
             <div className="admin-container">
@@ -874,6 +1033,14 @@ const AdminPanel = () => {
                                     <Clock size={20} /> Match History
                                 </button>
                             </li>
+                            <li>
+                                <button
+                                    className={`nav-link ${activeTab === 'Achievements' ? 'active' : ''}`}
+                                    onClick={() => { setActiveTab('Achievements'); setSidebarOpen(false); }}
+                                >
+                                    <Award size={20} /> Achievements
+                                </button>
+                            </li>
                             <li style={{ marginTop: 'auto' }}>
                                 <button className="nav-link logout-btn" onClick={handleLogout}>
                                     <LogOut size={20} /> Logout
@@ -948,7 +1115,7 @@ const AdminPanel = () => {
                                     </div>
 
                                     <div>
-                                        <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[2px] mb-1">{card.label}</h3>
+                                        <h3 className="text-[10px] font-black text-white/70 uppercase tracking-[2px] mb-1">{card.label}</h3>
                                         <div className="text-2xl font-black italic tracking-tighter" style={{ fontFamily: 'Orbitron, sans-serif' }}>
                                             {card.val}
                                         </div>
@@ -1161,6 +1328,19 @@ const AdminPanel = () => {
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
                                                 />
                                             </div>
+                                            <div>
+                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">Lineup Assignment</label>
+                                                <select
+                                                    value={newPlayerForm.lineup}
+                                                    onChange={(e) => setNewPlayerForm({ ...newPlayerForm, lineup: e.target.value })}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
+                                                >
+                                                    <option value="member" className="bg-[#0b101b]">Normal Member</option>
+                                                    <option value="main" className="bg-[#0b101b]">Main Lineup</option>
+                                                    <option value="elite" className="bg-[#0b101b]">Elite Lineup</option>
+                                                    <option value="management" className="bg-[#0b101b]">Management</option>
+                                                </select>
+                                            </div>
                                             <div className="md:col-span-2 lg:col-span-3">
                                                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-lg uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(59,108,255,0.3)]">
                                                     Deploy Agent to Roster
@@ -1190,6 +1370,7 @@ const AdminPanel = () => {
                                         <div className="flex gap-3 w-full lg:w-auto">
                                             {[
                                                 { val: teamFilter, set: setTeamFilter, options: [{ l: 'All Teams', v: '' }, { l: 'TBL', v: 'THE BLOODLOVERS' }, { l: 'Free Agent', v: 'FREE AGENT' }], icon: <Shield size={14} /> },
+                                                { val: lineupFilter, set: setLineupFilter, options: [{ l: 'All Lineups', v: '' }, { l: 'Main', v: 'main' }, { l: 'Elite', v: 'elite' }, { l: 'Management', v: 'management' }, { l: 'Normal', v: 'member' }], icon: <Users size={14} /> },
                                                 { val: roleFilter, set: setRoleFilter, options: [{ l: 'All Roles', v: '' }, { l: 'Assaulter', v: 'Assaulter' }, { l: 'Support', v: 'Support' }, { l: 'Sniper', v: 'Sniper' }, { l: 'IGL', v: 'IGL' }], icon: <Target size={14} /> }
                                             ].map((f, i) => (
                                                 <div key={i} className="relative flex-1 lg:flex-none min-w-[140px]">
@@ -1246,6 +1427,19 @@ const AdminPanel = () => {
                                                             <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-1.5 block">bKash Linked</label>
                                                             <input type="text" value={editValues.phone} onChange={(e) => setEditValues({ ...editValues, phone: e.target.value.replace(/\D/g, '') })} maxLength={11}
                                                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all" />
+                                                        </div>
+                                                        <div className="col-span-2">
+                                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-1.5 block">Lineup Assignment</label>
+                                                            <select
+                                                                value={editValues.lineup}
+                                                                onChange={(e) => setEditValues({ ...editValues, lineup: e.target.value })}
+                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all"
+                                                            >
+                                                                <option value="member" className="bg-[#0b101b]">Normal Member</option>
+                                                                <option value="main" className="bg-[#0b101b]">Main Lineup</option>
+                                                                <option value="elite" className="bg-[#0b101b]">Elite Lineup</option>
+                                                                <option value="management" className="bg-[#0b101b]">Management</option>
+                                                            </select>
                                                         </div>
                                                     </div>
 
@@ -1443,7 +1637,7 @@ const AdminPanel = () => {
                                         </div>
 
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Organization Name</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Organization Name</label>
                                             <input
                                                 type="text"
                                                 value={matchForm.orgName}
@@ -1452,48 +1646,152 @@ const AdminPanel = () => {
                                                 placeholder="e.g. NOVA ESPORTS"
                                             />
                                         </div>
+
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Map Name</label>
-                                            <input
-                                                type="text"
-                                                value={matchForm.mapName}
-                                                onChange={(e) => setMatchForm({ ...matchForm, mapName: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
-                                                placeholder="e.g. BERMUDA"
-                                            />
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Tournament Type</label>
+                                            <select
+                                                value={matchForm.tourType}
+                                                onChange={(e) => setMatchForm({ ...matchForm, tourType: e.target.value })}
+                                                className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all appearance-none cursor-pointer"
+                                                style={{ backgroundColor: '#0f1629' }}
+                                            >
+                                                <option value="SCRIM TOUR" className="bg-[#0f1629] text-white">SCRIM TOUR</option>
+                                                <option value="BLAST TOUR" className="bg-[#0f1629] text-white">BLAST TOUR</option>
+                                                <option value="OFFICIAL TOUR" className="bg-[#0f1629] text-white">OFFICIAL TOUR</option>
+                                                <option value="QUALIFIED TOUR" className="bg-[#0f1629] text-white">QUALIFIED TOUR</option>
+                                            </select>
+                                        </div>
+
+                                        {matchForm.tourType === 'QUALIFIED TOUR' && (
+                                            <>
+                                                <div className="admin-input-group">
+                                                    <label className="text-yellow-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Qualification Round</label>
+                                                    <select
+                                                        value={matchForm.currentRound}
+                                                        onChange={(e) => setMatchForm({ ...matchForm, currentRound: e.target.value })}
+                                                        className="w-full bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-white focus:border-yellow-400 outline-none transition-all appearance-none cursor-pointer"
+                                                        style={{ backgroundColor: '#0f1629' }}
+                                                    >
+                                                        {[1, 2, 3, 4, 5].map(r => (
+                                                            <option key={r} value={r} className="bg-[#0f1629] text-white">Round {r}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                <div className="admin-input-group">
+                                                    <label className="text-yellow-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Round Status</label>
+                                                    <select
+                                                        value={matchForm.qualificationStatus}
+                                                        onChange={(e) => setMatchForm({ ...matchForm, qualificationStatus: e.target.value })}
+                                                        className="w-full bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-white focus:border-yellow-400 outline-none transition-all appearance-none cursor-pointer"
+                                                        style={{ backgroundColor: '#0f1629' }}
+                                                    >
+                                                        <option value="PENDING" className="bg-[#0f1629] text-white">PENDING</option>
+                                                        <option value="QUALIFIED" className="bg-[#0f1629] text-white">QUALIFIED (PROCEED)</option>
+                                                        <option value="DISQUALIFIED" className="bg-[#0f1629] text-white">DISQUALIFIED (STOP)</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="admin-input-group">
+                                                    <label className="text-yellow-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Next Round Schedule</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={matchForm.nextRoundAt}
+                                                        onChange={(e) => setMatchForm({ ...matchForm, nextRoundAt: e.target.value })}
+                                                        className="w-full bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-white focus:border-yellow-400 outline-none transition-all"
+                                                    />
+                                                </div>
+
+                                                <div className="admin-input-group">
+                                                    <label className="text-yellow-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Match Config Type</label>
+                                                    <select
+                                                        value={matchForm.subType}
+                                                        onChange={(e) => setMatchForm({ ...matchForm, subType: e.target.value })}
+                                                        className="w-full bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-white focus:border-yellow-400 outline-none transition-all appearance-none cursor-pointer"
+                                                        style={{ backgroundColor: '#0f1629' }}
+                                                    >
+                                                        <option value="SCRIM TOUR" className="bg-[#0f1629] text-white">SCRIM TYPE (4 Ranks)</option>
+                                                        <option value="BLAST TOUR" className="bg-[#0f1629] text-white">BLAST TYPE (12 Ranks)</option>
+                                                    </select>
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className="admin-input-group md:col-span-2">
+                                            <label className="text-gray-300 block mb-3 uppercase text-[10px] tracking-widest font-bold">Select Tourmament Maps (Tap to Add)</label>
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {['BERMUDA', 'PURGATORY', 'KALAHARI', 'ALPINE', 'NEXTERRA', 'BERMUDA REMASTERED'].map(map => (
+                                                    <button
+                                                        key={map}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const current = (matchForm.mapName || '').split(',').map(m => m.trim()).filter(Boolean);
+                                                            setMatchForm({ ...matchForm, mapName: [...current, map].join(', ') });
+                                                        }}
+                                                        className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-gray-400 hover:border-[var(--neon-cyan)] hover:text-white transition-all"
+                                                    >
+                                                        + {map}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            <label className="text-[9px] text-[var(--neon-cyan)] block mb-2 uppercase font-black tracking-[2px]">Map Sequence History</label>
+                                            <div className="flex flex-wrap gap-2 p-3 bg-black/40 border border-white/5 rounded-xl min-h-[50px]">
+                                                {(matchForm.mapName || '').split(',').map(m => m.trim()).filter(Boolean).map((map, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--neon-cyan)]/20 border border-[var(--neon-cyan)]/40 rounded-lg text-[10px] font-black text-[var(--neon-cyan)] shadow-[0_0_10px_rgba(0,240,255,0.1)]"
+                                                    >
+                                                        {idx + 1}. {map}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const current = (matchForm.mapName || '').split(',').map(m => m.trim()).filter(Boolean);
+                                                                current.splice(idx, 1);
+                                                                setMatchForm({ ...matchForm, mapName: current.join(', ') });
+                                                            }}
+                                                            className="ml-1 hover:text-white transition-colors"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                {!(matchForm.mapName || '').trim() && <span className="text-[10px] text-gray-600 font-bold italic py-1">No maps selected yet...</span>}
+                                            </div>
+                                            <input type="hidden" value={matchForm.mapName} />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Match Status</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Match Status</label>
                                             <select
                                                 value={matchForm.status}
                                                 onChange={(e) => setMatchForm({ ...matchForm, status: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all appearance-none cursor-pointer"
+                                                style={{ backgroundColor: '#0f1629' }}
                                             >
-                                                <option value="LIVE">LIVE</option>
-                                                <option value="UPCOMING">UPCOMING</option>
-                                                <option value="FINISHED">FINISHED</option>
+                                                <option value="LIVE" className="bg-[#0f1629] text-white">LIVE</option>
+                                                <option value="UPCOMING" className="bg-[#0f1629] text-white">UPCOMING</option>
+                                                <option value="FINISHED" className="bg-[#0f1629] text-white">FINISHED</option>
                                             </select>
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Prize Pool</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Prize Pool</label>
                                             <input
                                                 type="text"
                                                 value={matchForm.prizePool}
                                                 onChange={(e) => setMatchForm({ ...matchForm, prizePool: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Slot Fee (Deduction)</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Slot Fee (Deduction)</label>
                                             <input
                                                 type="text"
                                                 value={matchForm.slotPrize}
                                                 onChange={(e) => setMatchForm({ ...matchForm, slotPrize: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">P & M Pool Calculator</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">P & M Pool Calculator</label>
                                             <div className="flex gap-2">
                                                 <select
                                                     value={calcRank}
@@ -1501,7 +1799,9 @@ const AdminPanel = () => {
                                                     className="w-1/2 bg-white/5 border border-white/10 rounded-lg px-2 py-3 text-white text-xs focus:border-[var(--neon-cyan)] outline-none"
                                                 >
                                                     <option value="" className="text-black">Select Rank</option>
-                                                    {[1, 2, 3, 4].map(n => <option key={n} value={n} className="text-black">#{n} Place</option>)}
+                                                    {Array.from({ length: (matchForm.tourType === 'BLAST TOUR' || matchForm.subType === 'BLAST TOUR') ? 12 : 4 }, (_, i) => i + 1).map(n => (
+                                                        <option key={n} value={n} className="text-black">#{n} Place</option>
+                                                    ))}
                                                 </select>
                                                 <input
                                                     type="text"
@@ -1520,31 +1820,31 @@ const AdminPanel = () => {
                                         </div>
 
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Start Time</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Start Time</label>
                                             <input
                                                 type="datetime-local"
                                                 value={matchForm.startTime}
                                                 onChange={(e) => setMatchForm({ ...matchForm, startTime: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">End Time</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">End Time</label>
                                             <input
                                                 type="datetime-local"
                                                 value={matchForm.endTime}
                                                 onChange={(e) => setMatchForm({ ...matchForm, endTime: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
 
                                         <div className="md:col-span-2">
-                                            <h4 className="admin-tactical-header">Prize Distribution (Ranks 1-4)</h4>
+                                            <h4 className="admin-tactical-header">Prize Distribution (Ranks 1-{(matchForm.tourType === 'BLAST TOUR' || matchForm.subType === 'BLAST TOUR') ? '12' : '4'})</h4>
                                         </div>
 
-                                        {[1, 2, 3, 4].map((num) => (
+                                        {Array.from({ length: (matchForm.tourType === 'BLAST TOUR' || matchForm.subType === 'BLAST TOUR') ? 12 : 4 }, (_, i) => i + 1).map((num) => (
                                             <div key={num} className="admin-input-group">
-                                                <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">#{num} Prize Amount</label>
+                                                <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">#{num} Prize Amount</label>
                                                 <input
                                                     type="text"
                                                     value={matchForm[`rank${num}`]}
@@ -1564,7 +1864,7 @@ const AdminPanel = () => {
                                         {[1, 2, 3, 4, 5].map((num) => (
                                             <React.Fragment key={num}>
                                                 <div className="admin-input-group">
-                                                    <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Player {num} IGN</label>
+                                                    <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Player {num} IGN</label>
                                                     <div className="relative">
                                                         <select
                                                             value={matchForm[`player${num}Name`]}
@@ -1582,7 +1882,7 @@ const AdminPanel = () => {
                                                     </div>
                                                 </div>
                                                 <div className="admin-input-group">
-                                                    <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Player {num} Share</label>
+                                                    <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Player {num} Share</label>
                                                     <input
                                                         type="text"
                                                         value={matchForm[`player${num}`]}
@@ -1597,21 +1897,21 @@ const AdminPanel = () => {
                                         <div className="admin-section-divider lg:col-span-2" />
 
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">Management Share</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Management Share</label>
                                             <input
                                                 type="text"
                                                 value={matchForm.management}
                                                 onChange={(e) => setMatchForm({ ...matchForm, management: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
                                         <div className="admin-input-group">
-                                            <label className="text-gray-400 block mb-2 uppercase text-[10px] tracking-widest font-bold">MVP Reward</label>
+                                            <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">MVP Reward</label>
                                             <input
                                                 type="text"
                                                 value={matchForm.mvp}
                                                 onChange={(e) => setMatchForm({ ...matchForm, mvp: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
+                                                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all"
                                             />
                                         </div>
 
@@ -1644,8 +1944,13 @@ const AdminPanel = () => {
                                                             <div className="text-[10px] text-[var(--neon-cyan)] tracking-widest font-black uppercase">{m.map_name || 'BERMUDA'}</div>
                                                         </td>
                                                         <td className="font-bold">{m.prize_pool}</td>
-                                                        <td>
-                                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black italic ${m.status === 'LIVE' ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-blue-500/20 text-blue-500 border border-blue-500/30'}`}>
+                                                        <td className="text-center">
+                                                            <span className={`px-4 py-1.5 rounded-lg text-[11px] font-black tracking-widest border ${m.status === 'LIVE'
+                                                                ? 'bg-red-500 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+                                                                : m.status === 'UPCOMING'
+                                                                    ? 'bg-blue-600 text-white border-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.4)]'
+                                                                    : 'bg-emerald-600 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+                                                                }`}>
                                                                 {m.status || 'LIVE'}
                                                             </span>
                                                         </td>
@@ -1960,6 +2265,110 @@ const AdminPanel = () => {
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </>
+                        )}
+
+                        {/* ACHIEVEMENTS TAB */}
+                        {activeTab === 'Achievements' && (
+                            <>
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-white mb-1">Hall of Achievements</h1>
+                                        <p className="text-sm text-gray-400">Manage showcase trophies and accolades</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsAddingAchievement(true)}
+                                        className="bg-[var(--neon-cyan)] text-black px-4 py-2 rounded-lg text-xs font-black uppercase hover:bg-white transition-all shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center gap-2"
+                                    >
+                                        <Award size={16} /> Add Achievement
+                                    </button>
+                                </div>
+
+                                {isAddingAchievement && (
+                                    <div className="admin-content-box mb-8 animate-fade-in border border-[var(--neon-cyan)]/30">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-[var(--neon-cyan)] font-black uppercase">New Commendation</h3>
+                                            <button onClick={() => setIsAddingAchievement(false)}><X size={20} className="text-gray-400 hover:text-white" /></button>
+                                        </div>
+                                        <form onSubmit={handleSaveAchievement} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="admin-input-group">
+                                                <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Achievement Title</label>
+                                                <input
+                                                    type="text"
+                                                    value={achievementForm.title}
+                                                    onChange={(e) => setAchievementForm({ ...achievementForm, title: e.target.value })}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none"
+                                                    placeholder="e.g. CHAMPION 2024"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div className="admin-input-group">
+                                                <label className="text-gray-300 block mb-2 uppercase text-[10px] tracking-widest font-bold">Image Upload</label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleAchievementImageChange}
+                                                    className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[var(--neon-cyan)] file:text-black hover:file:bg-white transition-all"
+                                                />
+                                            </div>
+
+                                            {achievementForm.preview && (
+                                                <div className="col-span-1 md:col-span-2 flex justify-center py-4 bg-black/40 rounded-lg border border-white/5 border-dashed">
+                                                    <div className="relative w-48 aspect-square">
+                                                        <img src={achievementForm.preview} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+                                                        <div className="absolute inset-0 border-2 border-[var(--neon-cyan)]/50 rounded-xl pointer-events-none" />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="col-span-1 md:col-span-2 flex justify-end">
+                                                <button
+                                                    type="submit"
+                                                    disabled={uploadingAchievement}
+                                                    className="bg-[var(--neon-cyan)] text-black px-8 py-3 rounded-full font-black uppercase tracking-widest hover:bg-white transition-all"
+                                                >
+                                                    {uploadingAchievement ? 'Uploading...' : 'Publish Achievement'}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {achievements.map((ach) => (
+                                        <div key={ach.id} className="group relative bg-[#050505] rounded-xl overflow-hidden border border-white/10 hover:border-[var(--neon-cyan)] transition-all duration-300">
+                                            <div className="aspect-square w-full relative">
+                                                {ach.image_url ? (
+                                                    <img src={ach.image_url} alt={ach.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-white/5">
+                                                        <Award size={40} className="text-gray-600" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                                            </div>
+
+                                            <div className="absolute bottom-0 left-0 w-full p-4">
+                                                <h3 className="text-white font-orbitron font-bold text-lg leading-tight uppercase drop-shadow-md">{ach.title}</h3>
+                                            </div>
+
+                                            <button
+                                                onClick={() => handleDeleteAchievement(ach.id, ach.image_url)}
+                                                className="absolute top-2 right-2 p-2 bg-red-500/20 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {achievements.length === 0 && !isAddingAchievement && (
+                                        <div className="col-span-full py-20 text-center opacity-40">
+                                            <Award size={64} className="mx-auto mb-4 text-gray-500" />
+                                            <p className="uppercase font-bold tracking-widest">No Achievements Displayed</p>
+                                        </div>
+                                    )}
                                 </div>
                             </>
                         )}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Debug Tool</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+        }
+
+        .section {
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        h2 {
+            color: #00ffff;
+            margin-top: 0;
+        }
+
+        .key {
+            color: #ffff00;
+        }
+
+        .value {
+            color: #00ff88;
+        }
+
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #00ffff;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Wallet Debug Tool</h1>
+
+    <div class="section">
+        <h2>All LocalStorage Keys</h2>
+        <div id="allKeys"></div>
+    </div>
+
+    <div class="section">
+        <h2>Player Wallets</h2>
+        <div id="playerWallets"></div>
+    </div>
+
+    <div class="section">
+        <h2>Corporate Wallets</h2>
+        <div id="corporateWallets"></div>
+    </div>
+
+    <div class="section">
+        <h2>Match Results</h2>
+        <div id="matchResults"></div>
+    </div>
+
+    <div class="section">
+        <h2>Actions</h2>
+        <button onclick="refreshData()">🔄 Refresh Data</button>
+        <button onclick="showRawStorage()">📋 Show Raw Storage</button>
+        <button onclick="fixPlayerName()">🔧 Fix RAHUL SARDER Wallet</button>
+    </div>
+
+    <script>
+        function refreshData() {
+            // All Keys
+            let allKeysHtml = '<table style="width:100%">';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                const displayValue = value.length > 100 ? value.substring(0, 100) + '...' : value;
+                allKeysHtml += `<tr><td class="key">${key}</td><td class="value">${displayValue}</td></tr>`;
+            }
+            allKeysHtml += '</table>';
+            document.getElementById('allKeys').innerHTML = allKeysHtml;
+
+            // Player Wallets
+            let playerHtml = '<table style="width:100%">';
+            let foundPlayers = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('player_wallet_')) {
+                    foundPlayers = true;
+                    const playerName = key.replace('player_wallet_', '').replace(/_/g, ' ').toUpperCase();
+                    const balance = Number(localStorage.getItem(key) || 0);
+                    playerHtml += `<tr><td class="key">${playerName}</td><td class="value">৳${balance.toLocaleString()}</td></tr>`;
+                }
+            }
+            if (!foundPlayers) {
+                playerHtml += '<tr><td class="error">No player wallets found!</td></tr>';
+            }
+            playerHtml += '</table>';
+            document.getElementById('playerWallets').innerHTML = playerHtml;
+
+            // Corporate Wallets
+            const corpHtml = `
+                <table style="width:100%">
+                    <tr><td class="key">TBL MANAGEMENT</td><td class="value">৳${Number(localStorage.getItem('tbl_mgmt_bal') || 0).toLocaleString()}</td></tr>
+                    <tr><td class="key">TBL RAHUL (MVP)</td><td class="value">৳${Number(localStorage.getItem('tbl_mvp_bal') || 0).toLocaleString()}</td></tr>
+                    <tr><td class="key">ORG RESERVE</td><td class="value">৳${Number(localStorage.getItem('tbl_reserve_bal') || 0).toLocaleString()}</td></tr>
+                </table>
+            `;
+            document.getElementById('corporateWallets').innerHTML = corpHtml;
+
+            // Match Results
+            let matchHtml = '<table style="width:100%">';
+            let foundMatches = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('match_res_')) {
+                    foundMatches = true;
+                    const matchData = JSON.parse(localStorage.getItem(key));
+                    matchHtml += `<tr><td colspan="2" style="padding-top:10px"><strong>Match ID: ${matchData.id}</strong></td></tr>`;
+                    matchHtml += `<tr><td class="key">Rank</td><td class="value">#${matchData.rank}</td></tr>`;
+                    matchHtml += `<tr><td class="key">Total Win</td><td class="value">৳${matchData.totalWin}</td></tr>`;
+                    matchHtml += `<tr><td colspan="2" style="padding-top:5px"><strong>Payouts:</strong></td></tr>`;
+                    matchData.payouts.forEach(p => {
+                        matchHtml += `<tr><td class="key">&nbsp;&nbsp;${p.name} (${p.percent}%)</td><td class="value">৳${p.amount}</td></tr>`;
+                    });
+                }
+            }
+            if (!foundMatches) {
+                matchHtml += '<tr><td class="error">No match results found!</td></tr>';
+            }
+            matchHtml += '</table>';
+            document.getElementById('matchResults').innerHTML = matchHtml;
+        }
+
+        function showRawStorage() {
+            console.log('=== RAW LOCALSTORAGE ===');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                console.log(`${key}:`, localStorage.getItem(key));
+            }
+        }
+
+        function fixPlayerName() {
+            // Check for common variations
+            const variations = [
+                'player_wallet_rahul_sarder',
+                'player_wallet_rahulrht',
+                'player_wallet_rahul',
+                'player_wallet_sarder'
+            ];
+
+            let found = false;
+            for (const variant of variations) {
+                if (localStorage.getItem(variant)) {
+                    const currentBalance = Number(localStorage.getItem(variant) || 0);
+                    alert(`Found wallet: ${variant}\nCurrent balance: ৳${currentBalance}\n\nIf this should be RAHUL SARDER's wallet, the name in match settings might be different.`);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                alert('No wallet found for RAHUL SARDER or similar names.\n\nPossible reasons:\n1. The player name in match settings is different\n2. Distribution hasn\'t been done yet\n3. The match hasn\'t been settled yet\n\nCheck the console logs when you click "DISTRIBUTE TO WALLET"');
+            }
+
+            refreshData();
+        }
+
+        // Initial load
+        refreshData();
+    </script>
+</body>
+
+</html>

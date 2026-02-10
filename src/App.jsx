@@ -12,6 +12,8 @@ import MvpPage from './pages/MvpPage';
 import bgMain from './assets/bg-main.jpg';
 import logo from './assets/logo.png';
 import MonthlyMvpPopup from './components/MonthlyMvpPopup';
+import HomePage from './pages/HomePage';
+import AchievementPage from './pages/AchievementPage';
 
 function AppContent() {
     const location = useLocation();
@@ -24,7 +26,7 @@ function AppContent() {
             {/* Global Logo Background Watermark */}
             {shouldShowLogo && (
                 <div
-                    className="fixed inset-0 z-0 opacity-100 pointer-events-none flex items-center justify-center overflow-hidden"
+                    className={`fixed inset-0 z-0 opacity-100 pointer-events-none flex items-center justify-center overflow-hidden ${(location.pathname === '/home' || location.pathname === '/achievement') ? 'blur-sm' : ''}`}
                 >
                     <div
                         style={{
@@ -42,6 +44,8 @@ function AppContent() {
             <main className={!isAdminPage ? "pt-[72px]" : "pt-0"}>
                 <Routes>
                     <Route path="/" element={<HeroSection />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/achievement" element={<AchievementPage />} />
                     <Route path="/members" element={<MembersPage />} />
                     <Route path="/admin" element={<AdminPanel />} />
                     <Route path="/login" element={<AuthPage />} />

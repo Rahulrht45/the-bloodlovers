@@ -300,13 +300,50 @@ const MatchesPage = () => {
                                 </div>
 
                                 <div className="match-card-info">
+                                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                                        <span className="px-2 py-0.5 bg-white/10 border border-white/20 rounded-md text-[8px] font-black text-white/50 uppercase tracking-[2px]">
+                                            {match.tour_type || 'SCRIM TOUR'}
+                                        </span>
+                                        {match.tour_type === 'QUALIFIED TOUR' && (
+                                            <span className="px-2 py-0.5 bg-yellow-400/20 border border-yellow-400/40 rounded-md text-[8px] font-black text-yellow-500 uppercase tracking-[1px]">
+                                                Round {match.current_round}
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="match-card-org">
                                         {match.org_name}
                                         {mState === 'UPCOMING' && (
                                             <span className="ml-2 opacity-50 text-[9px]">Starts @ {new Date(match.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         )}
                                     </div>
-                                    <h2 className="match-card-map">{match.map_name || 'BERMUDA'}</h2>
+                                    <div className="match-card-map-wrapper flex flex-wrap gap-2 mt-2">
+                                        {(match.map_name || 'BERMUDA').split(',').map((m, idx) => (
+                                            <span key={idx} className="px-2 py-0.5 bg-[var(--neon-cyan)]/20 border border-[var(--neon-cyan)]/30 rounded text-[9px] font-black text-[var(--neon-cyan)] uppercase tracking-tighter">
+                                                {m.trim()}
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    {match.tour_type === 'QUALIFIED TOUR' && (
+                                        <div className="qualification-meta mt-3 p-2 bg-black/30 rounded-lg border border-white/5">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-[7px] text-white/40 font-bold uppercase tracking-widest">Status</span>
+                                                <span className={`text-[8px] font-black uppercase ${match.qualification_status === 'QUALIFIED' ? 'text-green-400' :
+                                                        match.qualification_status === 'DISQUALIFIED' ? 'text-red-500' : 'text-yellow-400'
+                                                    }`}>
+                                                    {match.current_round === 5 && match.qualification_status === 'QUALIFIED' ? '★ CHAMPION ★' : match.qualification_status}
+                                                </span>
+                                            </div>
+                                            {match.qualification_status === 'QUALIFIED' && match.current_round < 5 && match.next_round_at && (
+                                                <div className="flex justify-between items-center bg-green-500/5 p-1 rounded border border-green-500/10">
+                                                    <span className="text-[7px] text-green-400/60 font-medium">NEXT ROUND:</span>
+                                                    <span className="text-[7px] text-green-400 font-black">
+                                                        {new Date(match.next_round_at).toLocaleDateString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -324,15 +361,11 @@ const MatchesPage = () => {
 
                                         {activePrizeMatchId === match.id && (
                                             <div className="prize-breakdown-mini mt-3 pt-3 border-t border-white/5 space-y-2">
-                                                {[1, 2, 3, 4].map(rank => {
+                                                {Array.from({ length: (match.tour_type === 'BLAST TOUR' || match.sub_type === 'BLAST TOUR') ? 12 : 4 }).map((_, i) => {
+                                                    const rank = i + 1;
                                                     const getPrizeValue = (p) => parseInt(String(p).replace(/[৳₹,]/g, '')) || 0;
-                                                    const pMap = {
-                                                        1: getPrizeValue(match.rank1_percent || '0'),
-                                                        2: getPrizeValue(match.rank2_percent || '0'),
-                                                        3: getPrizeValue(match.rank3_percent || '0'),
-                                                        4: getPrizeValue(match.rank4_percent || '0')
-                                                    };
-                                                    const amt = pMap[rank];
+                                                    const amt = getPrizeValue(match[`rank${rank}_percent`] || '0');
+                                                    if (amt === 0 && rank > 4) return null; // Only show top 4 if 5-12 are 0
                                                     return (
                                                         <div key={rank} className="flex justify-between items-center text-[10px]">
                                                             <span className="font-bold text-gray-400">Position #{rank}</span>
@@ -351,19 +384,29 @@ const MatchesPage = () => {
 
                                 {mState === 'LOCKED' && (
                                     <div className="match-settlement-prompt p-4 bg-white/5 border border-dashed border-[#ffc800]/30 rounded-2xl mb-4">
-                                        <span className="text-[10px] font-black uppercase text-[#ffc800] tracking-widest mb-3 block text-center">Match Ended // Select Squad Position</span>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {[1, 2, 3, 4].map((r) => (
-                                                <button
-                                                    key={r}
-                                                    onClick={() => settleMatch(match, r)}
-                                                    className="rank-btn py-3 bg-black/40 border border-white/5 rounded-xl hover:bg-[#ffc800] hover:text-black transition-all font-black text-sm"
-                                                >
-                                                    #{r}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <p className="text-[9px] text-gray-500 text-center mt-3 font-bold uppercase tracking-wider">Note: Position cannot be changed after submission</p>
+                                        <span className="text-[10px] font-black uppercase text-[#ffd014] tracking-widest mb-3 block text-center">Match Ended // Select Squad Position</span>
+                                        {match.tour_type === 'QUALIFIED TOUR' && match.current_round < 5 && match.qualification_status !== 'QUALIFIED' ? (
+                                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center">
+                                                <span className="text-[9px] font-black text-red-500 uppercase">Wait for Round 5 to unlock distribution</span>
+                                                <p className="text-[8px] text-gray-500 mt-1 uppercase">OR GET QUALIFIED BY ADMIN</p>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {Array.from({ length: (match.tour_type === 'BLAST TOUR' || match.sub_type === 'BLAST TOUR') ? 12 : 4 }).map((_, i) => {
+                                                    const r = i + 1;
+                                                    return (
+                                                        <button
+                                                            key={r}
+                                                            onClick={() => settleMatch(match, r)}
+                                                            className="rank-btn py-3 bg-black/40 border border-white/5 rounded-xl hover:bg-[#ffc800] hover:text-black transition-all font-black text-sm"
+                                                        >
+                                                            #{r}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        <p className="text-[9px] text-gray-300 text-center mt-3 font-bold uppercase tracking-wider">Note: Position cannot be changed after submission</p>
                                     </div>
                                 )}
 
