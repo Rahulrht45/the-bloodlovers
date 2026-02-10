@@ -1941,7 +1941,14 @@ const AdminPanel = () => {
                                                     <tr key={m.id}>
                                                         <td>
                                                             <div className="font-bold text-white">{m.org_name}</div>
-                                                            <div className="text-[10px] text-[var(--neon-cyan)] tracking-widest font-black uppercase">{m.map_name || 'BERMUDA'}</div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[10px] text-[var(--neon-cyan)] tracking-widest font-black uppercase">{m.map_name || 'BERMUDA'}</span>
+                                                                {m.tour_type === 'QUALIFIED TOUR' && (
+                                                                    <span className="text-[8px] bg-yellow-400/20 text-yellow-500 px-1.5 py-0.5 rounded font-black uppercase">
+                                                                        R{m.current_round} • {m.qualification_status}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                         <td className="font-bold">{m.prize_pool}</td>
                                                         <td className="text-center">

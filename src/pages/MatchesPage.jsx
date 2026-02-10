@@ -176,12 +176,13 @@ const MatchesPage = () => {
         const getVal = (p) => parseInt(String(p).replace(/[৳₹,]/g, '')) || 0;
         const getPercent = (p) => parseInt(String(p).replace('%', '')) || 0;
 
-        const prizeMap = {
-            1: getVal(match.rank1_percent),
-            2: getVal(match.rank2_percent),
-            3: getVal(match.rank3_percent),
-            4: getVal(match.rank4_percent)
-        };
+        // Build Prize Map dynamically for 4 or 12 ranks
+        const totalRanks = (match.tour_type === 'BLAST TOUR' || match.sub_type === 'BLAST TOUR') ? 12 : 4;
+        const prizeMap = {};
+        for (let i = 1; i <= totalRanks; i++) {
+            prizeMap[i] = getVal(match[`rank${i}_percent`] || '0');
+        }
+
         const rankPrize = prizeMap[rank] || 0;
         const slotFee = getVal(match.slot_prize);
         const pmPool = Math.max(0, rankPrize - slotFee);
@@ -325,21 +326,44 @@ const MatchesPage = () => {
                                     </div>
 
                                     {match.tour_type === 'QUALIFIED TOUR' && (
-                                        <div className="qualification-meta mt-3 p-2 bg-black/30 rounded-lg border border-white/5">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-[7px] text-white/40 font-bold uppercase tracking-widest">Status</span>
-                                                <span className={`text-[8px] font-black uppercase ${match.qualification_status === 'QUALIFIED' ? 'text-green-400' :
-                                                        match.qualification_status === 'DISQUALIFIED' ? 'text-red-500' : 'text-yellow-400'
+                                        <div className="qualification-meta mt-3 p-3 bg-black/40 rounded-xl border border-white/5 backdrop-blur-sm relative overflow-hidden group">
+                                            {/* Status Glow */}
+                                            <div className={`absolute inset-0 opacity-10 blur-xl transition-all duration-500 ${match.qualification_status === 'QUALIFIED' ? 'bg-green-500 group-hover:opacity-20' :
+                                                match.qualification_status === 'DISQUALIFIED' ? 'bg-red-500 group-hover:opacity-20' : 'bg-yellow-500 group-hover:opacity-20'
+                                                }`} />
+
+                                            <div className="relative flex justify-between items-center mb-2">
+                                                <span className="text-[8px] text-white/40 font-black uppercase tracking-[2px]">Status Overlay</span>
+                                                <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${match.qualification_status === 'QUALIFIED' ? 'text-green-400' :
+                                                    match.qualification_status === 'DISQUALIFIED' ? 'text-red-500' : 'text-yellow-400'
                                                     }`}>
+                                                    {match.current_round === 5 && match.qualification_status === 'QUALIFIED' && <Trophy size={10} className="animate-bounce" />}
                                                     {match.current_round === 5 && match.qualification_status === 'QUALIFIED' ? '★ CHAMPION ★' : match.qualification_status}
                                                 </span>
                                             </div>
-                                            {match.qualification_status === 'QUALIFIED' && match.current_round < 5 && match.next_round_at && (
-                                                <div className="flex justify-between items-center bg-green-500/5 p-1 rounded border border-green-500/10">
-                                                    <span className="text-[7px] text-green-400/60 font-medium">NEXT ROUND:</span>
-                                                    <span className="text-[7px] text-green-400 font-black">
-                                                        {new Date(match.next_round_at).toLocaleDateString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+
+                                            {match.qualification_status === 'QUALIFIED' && match.current_round < 5 ? (
+                                                <div className="relative p-2 bg-green-500/10 border border-green-500/20 rounded-lg animate-pulse">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-[8px] text-green-400/80 font-bold uppercase">NEXT OBJECTIVE:</span>
+                                                        <span className="text-[9px] text-green-400 font-black uppercase">ROUND {parseInt(match.current_round) + 1}</span>
+                                                    </div>
+                                                    {match.next_round_at && (
+                                                        <div className="text-[7px] text-green-500/60 mt-1 font-mono text-right">
+                                                            {new Date(match.next_round_at).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : match.qualification_status === 'DISQUALIFIED' ? (
+                                                <div className="relative p-2 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-[8px] text-red-400/80 font-bold uppercase">MISSION STATUS:</span>
+                                                        <span className="text-[9px] text-red-400 font-black uppercase">ELIMINATED</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="relative p-2 bg-yellow-400/5 border border-yellow-400/10 rounded-lg italic text-center">
+                                                    <span className="text-[8px] text-yellow-400/50 font-medium">WAITING FOR COMMANDER ORDERS...</span>
                                                 </div>
                                             )}
                                         </div>
@@ -383,30 +407,61 @@ const MatchesPage = () => {
                                 </div>
 
                                 {mState === 'LOCKED' && (
-                                    <div className="match-settlement-prompt p-4 bg-white/5 border border-dashed border-[#ffc800]/30 rounded-2xl mb-4">
-                                        <span className="text-[10px] font-black uppercase text-[#ffd014] tracking-widest mb-3 block text-center">Match Ended // Select Squad Position</span>
-                                        {match.tour_type === 'QUALIFIED TOUR' && match.current_round < 5 && match.qualification_status !== 'QUALIFIED' ? (
-                                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center">
-                                                <span className="text-[9px] font-black text-red-500 uppercase">Wait for Round 5 to unlock distribution</span>
-                                                <p className="text-[8px] text-gray-500 mt-1 uppercase">OR GET QUALIFIED BY ADMIN</p>
+                                    <div className="match-settlement-prompt p-4 bg-white/5 border border-dashed border-[#ffc800]/30 rounded-2xl mb-4 relative overflow-hidden">
+                                        {/* QUALIFIED PROGRESSION BLOCK */}
+                                        {match.tour_type === 'QUALIFIED TOUR' && match.current_round < 5 && match.qualification_status === 'QUALIFIED' ? (
+                                            <div className="text-center py-4 relative z-10">
+                                                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-500/40">
+                                                    <ChevronUp size={24} className="text-green-400 animate-bounce" />
+                                                </div>
+                                                <h4 className="text-green-400 font-black text-xs uppercase tracking-[3px] mb-1">Squad Qualified</h4>
+                                                <p className="text-[9px] text-white/40 uppercase font-black">Waiting for Next Round Initiation</p>
+                                                <div className="mt-4 p-2 bg-white/5 rounded-lg border border-white/10 text-[8px] text-gray-400 italic">
+                                                    Prizes are unlocked upon elimination or in the Final Round.
+                                                </div>
+                                            </div>
+                                        ) : match.tour_type === 'QUALIFIED TOUR' && match.current_round < 5 && match.qualification_status === 'PENDING' ? (
+                                            <div className="p-4 bg-yellow-400/5 border border-yellow-400/20 rounded-xl text-center">
+                                                <Activity size={24} className="mx-auto mb-2 text-yellow-400/50 animate-pulse" />
+                                                <span className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">Awaiting Verification</span>
+                                                <p className="text-[8px] text-gray-500 mt-1 uppercase">ADMIN MUST VERIFY QUALIFICATION STATUS</p>
                                             </div>
                                         ) : (
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {Array.from({ length: (match.tour_type === 'BLAST TOUR' || match.sub_type === 'BLAST TOUR') ? 12 : 4 }).map((_, i) => {
-                                                    const r = i + 1;
-                                                    return (
-                                                        <button
-                                                            key={r}
-                                                            onClick={() => settleMatch(match, r)}
-                                                            className="rank-btn py-3 bg-black/40 border border-white/5 rounded-xl hover:bg-[#ffc800] hover:text-black transition-all font-black text-sm"
-                                                        >
-                                                            #{r}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
+                                            <>
+                                                {/* CHAMPION SPECIAL HEADER */}
+                                                {match.current_round === 5 && match.qualification_status === 'QUALIFIED' && (
+                                                    <div className="relative mb-6 p-4 bg-gradient-to-r from-yellow-500/20 to-transparent border border-yellow-500/30 rounded-xl overflow-hidden group">
+                                                        <div className="absolute inset-0 bg-yellow-500/10 blur-2xl group-hover:opacity-100 opacity-0 transition-opacity" />
+                                                        <div className="relative z-10 flex items-center gap-4">
+                                                            <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(251,188,4,0.5)]">
+                                                                <Trophy size={20} className="text-black" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-[10px] text-yellow-500 font-black uppercase tracking-[2px]">Tournament Result</div>
+                                                                <div className="text-lg font-black italic text-white leading-none">GRAND CHAMPION</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <span className="text-[10px] font-black uppercase text-[#ffd014] tracking-widest mb-3 block text-center">Match Ended // Select Squad Position</span>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {Array.from({ length: (match.tour_type === 'BLAST TOUR' || match.sub_type === 'BLAST TOUR') ? 12 : 4 }).map((_, i) => {
+                                                        const r = i + 1;
+                                                        return (
+                                                            <button
+                                                                key={r}
+                                                                onClick={() => settleMatch(match, r)}
+                                                                className="rank-btn py-3 bg-black/40 border border-white/5 rounded-xl hover:bg-[#ffc800] hover:text-black transition-all font-black text-sm"
+                                                            >
+                                                                #{r}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <p className="text-[9px] text-gray-300 text-center mt-3 font-bold uppercase tracking-wider">Note: Position cannot be changed after submission</p>
+                                            </>
                                         )}
-                                        <p className="text-[9px] text-gray-300 text-center mt-3 font-bold uppercase tracking-wider">Note: Position cannot be changed after submission</p>
                                     </div>
                                 )}
 
