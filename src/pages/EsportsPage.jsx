@@ -1,5 +1,5 @@
 import React from 'react';
-import { Footer } from '../components/HomeSections';
+import Footer from '../components/Footer';
 
 const EsportsPage = ({ title, description }) => {
     return (
