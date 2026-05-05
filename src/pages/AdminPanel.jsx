@@ -18,14 +18,17 @@ import {
     Wallet,
     Crosshair,
     Award,
+    Star,
+    ArrowUpRight,
+    TrendingDown,
     Clock,
     Target,
     Smartphone,
     Hash,
-    Loader2,
-    ArrowUpRight
+    Loader2
 } from 'lucide-react';
 import { supabase } from '../supabase';
+import { getStarFill, getRatingBreakdown, calculateSuggestedRating } from '../utils/ratingUtils';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
@@ -55,6 +58,19 @@ const AdminPanel = () => {
     const [editValues, setEditValues] = useState({});
     const [editingWallet, setEditingWallet] = useState(null);
     const [walletRefresh, setWalletRefresh] = useState(0);
+    const [selectedRatingPlayers, setSelectedRatingPlayers] = useState([]);
+    const [batchValue, setBatchValue] = useState(0);
+    const [playerSearch, setPlayerSearch] = useState('');
+
+    const handleBatchUpdateRatings = async () => {
+        if (selectedRatingPlayers.length === 0) return;
+        const { error } = await supabase.from('players').update({ rating: batchValue }).in('id', selectedRatingPlayers);
+        if (!error) {
+            setPlayers(players.map(p => selectedRatingPlayers.includes(p.id) ? { ...p, rating: batchValue } : p));
+            alert(`Updated ${selectedRatingPlayers.length} players to ${batchValue} PTS`);
+            setSelectedRatingPlayers([]);
+        }
+    };
 
     const [allMatches, setAllMatches] = useState([]);
     const [achievements, setAchievements] = useState([]);
@@ -112,13 +128,12 @@ const AdminPanel = () => {
         ign: '',
         in_game_uid: '',
         team: 'THE BLOODLOVERS',
-        role: 'Assaulter',
+        role: 'RUSHER',
         avatar: '',
         phone: '',
         userId: '',
         lineup: 'member' // Added lineup field
     });
-    const [playerSearch, setPlayerSearch] = useState('');
     const [teamFilter, setTeamFilter] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
     const [lineupFilter, setLineupFilter] = useState(''); // Added lineup filter state
@@ -626,7 +641,8 @@ const AdminPanel = () => {
                     avatar: newPlayerForm.avatar,
                     phone: newPlayerForm.phone,
                     user_id: newPlayerForm.userId || null,
-                    lineup: newPlayerForm.lineup || 'member', // Add lineup
+                    lineup: newPlayerForm.lineup || 'member',
+                    rating: 0, // Default rating
                     kills: 0,
                     wins: 0,
                     mvp_points: 0,
@@ -645,7 +661,7 @@ const AdminPanel = () => {
                 ign: '',
                 in_game_uid: '',
                 team: 'THE BLOODLOVERS',
-                role: 'Assaulter',
+                role: 'RUSHER',
                 avatar: '',
                 phone: '',
                 userId: '',
@@ -698,7 +714,9 @@ const AdminPanel = () => {
             damage: player.damage || 0,
             survival_time: player.survival_time || '00:00',
             phone: player.phone || '',
-            lineup: player.lineup || 'member' // Added
+            rating: player.rating || 0,
+            lineup: player.lineup || 'member',
+            role: player.role || ''
         });
     };
 
@@ -727,7 +745,9 @@ const AdminPanel = () => {
                     damage: editValues.damage,
                     survival_time: editValues.survival_time,
                     phone: editValues.phone,
-                    lineup: editValues.lineup // Added
+                    rating: editValues.rating,
+                    lineup: editValues.lineup,
+                    role: editValues.role
                 })
                 .eq('id', id);
 
@@ -1066,10 +1086,8 @@ const AdminPanel = () => {
                     {/* SIDEBAR */}
                     <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                         <div className="sidebar-logo">
-                            <div className="logo-icon">
-                                <Zap size={20} color="#000" />
-                            </div>
-                            <h2>BLOODLOVERS</h2>
+                            <img src="/src/assets/logo.png" alt="BLOODLOVERS" className="w-10 h-10 object-contain" />
+                            <h2 className="ml-3 text-red-600">BLOODLOVERS</h2>
                         </div>
                         <ul>
                             <li>
@@ -1130,6 +1148,14 @@ const AdminPanel = () => {
                             </li>
                             <li>
                                 <button
+                                    className={`nav-link ${activeTab === 'Ratings' ? 'active' : ''}`}
+                                    onClick={() => { setActiveTab('Ratings'); setSidebarOpen(false); }}
+                                >
+                                    <Star size={20} /> Ratings
+                                </button>
+                            </li>
+                            <li>
+                                <button
                                     className={`nav-link ${activeTab === 'Withdrawals' ? 'active' : ''}`}
                                     onClick={() => { setActiveTab('Withdrawals'); setSidebarOpen(false); }}
                                 >
@@ -1163,22 +1189,22 @@ const AdminPanel = () => {
                         {/* DASHBOARD CARDS */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                             {[
-                                { label: 'Total Members', val: players.length, icon: <Users size={24} />, color: 'var(--neon-cyan)', glow: 'rgba(0, 240, 255, 0.4)' },
+                                { label: 'Total Members', val: players.length, icon: <Users size={24} />, color: '#ff1a1a', glow: 'rgba(255, 26, 26, 0.4)' },
                                 {
                                     label: 'Corporate Funds',
                                     val: `৳${dbUsers.filter(u => ['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'].includes(u.id)).reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}`,
                                     icon: <ShieldCheck size={24} />,
-                                    color: 'var(--neon-purple)',
-                                    glow: 'rgba(176, 38, 255, 0.4)'
+                                    color: '#7000ff',
+                                    glow: 'rgba(112, 0, 255, 0.4)'
                                 },
                                 {
                                     label: 'Member Funds',
                                     val: `৳${dbUsers.filter(u => !['00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'].includes(u.id)).reduce((sum, u) => sum + Number(u.global_credit || 0), 0).toLocaleString()}`,
                                     icon: <Wallet size={24} />,
-                                    color: '#FBBC04',
-                                    glow: 'rgba(251, 188, 4, 0.4)'
+                                    color: '#ff1a1a',
+                                    glow: 'rgba(255, 26, 26, 0.4)'
                                 },
-                                { label: 'Active Matches', val: allMatches.length, icon: <TrendingUp size={24} />, color: 'var(--neon-green)', glow: 'rgba(57, 255, 20, 0.4)' }
+                                { label: 'Active Matches', val: allMatches.length, icon: <TrendingUp size={24} />, color: '#39ff14', glow: 'rgba(57, 255, 20, 0.4)' }
                             ].map((card, i) => (
                                 <div key={i} className="relative group overflow-hidden rounded-[24px] p-6 text-white transition-all duration-300 hover:-translate-y-2"
                                     style={{
@@ -1315,6 +1341,167 @@ const AdminPanel = () => {
                             </>
                         )}
 
+                        {activeTab === 'Ratings' && (
+                            <div className="animate-in fade-in duration-500">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h1 className="text-2xl font-black text-white italic tracking-tighter">RATING MANAGEMENT</h1>
+                                        <p className="text-[10px] text-red-500 font-bold uppercase tracking-[2px]">High Precision Stat Control</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        {selectedRatingPlayers.length > 0 && (
+                                            <div className="flex items-center gap-3 bg-red-600/5 p-1.5 rounded-2xl border border-red-500/10 animate-in slide-in-from-right-4 backdrop-blur-md">
+                                                <div className="flex items-center bg-black/40 rounded-xl px-3 py-1 border border-white/5">
+                                                    <span className="text-[9px] font-black text-gray-500 uppercase mr-2">New Value:</span>
+                                                    <input 
+                                                        type="number" 
+                                                        placeholder="0" 
+                                                        value={batchValue}
+                                                        onChange={(e) => setBatchValue(parseFloat(e.target.value) || 0)}
+                                                        className="w-12 bg-transparent text-xs text-red-500 font-black outline-none focus:text-white transition-colors"
+                                                    />
+                                                </div>
+                                                <button 
+                                                    onClick={handleBatchUpdateRatings}
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
+                                                >
+                                                    UPDATE {selectedRatingPlayers.length}
+                                                </button>
+                                                <button onClick={() => setSelectedRatingPlayers([])} className="p-2 text-gray-500 hover:text-white transition-colors">
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                            <input
+                                                type="text"
+                                                placeholder="Search Player..."
+                                                value={playerSearch}
+                                                onChange={(e) => setPlayerSearch(e.target.value)}
+                                                className="bg-black/40 border border-white/10 rounded-full pl-10 pr-4 py-2 text-xs text-white focus:border-red-500 outline-none w-64"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {players
+                                        .filter(p => (p.ign || '').toLowerCase().includes(playerSearch.toLowerCase()))
+                                        .map(player => (
+                                            <div 
+                                                key={player.id} 
+                                                onClick={(e) => {
+                                                    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                                                        setSelectedRatingPlayers(prev => 
+                                                            prev.includes(player.id) ? prev.filter(id => id !== player.id) : [...prev, player.id]
+                                                        );
+                                                    }
+                                                }}
+                                                className={`admin-content-box group/card relative transition-all cursor-pointer ${selectedRatingPlayers.includes(player.id) ? 'border-red-600 bg-red-600/5 ring-1 ring-red-600 shadow-[0_0_20px_rgba(255,26,26,0.1)]' : 'hover:border-red-600/30'}`}
+                                            >
+                                                {selectedRatingPlayers.includes(player.id) && (
+                                                    <div className="absolute top-2 right-2 z-20">
+                                                        <div className="bg-red-600 text-white rounded-full p-1 shadow-lg">
+                                                            <Check size={12} strokeWidth={4} />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500/20 to-transparent flex items-center justify-center border border-red-500/10">
+                                                        <Star size={18} className="text-red-500" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-sm font-black text-white leading-none">{player.ign}</h3>
+                                                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">{player.role || 'MEMBER'}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col items-end gap-3">
+                                                    {/* Star Preview & Breakdown */}
+                                                    <div className="flex flex-col items-end gap-3 group/stars relative">
+                                                        <div className="flex gap-1">
+                                                            {[...Array(5)].map((_, i) => {
+                                                                const fill = getStarFill(player.rating, player.role, i);
+                                                                return (
+                                                                    <div key={i} className="relative w-4 h-4">
+                                                                        <Star size={16} className="text-white/10 fill-current" />
+                                                                        <div className="absolute inset-0 overflow-hidden" style={{ width: `${fill}%` }}>
+                                                                            <Star size={16} className="text-red-500 fill-current drop-shadow-[0_0_5px_rgba(255,26,26,0.5)]" />
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        
+                                                        {/* Breakdown Tooltip */}
+                                                        <div className="absolute top-full right-0 mt-2 opacity-0 group-hover/stars:opacity-100 transition-opacity z-10 bg-black/90 backdrop-blur-md p-3 rounded-xl border border-red-500/30 w-48 pointer-events-none">
+                                                            <div className="space-y-1.5">
+                                                                {getRatingBreakdown(player).map((stat, idx) => (
+                                                                    <div key={idx} className="flex justify-between items-center text-[10px]">
+                                                                        <span className="text-gray-400 uppercase font-black tracking-widest">{stat.n}</span>
+                                                                        <span className="text-red-500 font-black italic">{stat.p} pts</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="relative">
+                                                            <input
+                                                                id={`rating-input-${player.id}`}
+                                                                type="number"
+                                                                step="0.1"
+                                                                defaultValue={player.rating || 0}
+                                                                onKeyDown={async (e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        const val = parseFloat(e.target.value) || 0;
+                                                                        const { error } = await supabase.from('players').update({ rating: val }).eq('id', player.id);
+                                                                        if (!error) {
+                                                                            setPlayers(players.map(p => p.id === player.id ? { ...p, rating: val } : p));
+                                                                            e.target.blur();
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                className="w-20 bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-center text-sm font-black text-red-500 focus:border-red-500 outline-none transition-all"
+                                                            />
+                                                            <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[7px] font-black px-1 rounded uppercase tracking-tighter">PTS</div>
+                                                        </div>
+                                                        <div className="flex gap-1">
+                                                            <button 
+                                                                onClick={() => {
+                                                                    const suggested = calculateSuggestedRating(player);
+                                                                    const input = document.getElementById(`rating-input-${player.id}`);
+                                                                    if (input) input.value = suggested;
+                                                                    alert(`Suggested Rating based on stats: ${suggested} PTS`);
+                                                                }}
+                                                                className="flex-1 py-1 px-2 rounded-lg bg-white/5 hover:bg-white/10 text-[8px] font-black uppercase text-gray-400 hover:text-white transition-all border border-white/5"
+                                                            >
+                                                                SUGGEST
+                                                            </button>
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    const input = document.getElementById(`rating-input-${player.id}`);
+                                                                    const val = parseFloat(input.value) || 0;
+                                                                    const { error } = await supabase.from('players').update({ rating: val }).eq('id', player.id);
+                                                                    if (!error) {
+                                                                        setPlayers(players.map(p => p.id === player.id ? { ...p, rating: val } : p));
+                                                                        alert(`Saved ${val} PTS for ${player.ign}`);
+                                                                    }
+                                                                }}
+                                                                className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all border border-red-500/20"
+                                                            >
+                                                                <Check size={12} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === 'Members' && (
                             <>
                                 {/* Header with Search and Actions */}
@@ -1385,11 +1572,13 @@ const AdminPanel = () => {
                                                     onChange={(e) => setNewPlayerForm({ ...newPlayerForm, role: e.target.value })}
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
                                                 >
-                                                    <option value="Assaulter" className="bg-[#0b101b]">Assaulter</option>
-                                                    <option value="Support" className="bg-[#0b101b]">Support</option>
-                                                    <option value="Sniper" className="bg-[#0b101b]">Sniper</option>
-                                                    <option value="IGL" className="bg-[#0b101b]">IGL</option>
-                                                    <option value="Scout" className="bg-[#0b101b]">Scout</option>
+                                                    <option value="ALL ROUNDER" className="bg-[#0b101b]">ALL ROUNDER</option>
+                                                    <option value="RUSHER" className="bg-[#0b101b]">RUSHER</option>
+                                                    <option value="SUPPORT" className="bg-[#0b101b]">SUPPORT</option>
+                                                    <option value="SNIPER" className="bg-[#0b101b]">SNIPER</option>
+                                                    <option value="BOMBER" className="bg-[#0b101b]">BOMBER</option>
+                                                    <option value="COACH" className="bg-[#0b101b]">COACH</option>
+                                                    <option value="MANAGER" className="bg-[#0b101b]">MANAGER</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -1431,8 +1620,7 @@ const AdminPanel = () => {
                                                     className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all"
                                                 >
                                                     <option value="member" className="bg-[#0b101b]">Normal Member</option>
-                                                    <option value="main" className="bg-[#0b101b]">Main Lineup</option>
-                                                    <option value="elite" className="bg-[#0b101b]">Elite Lineup</option>
+                                                    <option value="main" className="bg-[#0b101b]">Player Lineup</option>
                                                     <option value="management" className="bg-[#0b101b]">Management</option>
                                                 </select>
                                             </div>
@@ -1465,8 +1653,8 @@ const AdminPanel = () => {
                                         <div className="flex gap-3 w-full lg:w-auto">
                                             {[
                                                 { val: teamFilter, set: setTeamFilter, options: [{ l: 'All Teams', v: '' }, { l: 'TBL', v: 'THE BLOODLOVERS' }, { l: 'Free Agent', v: 'FREE AGENT' }], icon: <Shield size={14} /> },
-                                                { val: lineupFilter, set: setLineupFilter, options: [{ l: 'All Lineups', v: '' }, { l: 'Main', v: 'main' }, { l: 'Elite', v: 'elite' }, { l: 'Management', v: 'management' }, { l: 'Normal', v: 'member' }], icon: <Users size={14} /> },
-                                                { val: roleFilter, set: setRoleFilter, options: [{ l: 'All Roles', v: '' }, { l: 'Assaulter', v: 'Assaulter' }, { l: 'Support', v: 'Support' }, { l: 'Sniper', v: 'Sniper' }, { l: 'IGL', v: 'IGL' }], icon: <Target size={14} /> }
+                                                { val: lineupFilter, set: setLineupFilter, options: [{ l: 'All Lineups', v: '' }, { l: 'Player', v: 'main' }, { l: 'Management', v: 'management' }, { l: 'Normal', v: 'member' }], icon: <Users size={14} /> },
+                                                { val: roleFilter, set: setRoleFilter, options: [{ l: 'All Roles', v: '' }, { l: 'All Rounder', v: 'ALL ROUNDER' }, { l: 'Rusher', v: 'RUSHER' }, { l: 'Support', v: 'SUPPORT' }, { l: 'Sniper', v: 'SNIPER' }, { l: 'Bomber', v: 'BOMBER' }], icon: <Target size={14} /> }
                                             ].map((f, i) => (
                                                 <div key={i} className="relative flex-1 lg:flex-none min-w-[140px]">
                                                     <select
@@ -1531,9 +1719,25 @@ const AdminPanel = () => {
                                                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all"
                                                             >
                                                                 <option value="member" className="bg-[#0b101b]">Normal Member</option>
-                                                                <option value="main" className="bg-[#0b101b]">Main Lineup</option>
-                                                                <option value="elite" className="bg-[#0b101b]">Elite Lineup</option>
+                                                                <option value="main" className="bg-[#0b101b]">Player Lineup</option>
                                                                 <option value="management" className="bg-[#0b101b]">Management</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="col-span-2">
+                                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-1.5 block">Combat Role</label>
+                                                            <select
+                                                                value={editValues.role}
+                                                                onChange={(e) => setEditValues({ ...editValues, role: e.target.value })}
+                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition-all"
+                                                            >
+                                                                <option value="">Select Role</option>
+                                                                <option value="ALL ROUNDER" className="bg-[#0b101b]">ALL ROUNDER</option>
+                                                                <option value="RUSHER" className="bg-[#0b101b]">RUSHER</option>
+                                                                <option value="SUPPORT" className="bg-[#0b101b]">SUPPORT</option>
+                                                                <option value="SNIPER" className="bg-[#0b101b]">SNIPER</option>
+                                                                <option value="BOMBER" className="bg-[#0b101b]">BOMBER</option>
+                                                                <option value="COACH" className="bg-[#0b101b]">COACH</option>
+                                                                <option value="MANAGER" className="bg-[#0b101b]">MANAGER</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -1542,6 +1746,7 @@ const AdminPanel = () => {
                                                         <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] mb-3 block">Combat Statistics</label>
                                                         <div className="grid grid-cols-3 gap-3">
                                                             {[
+                                                                { l: 'Rating', v: editValues.rating, k: 'rating', c: 'text-purple-400', step: "0.1" },
                                                                 { l: 'Kills', v: editValues.kills, k: 'kills', c: 'text-white' },
                                                                 { l: 'Matches', v: editValues.wins, k: 'wins', c: 'text-white' },
                                                                 { l: 'MVP', v: editValues.mvp_points, k: 'mvp_points', c: 'text-yellow-400' },
@@ -1553,6 +1758,7 @@ const AdminPanel = () => {
                                                                     <label className="text-[8px] font-bold text-white/20 uppercase mb-1 block text-center tracking-tighter">{f.l}</label>
                                                                     <input
                                                                         type={f.isTime ? 'text' : 'number'}
+                                                                        step={f.step || "1"}
                                                                         value={f.v}
                                                                         onChange={(e) => setEditValues({ ...editValues, [f.k]: f.isTime ? e.target.value : (parseFloat(e.target.value) || 0) })}
                                                                         className={`w-full bg-white/[0.03] border border-white/5 rounded-lg py-1.5 text-center text-xs outline-none focus:border-blue-500/50 ${f.c}`}
@@ -1615,12 +1821,26 @@ const AdminPanel = () => {
                                                         <h3 className="text-xl font-black text-white leading-none truncate mb-2">
                                                             {player.ign}
                                                         </h3>
-                                                        <div className="flex gap-3 mt-1">
+                                                        <div className="flex gap-3 mt-1 items-center">
                                                             <div className="flex items-center gap-1 text-[10px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20">
                                                                 <Hash size={10} className="text-blue-400" /> {player.in_game_uid || 'NO UID'}
                                                             </div>
                                                             <div className="flex items-center gap-1 text-[10px] font-mono bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20">
                                                                 <Smartphone size={10} className="text-emerald-400" /> {player.phone || 'NO PHONE'}
+                                                            </div>
+                                                            {/* Mini Star Rating */}
+                                                            <div className="flex gap-0.5 ml-auto">
+                                                                {[...Array(5)].map((_, i) => {
+                                                                    const fill = getStarFill(player.rating, player.role, i);
+                                                                    return (
+                                                                        <div key={i} className="relative w-2.5 h-2.5">
+                                                                            <Star size={10} className="text-white/10 fill-current" />
+                                                                            <div className="absolute inset-0 overflow-hidden" style={{ width: `${fill}%` }}>
+                                                                                <Star size={10} className="text-red-500 fill-current" />
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
                                                     </div>

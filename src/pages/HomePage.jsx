@@ -65,7 +65,7 @@ const Countdown = () => {
     }
 
     return (
-        <span className="font-orbitron text-2xl md:text-3xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-green-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+        <span className="font-orbitron text-2xl md:text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-white to-red-600 drop-shadow-[0_0_15px_rgba(255,26,26,0.5)]">
             {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
         </span>
     );
@@ -75,15 +75,15 @@ const MenuCard = ({ title, subtitle, linkTo, children }) => {
     const CardContent = (
         <div className="relative w-full h-32 group cursor-pointer transform transition-transform duration-300 hover:scale-105">
             {/* Neon Glow Layer behind the card */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#ff3333] via-[#ffd700] to-[#33ff33] rounded-2xl blur opacity-40 group-hover:opacity-100 group-hover:blur-md transition duration-500"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-red-900 to-red-600 rounded-2xl blur opacity-40 group-hover:opacity-100 group-hover:blur-md transition duration-500"></div>
 
             {/* Main Card Container */}
             <div className="relative w-full h-full bg-black rounded-2xl p-[2px]">
                 {/* Gradient Border Line */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#ff0000] via-[#ffff00] to-[#00ff00] rounded-2xl opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-white/20 to-red-600 rounded-2xl opacity-80" />
 
                 {/* Inner Content */}
-                <div className="absolute inset-[2px] bg-[#050505] rounded-[14px] flex flex-col items-center justify-center p-4 overflow-hidden group-hover:bg-[#0a0a0a] transition-colors duration-300">
+                <div className="absolute inset-[2px] bg-[#05010d] rounded-[14px] flex flex-col items-center justify-center p-4 overflow-hidden group-hover:bg-[#0f0a1a] transition-colors duration-300">
 
                     {/* Subtle Inner Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -93,7 +93,7 @@ const MenuCard = ({ title, subtitle, linkTo, children }) => {
                     </h3>
 
                     {subtitle && (
-                        <div className="text-white/90 font-orbitron text-base md:text-lg font-bold text-center mt-1 z-10 tracking-widest group-hover:text-[#ffff00] transition-colors duration-300 drop-shadow-[0_0_5px_rgba(255,255,0,0.5)]">
+                        <div className="text-white/90 font-orbitron text-base md:text-lg font-bold text-center mt-1 z-10 tracking-widest group-hover:text-red-500 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(255,26,26,0.5)]">
                             {subtitle}
                         </div>
                     )}
@@ -130,12 +130,12 @@ const HomePage = () => {
 
             <MenuCard
                 title="Best Achievement"
-                linkTo="#"
+                linkTo="/achievement"
             />
 
             <MenuCard
                 title="All Time Best Player"
-                linkTo="#"
+                linkTo="/members"
             />
 
             <MenuCard title="Next Tournament Countdown">

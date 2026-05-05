@@ -69,10 +69,8 @@ const AuthPage = () => {
         setSuccess('');
 
         try {
-            if (!isLogin) {
-                if (!/^\d{11}$/.test(phoneNumber)) {
-                    throw new Error('bKash number must be exactly 11 digits (e.g., 01XXXXXXXXX).');
-                }
+            if (!isLogin && !/^\d{11}$/.test(phoneNumber)) {
+                throw new Error('bKash number must be exactly 11 digits (e.g., 01XXXXXXXXX).');
             }
 
             if (isLogin) {
@@ -88,6 +86,7 @@ const AuthPage = () => {
                     }
                     throw loginError;
                 }
+
 
                 setSuccess('Authentication successful! Establishing neural link...');
                 setTimeout(() => navigate('/'), 1500);
@@ -152,12 +151,13 @@ const AuthPage = () => {
                 <div className="auth-header">
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
                         <div style={{
-                            background: 'var(--neon-cyan)',
-                            padding: '10px',
-                            borderRadius: '12px',
-                            boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)'
+                            background: 'rgba(255, 26, 26, 0.1)',
+                            padding: '12px',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255, 26, 26, 0.3)',
+                            boxShadow: '0 0 25px rgba(255, 26, 26, 0.2)'
                         }}>
-                            <Zap size={24} color="#000" />
+                            <img src="/src/assets/logo.png" alt="BLOODLOVERS" className="w-12 h-12 object-contain" />
                         </div>
                     </div>
                     <h1>{isLogin ? 'LOGIN' : 'SIGN UP'}</h1>
@@ -242,22 +242,6 @@ const AuthPage = () => {
                                 </div>
                             </div>
 
-                            {/* bKash Number */}
-                            <div className="auth-form-group">
-                                <label>bKash Number (Personal)</label>
-                                <div className="auth-input-wrapper">
-                                    <input
-                                        type="tel"
-                                        placeholder="01XXXXXXXXX"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                                        maxLength={11}
-                                        required={!isLogin}
-                                    />
-                                    <Smartphone className="auth-input-icon" size={18} />
-                                </div>
-                            </div>
-
                             {/* Team Name */}
                             <div className="auth-form-group">
                                 <label>Team Name</label>
@@ -286,7 +270,7 @@ const AuthPage = () => {
                                         <option value="SUPPORT">SUPPORT</option>
                                         <option value="BOMBER">BOMBER</option>
                                         <option value="SNIPER">SNIPER</option>
-                                        <option value="RIFLER">RIFLER</option>
+                                        <option value="ALL ROUNDER">ALL ROUNDER</option>
                                         <option value="COACH">COACH</option>
                                         <option value="MANAGER">MANAGER</option>
                                         <option value="ANALYST">ANALYST</option>
@@ -329,6 +313,24 @@ const AuthPage = () => {
                             <Mail className="auth-input-icon" size={18} />
                         </div>
                     </div>
+
+                    {/* bKash Number - Only for Sign Up */}
+                    {!isLogin && (
+                        <div className="auth-form-group">
+                            <label>bKash Number (Personal)</label>
+                            <div className="auth-input-wrapper">
+                                <input
+                                    type="tel"
+                                    placeholder="01XXXXXXXXX"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                                    maxLength={11}
+                                    required
+                                />
+                                <Smartphone className="auth-input-icon" size={18} />
+                            </div>
+                        </div>
+                    )}
 
                     <div className="auth-form-group">
                         <label>Secure Password</label>

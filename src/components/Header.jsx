@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, LogOut } from 'lucide-react';
 import { supabase } from '../supabase';
 import logo from '../assets/logo.png';
@@ -9,6 +9,7 @@ const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -39,156 +40,117 @@ const Header = () => {
         navigate('/');
     };
 
-    const navItems = ['Home', 'Matches', 'Achievement', 'Wallet', 'Members', 'MVP', 'Admin Panel'];
+    const navItems = [
+        { name: 'Home',         path: '/home' },
+        { name: 'Team',         path: '/members' },
+        { name: 'Achievements', path: '/achievement' },
+        { name: 'Matches',      path: '/matches' },
+        { name: 'News',         path: '/news' },
+        { name: 'Sponsors',     path: '/sponsors' },
+        { name: 'Join',         path: '/signup' }
+    ];
 
     return (
         <header
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 h-[72px] flex items-center ${scrolled ? 'bg-[#020014]/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.05)] shadow-[0_4px_30px_rgba(0,0,0,0.1)]' : 'bg-transparent border-b border-transparent'
+            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 h-[80px] flex items-center ${scrolled ? 'bg-[#05010d]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl' : 'bg-transparent'
                 }`}
         >
-            <div className="w-full h-full flex items-center justify-between" style={{ paddingLeft: '5vw', paddingRight: '5vw' }}>
+            <div className="container mx-auto px-4 md:px-8 flex items-center justify-between">
                 {/* Logo */}
-                <Link to="/" className="flex items-center cursor-pointer group z-50 h-full">
-                    <img src={logo} alt="BLOODLOVERS" className="h-[64px] md:h-[72px] w-auto object-contain transform group-hover:scale-105 transition-transform duration-500" />
+                <Link to="/" className="flex items-center gap-3 group">
+                    <img src={logo} alt="BL" className="h-10 w-auto object-contain" />
+                    <div className="flex flex-col leading-none">
+                        <span className="font-orbitron font-black text-xl tracking-tighter text-white">BLOODLOVERS</span>
+                        <span className="font-orbitron text-[10px] tracking-[0.3em] text-red-600 font-bold">- ESPORTS -</span>
+                    </div>
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-8 bg-white/5 border border-white/10 rounded-full px-10 py-4 backdrop-blur-md shadow-lg shadow-black/20">
+                <nav className="hidden md:flex items-center gap-6">
                     {navItems.map((item) => {
-                        const isInternalPage = ['Home', 'Members', 'Leaderboard', 'MVP', 'Matches', 'Wallet', 'Achievement'].includes(item);
-                        const isAdmin = item === 'Admin Panel';
-                        let linkTo = "/members";
-                        if (isAdmin) linkTo = "/admin";
-                        else if (item === 'Matches') linkTo = "/matches";
-                        else if (item === 'Wallet') linkTo = "/wallet";
-                        else if (item === 'MVP') linkTo = "/mvp";
-                        else if (item === 'Home') linkTo = "/home";
-                        else if (item === 'Achievement') linkTo = "/achievement";
-
-                        if (isInternalPage || isAdmin) {
-                            return (
-                                <Link
-                                    key={item}
-                                    to={linkTo}
-                                    className="font-exo text-[13px] font-bold uppercase tracking-[0.1em] text-gray-400 hover:text-white transition-all duration-300 relative group flex flex-col items-center"
-                                >
-                                    {item}
-                                    <span className="w-0 h-[2px] bg-[var(--neon-cyan)] mt-1 transition-all duration-300 group-hover:w-full box-shadow-[0_0_8px_var(--neon-cyan)]"></span>
-                                </Link>
-                            );
-                        }
-
+                        const isActive = location.pathname === item.path;
                         return (
-                            <a
-                                key={item}
-                                href={`/#${item.toLowerCase()}`}
-                                className="font-exo text-[13px] font-bold uppercase tracking-[0.1em] text-gray-400 hover:text-white transition-all duration-300 relative group flex flex-col items-center"
+                            <Link
+                                key={item.name}
+                                to={item.path}
+                                className={`font-orbitron text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 relative group ${
+                                    isActive ? 'text-red-500' : 'text-gray-300 hover:text-red-500'
+                                }`}
                             >
-                                {item}
-                                <span className="w-0 h-[2px] bg-[var(--neon-cyan)] mt-1 transition-all duration-300 group-hover:w-full box-shadow-[0_0_8px_var(--neon-cyan)]"></span>
-                            </a>
+                                {item.name}
+                                <span className={`absolute -bottom-1 left-0 h-[2px] bg-red-600 transition-all duration-300 ${
+                                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                                }`}></span>
+                            </Link>
                         );
                     })}
                 </nav>
 
-                {/* Actions (Desktop & Mobile Profile) */}
-                <div className={`${user ? 'flex' : 'hidden md:flex'} items-center gap-2 md:gap-8`}>
+                {/* Actions */}
+                <div className="flex items-center gap-6">
                     {user ? (
                         <div className="flex items-center gap-4">
-                            <Link
-                                to="/profile"
-                                className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:border-[var(--neon-cyan)] transition-all cursor-pointer"
-                                title="Edit Profile"
-                            >
-                                <User size={16} className="text-[var(--neon-cyan)]" />
-                                <span className="font-exo text-xs font-bold uppercase tracking-widest text-white/80">
-                                    {user.user_metadata?.full_name || user.email.split('@')[0]}
+                            <Link to="/profile" className="flex items-center gap-2 text-white/80 hover:text-white">
+                                <User size={16} className="text-red-600" />
+                                <span className="font-orbitron text-[10px] font-bold uppercase tracking-widest">
+                                    {user.user_metadata?.full_name || 'OPERATIVE'}
                                 </span>
                             </Link>
-                            <button
-                                onClick={handleLogout}
-                                className="text-gray-400 hover:text-white transition-colors"
-                                title="Logout"
-                            >
-                                <LogOut size={20} />
+                            <button onClick={handleLogout} className="text-gray-500 hover:text-white transition-colors">
+                                <LogOut size={18} />
                             </button>
                         </div>
                     ) : (
-                        <>
-                            <Link
-                                to="/login"
-                                className="font-exo font-bold text-white hover:text-[var(--neon-cyan)] transition-colors text-xs uppercase tracking-widest opacity-80 hover:opacity-100"
-                            >
-                                Log In
-                            </Link>
-                            <Link
-                                to="/signup"
-                                className="btn-primary text-xs py-3 px-8 border-[1px]"
-                            >
-                                Sign Up
-                            </Link>
-                        </>
+                        <Link to="/login" className="btn-outline text-[10px] py-2 px-6 border-red-600/30 hover:border-red-600">
+                            LOGIN
+                        </Link>
                     )}
                 </div>
 
                 {/* Mobile Menu Toggle */}
                 <button
-                    className="md:hidden z-50 text-white focus:outline-none"
+                    className="md:hidden z-50 flex flex-col justify-center gap-1.5 p-1 text-white focus:outline-none"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    aria-label="Toggle menu"
                 >
-                    <div className={`w-6 h-0.5 bg-white mb-1.5 transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
-                    <div className={`w-6 h-0.5 bg-white mb-1.5 transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`}></div>
-                    <div className={`w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
+                    <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+                    <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 scale-x-0' : ''}`}></span>
+                    <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
                 </button>
 
                 {/* Mobile Fullscreen Menu */}
-                <div className={`fixed inset-0 bg-[#020014] z-40 flex flex-col items-center justify-center gap-8 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                    {navItems.map((item) => {
-                        const isInternalPage = ['Home', 'Members', 'Leaderboard', 'MVP', 'Matches', 'Wallet', 'Achievement'].includes(item);
-                        const isAdmin = item === 'Admin Panel';
-                        let linkTo = "/members";
-                        if (isAdmin) linkTo = "/admin";
-                        else if (item === 'Matches') linkTo = "/matches";
-                        else if (item === 'Wallet') linkTo = "/wallet";
-                        else if (item === 'MVP') linkTo = "/mvp";
-                        else if (item === 'Home') linkTo = "/home";
-                        else if (item === 'Achievement') linkTo = "/achievement";
-
-                        if (isInternalPage || isAdmin) {
-                            return (
-                                <Link
-                                    key={item}
-                                    to={linkTo}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="font-orbitron text-2xl font-bold text-white hover:text-[var(--neon-cyan)] uppercase tracking-wider"
-                                >
-                                    {item}
-                                </Link>
-                            );
-                        }
-
-                        return (
-                            <a
-                                key={item}
-                                href={`/#${item.toLowerCase()}`}
+                <div className={`fixed inset-0 bg-[#05010d] z-40 flex flex-col items-center justify-center gap-6 transition-transform duration-500 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="flex flex-col items-center gap-6">
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.name}
+                                to={item.path}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="font-orbitron text-2xl font-bold text-white hover:text-[var(--neon-cyan)] uppercase tracking-wider"
+                                className="font-orbitron text-2xl font-bold text-white hover:text-red-600 uppercase tracking-widest transition-colors"
                             >
-                                {item}
-                            </a>
-                        );
-                    })}
-                    <div className="flex flex-col gap-4 mt-8 w-full px-12">
+                                {item.name}
+                            </Link>
+                        ))}
+                    </div>
+                    
+                    <div className="flex flex-col gap-4 mt-12 w-full px-12 max-w-md">
                         {user ? (
                             <>
-                                <div className="text-white font-orbitron text-center mb-4">
-                                    WELCOME, {user.user_metadata?.full_name?.toUpperCase() || user.email.split('@')[0].toUpperCase()}
+                                <div className="text-white/60 font-orbitron text-center text-xs tracking-widest mb-2 uppercase">
+                                    Operator: <span className="text-white font-black">{user.user_metadata?.full_name || user.email.split('@')[0]}</span>
                                 </div>
+                                <Link
+                                    to="/profile"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full h-14 border border-white/10 text-white font-orbitron font-bold uppercase tracking-widest flex items-center justify-center hover:bg-white/5 transition-all"
+                                >
+                                    My Profile
+                                </Link>
                                 <button
                                     onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                                    className="w-full h-12 border border-red-500/50 text-red-500 font-exo font-bold uppercase tracking-wider"
+                                    className="w-full h-14 border border-red-600/30 text-red-500 font-orbitron font-bold uppercase tracking-widest flex items-center justify-center hover:bg-red-600/10 transition-all"
                                 >
-                                    Logout
+                                    Terminate Session
                                 </button>
                             </>
                         ) : (
@@ -196,16 +158,16 @@ const Header = () => {
                                 <Link
                                     to="/login"
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="w-full h-12 border border-white/20 text-white font-exo font-bold uppercase tracking-wider flex items-center justify-center"
+                                    className="w-full h-14 border border-white/10 text-white font-orbitron font-bold uppercase tracking-widest flex items-center justify-center"
                                 >
-                                    Log In
+                                    Sign In
                                 </Link>
                                 <Link
                                     to="/signup"
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="w-full h-12 bg-[var(--neon-cyan)] text-black font-exo font-bold uppercase tracking-wider animate-pulse flex items-center justify-center"
+                                    className="w-full h-14 bg-red-600 text-white font-orbitron font-bold uppercase tracking-widest flex items-center justify-center shadow-lg shadow-red-600/20"
                                 >
-                                    Sign Up
+                                    Join Forces
                                 </Link>
                             </>
                         )}

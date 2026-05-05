@@ -2,14 +2,14 @@
 
 /* Neon Color Variables */
 :root {
-    --neon-cyan: #00f0ff;
-    --neon-purple: #b026ff;
-    --neon-pink: #ff006e;
+    --neon-cyan: #ff1a1a;
+    --neon-purple: #990000;
+    --neon-pink: #660000;
     --neon-green: #39ff14;
-    --dark-bg: #0a0e27;
-    --darker-bg: #060918;
-    --card-bg: #0f1629;
-    --border-color: rgba(0, 240, 255, 0.15);
+    --dark-bg: #05010d;
+    --darker-bg: #030108;
+    --card-bg: #0f0a1a;
+    --border-color: rgba(255, 26, 26, 0.1);
 }
 
 /* Base Container */
@@ -29,8 +29,8 @@
     right: 0;
     bottom: 0;
     background:
-        radial-gradient(circle at 20% 50%, rgba(0, 240, 255, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(176, 38, 255, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 20% 50%, rgba(255, 26, 26, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 26, 26, 0.05) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
 }
@@ -55,8 +55,8 @@
     width: 200%;
     height: 200%;
     background:
-        radial-gradient(circle at 30% 40%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 70% 60%, rgba(176, 38, 255, 0.08) 0%, transparent 40%);
+        radial-gradient(circle at 30% 40%, rgba(255, 26, 26, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 70% 60%, rgba(255, 26, 26, 0.1) 0%, transparent 40%);
     animation: loginGlow 15s ease-in-out infinite;
     pointer-events: none;
 }
@@ -83,7 +83,7 @@
     backdrop-filter: blur(20px);
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(0, 240, 255, 0.1),
+        0 0 40px rgba(255, 26, 26, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     position: relative;
     z-index: 1;
@@ -108,7 +108,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+    text-shadow: 0 0 30px rgba(255, 26, 26, 0.3);
 }
 
 .login-header p {
@@ -134,7 +134,7 @@
 .admin-input-group input {
     width: 100%;
     padding: 14px 16px;
-    background: rgba(0, 240, 255, 0.05);
+    background: rgba(255, 26, 26, 0.05);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     color: #fff;
@@ -145,10 +145,10 @@
 .admin-input-group input:focus {
     outline: none;
     border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.08);
+    background: rgba(255, 26, 26, 0.08);
     box-shadow:
-        0 0 0 3px rgba(0, 240, 255, 0.1),
-        0 0 20px rgba(0, 240, 255, 0.2);
+        0 0 0 3px rgba(255, 26, 26, 0.1),
+        0 0 20px rgba(255, 26, 26, 0.2);
 }
 
 .login-box button[type="submit"] {
@@ -165,14 +165,14 @@
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 8px;
-    box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 26, 26, 0.3);
 }
 
 .login-box button[type="submit"]:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 10px 30px rgba(0, 240, 255, 0.4),
-        0 0 40px rgba(0, 240, 255, 0.3);
+        0 10px 30px rgba(255, 26, 26, 0.4),
+        0 0 40px rgba(255, 26, 26, 0.3);
 }
 
 /* ==================== DASHBOARD LAYOUT ==================== */
@@ -200,7 +200,7 @@
     backdrop-filter: blur(10px);
     box-shadow:
         4px 0 20px rgba(0, 0, 0, 0.3),
-        inset -1px 0 0 rgba(0, 240, 255, 0.1);
+        inset -1px 0 0 rgba(255, 26, 26, 0.1);
 }
 
 .sidebar-logo {
@@ -221,8 +221,8 @@
     align-items: center;
     justify-content: center;
     box-shadow:
-        0 4px 15px rgba(0, 240, 255, 0.4),
-        0 0 20px rgba(0, 240, 255, 0.3);
+        0 4px 15px rgba(255, 26, 26, 0.4),
+        0 0 20px rgba(255, 26, 26, 0.3);
     animation: logoPulse 3s ease-in-out infinite;
 }
 
@@ -230,11 +230,11 @@
 
     0%,
     100% {
-        box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4), 0 0 20px rgba(0, 240, 255, 0.3);
+        box-shadow: 0 4px 15px rgba(255, 26, 26, 0.4), 0 0 20px rgba(255, 26, 26, 0.3);
     }
 
     50% {
-        box-shadow: 0 4px 20px rgba(0, 240, 255, 0.6), 0 0 30px rgba(0, 240, 255, 0.5);
+        box-shadow: 0 4px 20px rgba(255, 26, 26, 0.6), 0 0 30px rgba(255, 26, 26, 0.5);
     }
 }
 
@@ -294,7 +294,7 @@
 }
 
 .nav-link:hover {
-    background: rgba(0, 240, 255, 0.05);
+    background: rgba(255, 26, 26, 0.05);
     color: var(--neon-cyan);
 }
 
@@ -303,12 +303,12 @@
 }
 
 .nav-link.active {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(176, 38, 255, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(255, 26, 26, 0.15) 0%, rgba(153, 0, 0, 0.15) 100%);
     color: var(--neon-cyan);
     box-shadow:
-        0 4px 12px rgba(0, 240, 255, 0.2),
+        0 4px 12px rgba(255, 26, 26, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(0, 240, 255, 0.2);
+    border: 1px solid rgba(255, 26, 26, 0.2);
 }
 
 .nav-link.active::before {
@@ -377,7 +377,7 @@
     font-weight: 700;
     font-size: 16px;
     color: #fff;
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    box-shadow: 0 0 20px rgba(255, 26, 26, 0.4);
 }
 
 /* ==================== STATS CARDS ==================== */
@@ -389,10 +389,10 @@
 }
 
 .admin-card {
-    background: linear-gradient(135deg, rgba(15, 22, 41, 0.8) 0%, rgba(10, 14, 39, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(15, 22, 41, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 20px;
+    padding: 28px;
     display: flex;
     align-items: flex-start;
     gap: 16px;
@@ -421,7 +421,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 26, 26, 0.05) 0%, transparent 70%);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -432,7 +432,7 @@
     transform: translateY(-4px);
     box-shadow:
         0 10px 30px rgba(0, 0, 0, 0.3),
-        0 0 40px rgba(0, 240, 255, 0.2);
+        0 0 40px rgba(255, 26, 26, 0.2);
 }
 
 .admin-card:hover::before {
@@ -446,15 +446,15 @@
 .admin-card-icon {
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(176, 38, 255, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(255, 26, 26, 0.15) 0%, rgba(153, 0, 0, 0.15) 100%);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--neon-cyan);
     flex-shrink: 0;
-    border: 1px solid rgba(0, 240, 255, 0.2);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    border: 1px solid rgba(255, 26, 26, 0.2);
+    box-shadow: 0 0 20px rgba(255, 26, 26, 0.2);
     position: relative;
     z-index: 1;
 }
@@ -507,11 +507,11 @@
 
 /* ==================== CONTENT BOXES ==================== */
 .admin-content-box {
-    background: rgba(15, 22, 41, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 24px;
+    background: rgba(15, 22, 41, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 32px;
     backdrop-filter: blur(20px);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     position: relative;
@@ -538,19 +538,19 @@
 
 .chart-bar {
     flex: 1;
-    background: linear-gradient(180deg, var(--neon-cyan) 0%, rgba(0, 240, 255, 0.1) 100%);
+    background: linear-gradient(180deg, var(--neon-cyan) 0%, rgba(255, 26, 26, 0.1) 100%);
     border-radius: 6px 6px 2px 2px;
     min-height: 4px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
-    border: 1px solid rgba(0, 240, 255, 0.2);
+    border: 1px solid rgba(255, 26, 26, 0.2);
 }
 
 .chart-bar:hover {
     filter: brightness(1.2);
     transform: translateY(-8px) scaleX(1.1);
-    box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2);
+    box-shadow: 0 10px 20px rgba(255, 26, 26, 0.2);
 }
 
 .chart-bar::after {
@@ -638,7 +638,7 @@
     cursor: pointer;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 26, 26, 0.3);
     transition: all 0.3s ease;
 }
 
@@ -774,8 +774,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow:
-        0 4px 15px rgba(0, 240, 255, 0.3),
-        0 0 20px rgba(0, 240, 255, 0.2);
+        0 4px 15px rgba(255, 26, 26, 0.3),
+        0 0 20px rgba(255, 26, 26, 0.2);
     position: relative;
     overflow: hidden;
 }

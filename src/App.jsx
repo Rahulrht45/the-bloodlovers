@@ -12,38 +12,35 @@ import MvpPage from './pages/MvpPage';
 import bgMain from './assets/bg-main.jpg';
 import logo from './assets/logo.png';
 import MonthlyMvpPopup from './components/MonthlyMvpPopup';
-import HomePage from './pages/HomePage';
 import AchievementPage from './pages/AchievementPage';
+import EsportsPage from './pages/EsportsPage';
+import HomePage from './pages/HomePage';
+
+import { OurLegends, Achievements, Sponsors, JoinSection, Footer } from './components/HomeSections';
+
+function LandingPage() {
+    return (
+        <>
+            <HeroSection />
+            <Sponsors />
+            <OurLegends />
+            <Achievements />
+            <JoinSection />
+            <Footer />
+        </>
+    );
+}
 
 function AppContent() {
     const location = useLocation();
     const isAdminPage = location.pathname === '/admin';
-    const hideLogoPaths = ['/matches', '/mvp', '/members'];
-    const shouldShowLogo = !hideLogoPaths.includes(location.pathname);
 
     return (
-        <div className="w-full min-h-screen text-white overflow-x-hidden relative">
-            {/* Global Logo Background Watermark */}
-            {shouldShowLogo && (
-                <div
-                    className={`fixed inset-0 z-0 opacity-100 pointer-events-none flex items-center justify-center overflow-hidden ${(location.pathname === '/home' || location.pathname === '/achievement') ? 'blur-sm' : ''}`}
-                >
-                    <div
-                        style={{
-                            backgroundImage: `url(${logo})`,
-                            backgroundSize: 'contain',
-                            backgroundPosition: 'center',
-                            backgroundRepeat: 'no-repeat',
-                            width: 'min(800px, 90vw)',
-                            height: 'min(800px, 90vw)',
-                        }}
-                    />
-                </div>
-            )}
+        <div className="w-full min-h-screen text-white overflow-x-hidden relative bg-[#05010d]">
             {!isAdminPage && <Header />}
-            <main className={!isAdminPage ? "pt-[72px]" : "pt-0"}>
+            <main>
                 <Routes>
-                    <Route path="/" element={<HeroSection />} />
+                    <Route path="/" element={<LandingPage />} />
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/achievement" element={<AchievementPage />} />
                     <Route path="/members" element={<MembersPage />} />
@@ -55,6 +52,9 @@ function AppContent() {
                     <Route path="/matches" element={<MatchesPage />} />
                     <Route path="/wallet" element={<WalletPage />} />
                     <Route path="/mvp" element={<MvpPage />} />
+                    <Route path="/media" element={<EsportsPage title="MEDIA GALLERY" description="Exclusive highlights, team vlogs, and tournament footage." />} />
+                    <Route path="/news" element={<EsportsPage title="LATEST NEWS" description="The most recent updates from the BloodLovers competitive scene." />} />
+                    <Route path="/sponsors" element={<EsportsPage title="OUR SPONSORS" description="Partnering with the world's leading brands to dominate the game." />} />
                 </Routes>
             </main>
         </div>

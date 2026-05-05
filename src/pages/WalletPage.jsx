@@ -209,7 +209,7 @@ const WalletPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#020014] text-[var(--neon-cyan)]">
+            <div className="min-h-screen flex items-center justify-center bg-[#020014] text-[#ff1a1a]">
                 <div className="text-center">
                     <Loader2 size={48} className="animate-spin mx-auto mb-4" />
                     <p className="text-xs font-black uppercase tracking-[4px]">Accessing Secure Ledger...</p>
@@ -227,7 +227,7 @@ const WalletPage = () => {
                     <p className="text-gray-400 text-sm mb-8">You must be logged in to view your financial data.</p>
                     <button
                         onClick={() => navigate('/login')}
-                        className="bg-[var(--neon-cyan)] text-black px-8 py-3 rounded font-black uppercase tracking-widest hover:bg-[#00f0ff80] transition-all w-full"
+                        className="bg-[#ff1a1a] text-white px-8 py-3 rounded font-black uppercase tracking-widest hover:bg-[#ff1a1a80] transition-all w-full"
                     >
                         Login Now
                     </button>
@@ -261,17 +261,17 @@ const WalletPage = () => {
                         {/* MAIN BALANCE CARD */}
                         <div className="balance-card relative overflow-hidden group">
                             {/* Abstract bg visual */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[var(--neon-cyan)]/20 to-transparent rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#ff1a1a]/20 to-transparent rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
 
                             <div className="card-top relative z-10">
                                 <div className="flex justify-between items-start">
-                                    <div className="p-3 bg-[var(--neon-cyan)]/10 rounded-2xl text-[var(--neon-cyan)] inline-flex">
+                                    <div className="p-3 bg-[#ff1a1a]/10 rounded-2xl text-[#ff1a1a] inline-flex">
                                         <Wallet size={32} />
                                     </div>
                                     <div className="text-right">
                                         <div className="flex items-center justify-end gap-2 mb-1">
                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Operator</span>
-                                            <span className="text-[10px] font-black text-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10 px-2 py-0.5 rounded border border-[var(--neon-cyan)]/20">
+                                            <span className="text-[10px] font-black text-[#ff1a1a] bg-[#ff1a1a]/10 px-2 py-0.5 rounded border border-[#ff1a1a]/20">
                                                 {walletData.name}
                                             </span>
                                         </div>
@@ -285,7 +285,7 @@ const WalletPage = () => {
 
                                 <div className="mt-8">
                                     <span className="block text-[10px] font-black text-white/40 uppercase tracking-[3px] mb-2">Available Balance</span>
-                                    <h1 className="text-6xl font-black italic tracking-tighter text-white drop-shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+                                    <h1 className="text-6xl font-black italic tracking-tighter text-white drop-shadow-[0_0_15px_rgba(255,26,26,0.3)]">
                                         ৳{walletData.balance.toLocaleString()}
                                     </h1>
                                 </div>
@@ -301,7 +301,7 @@ const WalletPage = () => {
                                 </div>
                                 <div className="stat-box">
                                     <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Account Status</span>
-                                    <div className="flex items-center gap-2 text-[var(--neon-cyan)]">
+                                    <div className="flex items-center gap-2 text-[#ff1a1a]">
                                         <ShieldCheck size={14} />
                                         <span className="font-black italic">VERIFIED OPERATOR</span>
                                     </div>
@@ -336,14 +336,14 @@ const WalletPage = () => {
                         <div className="ledger-header mb-6 flex justify-between items-center">
                             <div className="flex items-center gap-6">
                                 <div
-                                    className={`flex items-center gap-2 cursor-pointer transition-all ${activeTab === 'earnings' ? 'text-[var(--neon-cyan)] opacity-100' : 'text-gray-500 opacity-50 hover:opacity-80'}`}
+                                    className={`flex items-center gap-2 cursor-pointer transition-all ${activeTab === 'earnings' ? 'text-[#ff1a1a] opacity-100' : 'text-gray-500 opacity-50 hover:opacity-80'}`}
                                     onClick={() => setActiveTab('earnings')}
                                 >
                                     <Clock size={18} />
                                     <h2 className="text-lg font-black uppercase tracking-widest italic">Earnings</h2>
                                 </div>
                                 <div
-                                    className={`flex items-center gap-2 cursor-pointer transition-all ${activeTab === 'withdrawals' ? 'text-[var(--neon-cyan)] opacity-100' : 'text-gray-500 opacity-50 hover:opacity-80'}`}
+                                    className={`flex items-center gap-2 cursor-pointer transition-all ${activeTab === 'withdrawals' ? 'text-[#ff1a1a] opacity-100' : 'text-gray-500 opacity-50 hover:opacity-80'}`}
                                     onClick={() => setActiveTab('withdrawals')}
                                 >
                                     <ArrowUpRight size={18} />
@@ -369,7 +369,7 @@ const WalletPage = () => {
                                                     )}
                                                 </div>
                                                 <div className="tx-info">
-                                                    <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[var(--neon-cyan)] transition-colors">{tx.ref || 'Tournament Reward'}</h4>
+                                                    <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[#ff1a1a] transition-colors">{tx.ref || 'Tournament Reward'}</h4>
                                                     <div className="flex items-center gap-2 mt-0.5 opacity-40">
                                                         <span className="text-[10px] font-bold">{tx.date}</span>
                                                         <span className="text-[10px]">•</span>
@@ -402,7 +402,7 @@ const WalletPage = () => {
                                                     <ArrowUpRight size={18} className="text-red-500" />
                                                 </div>
                                                 <div className="tx-info">
-                                                    <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[var(--neon-cyan)] transition-colors">
+                                                    <h4 className="font-black italic uppercase text-sm text-white group-hover:text-[#ff1a1a] transition-colors">
                                                         Withdrawal Request
                                                     </h4>
                                                     <div className="flex items-center gap-2 mt-0.5 opacity-40">

@@ -14,22 +14,22 @@
 .auth-card {
     width: 100%;
     max-width: 450px;
-    background: rgba(13, 11, 38, 0.7);
+    background: rgba(15, 10, 26, 0.85);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 240, 255, 0.2);
+    border: 1px solid rgba(255, 26, 26, 0.2);
     border-radius: 24px;
     padding: 40px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 20px rgba(0, 240, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(255, 26, 26, 0.1);
     position: relative;
     z-index: 10;
     transition: all 0.3s ease;
 }
 
 .auth-card:hover {
-    border-color: rgba(0, 240, 255, 0.4);
+    border-color: rgba(255, 26, 26, 0.4);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6),
-        0 0 30px rgba(0, 240, 255, 0.15);
+        0 0 40px rgba(255, 26, 26, 0.15);
 }
 
 .auth-header {
@@ -39,14 +39,15 @@
 
 .auth-header h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 2.2rem;
+    font-weight: 900;
     letter-spacing: 4px;
-    background: linear-gradient(to right, #fff, var(--neon-cyan));
+    background: linear-gradient(to right, #fff, #ff1a1a);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 8px;
+    text-transform: uppercase;
 }
 
 .auth-header p {
@@ -77,9 +78,9 @@
 }
 
 .auth-toggle-btn.active {
-    background: var(--neon-cyan);
-    color: #000;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    background: #ff1a1a;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 26, 26, 0.4);
 }
 
 .auth-form-group {
@@ -88,14 +89,14 @@
 
 .auth-form-group label {
     display: block;
-    font-family: 'Exo', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--neon-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #ff1a1a;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     margin-bottom: 8px;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .auth-input-wrapper {
@@ -118,9 +119,9 @@
 
 .auth-input-wrapper input:focus {
     outline: none;
-    border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.05);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+    border-color: #ff1a1a;
+    background: rgba(255, 26, 26, 0.05);
+    box-shadow: 0 0 15px rgba(255, 26, 26, 0.1);
 }
 
 .auth-input-icon {
@@ -132,7 +133,7 @@
 
 .auth-input-wrapper input:focus+.auth-input-icon,
 .auth-input-wrapper input:not(:placeholder-shown)+.auth-input-icon {
-    color: var(--neon-cyan);
+    color: #ff1a1a;
 }
 
 .password-toggle {
@@ -160,14 +161,14 @@
 
 .auth-submit-btn {
     width: 100%;
-    background: var(--neon-cyan);
-    color: #000;
+    background: #ff1a1a;
+    color: #fff;
     padding: 16px;
     border: none;
     border-radius: 12px;
     font-family: 'Orbitron', sans-serif;
     font-size: 0.9rem;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -180,8 +181,8 @@
 
 .auth-submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 240, 255, 0.3);
-    filter: brightness(1.1);
+    box-shadow: 0 10px 25px rgba(255, 26, 26, 0.4);
+    filter: brightness(1.2);
 }
 
 .auth-submit-btn:active {
@@ -202,15 +203,15 @@
 }
 
 .auth-footer a {
-    color: var(--neon-cyan);
+    color: #ff1a1a;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     transition: all 0.3s ease;
 }
 
 .auth-footer a:hover {
     text-decoration: underline;
-    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+    text-shadow: 0 0 10px rgba(255, 26, 26, 0.5);
 }
 
 .auth-error {
@@ -276,8 +277,8 @@
 }
 
 .upload-preview:hover {
-    border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.05);
+    border-color: #ff1a1a;
+    background: rgba(255, 26, 26, 0.05);
 }
 
 .preview-image {
@@ -301,22 +302,22 @@
 }
 
 .upload-btn {
-    background: rgba(0, 240, 255, 0.1);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-    color: var(--neon-cyan);
+    background: rgba(255, 26, 26, 0.1);
+    border: 1px solid rgba(255, 26, 26, 0.3);
+    color: #ff1a1a;
     padding: 8px 20px;
     border-radius: 8px;
-    font-family: 'Exo', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 900;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .upload-btn:hover {
-    background: rgba(0, 240, 255, 0.2);
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    background: rgba(255, 26, 26, 0.2);
+    border-color: #ff1a1a;
+    box-shadow: 0 0 15px rgba(255, 26, 26, 0.2);
 }
 
 /* Select Dropdown Styling */
@@ -340,9 +341,9 @@
 
 .auth-select:focus {
     outline: none;
-    border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.05);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+    border-color: #ff1a1a;
+    background: rgba(255, 26, 26, 0.05);
+    box-shadow: 0 0 15px rgba(255, 26, 26, 0.1);
 }
 
 .auth-select option {

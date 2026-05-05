@@ -42,7 +42,7 @@
 }
 
 .mvp-header h1 span {
-    color: #22e3ff;
+    color: #ff1a1a;
 }
 
 .mvp-header p {
@@ -85,7 +85,7 @@
 }
 
 .time-unit {
-    color: #ffd24a;
+    color: #ff1a1a;
 }
 
 @keyframes fadeIn {
@@ -150,12 +150,13 @@
 }
 
 .mvp-card {
-    background: linear-gradient(180deg, #0f1a30, #090f1e);
+    background: linear-gradient(180deg, #0f0a1a, #05010d);
     border-radius: 18px;
     padding: 20px;
     text-align: center;
     position: relative;
     transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .mvp-card:hover {
@@ -163,8 +164,8 @@
 }
 
 .mvp-card.gold {
-    border: 2px solid #ffd24a;
-    box-shadow: 0 0 30px rgba(255, 210, 74, 0.3);
+    border: 2px solid #ff1a1a;
+    box-shadow: 0 0 30px rgba(255, 26, 26, 0.3);
     z-index: 10;
 }
 
@@ -188,7 +189,7 @@
 }
 
 .gold .rank {
-    color: #ffd24a;
+    color: #ff1a1a;
 }
 
 .avatar {
@@ -202,7 +203,7 @@
 }
 
 .gold .avatar {
-    border-color: #ffd24a;
+    border-color: #ff1a1a;
     width: 100px;
     height: 100px;
 }
@@ -240,7 +241,7 @@
 }
 
 .gold .value {
-    color: #ffd24a;
+    color: #ff1a1a;
     font-size: 40px;
 }
 

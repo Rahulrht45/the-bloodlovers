@@ -9,15 +9,15 @@
 }
 
 .profile-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.95));
-    border: 1px solid rgba(0, 240, 255, 0.2);
+    background: linear-gradient(135deg, rgba(15, 10, 26, 0.9), rgba(5, 1, 13, 0.95));
+    border: 1px solid rgba(255, 26, 26, 0.2);
     border-radius: 24px;
     padding: 40px;
     max-width: 600px;
     width: 100%;
     box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(0, 240, 255, 0.1);
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        0 0 50px rgba(255, 26, 26, 0.15);
     position: relative;
 }
 
@@ -52,13 +52,14 @@
 
 .profile-header h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #00f0ff, #00a8ff);
+    background: linear-gradient(135deg, #fff, #ff1a1a);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin: 0 0 10px 0;
+    text-transform: uppercase;
 }
 
 .profile-header p {
@@ -106,9 +107,9 @@
 }
 
 .upload-preview-large:hover {
-    border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.08);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    border-color: #ff1a1a;
+    background: rgba(255, 26, 26, 0.08);
+    box-shadow: 0 0 25px rgba(255, 26, 26, 0.2);
 }
 
 .preview-image-large {
@@ -128,9 +129,9 @@
 }
 
 .upload-btn-large {
-    background: rgba(0, 240, 255, 0.1);
-    border: 1px solid rgba(0, 240, 255, 0.3);
-    color: var(--neon-cyan);
+    background: rgba(255, 26, 26, 0.1);
+    border: 1px solid rgba(255, 26, 26, 0.3);
+    color: #ff1a1a;
     padding: 10px 24px;
     border-radius: 10px;
     font-family: 'Exo 2', sans-serif;
@@ -171,9 +172,9 @@
 .profile-input-wrapper input:focus,
 .profile-select:focus {
     outline: none;
-    border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.08);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    border-color: #ff1a1a;
+    background: rgba(255, 26, 26, 0.08);
+    box-shadow: 0 0 20px rgba(255, 26, 26, 0.15);
 }
 
 .profile-input-icon {
@@ -219,7 +220,7 @@
 .profile-stats-section h3 {
     font-family: 'Orbitron', sans-serif;
     font-size: 1.1rem;
-    color: var(--neon-cyan);
+    color: #ff1a1a;
     margin: 0 0 20px 0;
     text-align: center;
 }
@@ -248,7 +249,7 @@
     font-family: 'Orbitron', sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--neon-cyan);
+    color: #ff1a1a;
     margin-bottom: 4px;
 }
 
@@ -263,16 +264,16 @@
 /* Save Button */
 .profile-save-btn {
     width: 100%;
-    background: linear-gradient(135deg, #00f0ff, #00a8ff);
+    background: linear-gradient(135deg, #ff1a1a, #7000ff);
     border: none;
     border-radius: 12px;
     padding: 16px;
-    color: #000;
-    font-family: 'Exo 2', sans-serif;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;

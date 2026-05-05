@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Upload, Shield, Trophy, Mail, ArrowLeft, Save, Loader2, Smartphone } from 'lucide-react';
 import { supabase } from '../supabase';
+import { getStarFill, getRatingBreakdown } from '../utils/ratingUtils';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -213,17 +214,17 @@ const ProfilePage = () => {
 
                 {/* Wallet Balance Display */}
                 {inGameUid && (
-                    <div className="mb-6 p-4 bg-gradient-to-r from-[#FBBC04]/10 to-[#F59E0B]/10 border border-[#FBBC04]/30 rounded-xl">
+                    <div className="mb-6 p-4 bg-gradient-to-r from-[#ff1a1a]/10 to-[#ff1a1a]/5 border border-[#ff1a1a]/30 rounded-xl">
                         <div className="flex justify-between items-center">
                             <div>
                                 <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">Your Wallet Balance</div>
-                                <div className="text-3xl font-black italic text-[#FBBC04]">
+                                <div className="text-3xl font-black italic text-[#ff1a1a]">
                                     ৳{walletBalance.toLocaleString()}
                                 </div>
                             </div>
                             <button
                                 onClick={() => navigate('/wallet')}
-                                className="px-4 py-2 bg-[#FBBC04]/20 hover:bg-[#FBBC04]/40 text-[#FBBC04] rounded-lg text-sm font-bold transition-all"
+                                className="px-4 py-2 bg-[#ff1a1a]/20 hover:bg-[#ff1a1a]/40 text-[#ff1a1a] rounded-lg text-sm font-bold transition-all"
                             >
                                 View Wallet
                             </button>
@@ -324,7 +325,7 @@ const ProfilePage = () => {
                                 <option value="SUPPORT">SUPPORT</option>
                                 <option value="BOMBER">BOMBER</option>
                                 <option value="SNIPER">SNIPER</option>
-                                <option value="RIFLER">RIFLER</option>
+                                <option value="ALL ROUNDER">ALL ROUNDER</option>
                                 <option value="COACH">COACH</option>
                                 <option value="MANAGER">MANAGER</option>
                                 <option value="ANALYST">ANALYST</option>
@@ -377,6 +378,35 @@ const ProfilePage = () => {
                             <div className="stat-box">
                                 <div className="stat-value">{playerData.mvp_points || 0}</div>
                                 <div className="stat-label">MVP</div>
+                            </div>
+                            <div className="stat-box group relative" style={{ border: '1px solid #ff1a1a', background: 'rgba(255, 26, 26, 0.05)', minWidth: '180px' }}>
+                                <div className="flex justify-center gap-1 mb-2">
+                                    {[...Array(5)].map((_, i) => {
+                                        const fill = getStarFill(playerData.rating, playerData.role, i);
+                                        return (
+                                            <div key={i} className="relative w-5 h-5">
+                                                <Star size={20} className="text-white/10 fill-current" />
+                                                <div className="absolute inset-0 overflow-hidden" style={{ width: `${fill}%` }}>
+                                                    <Star size={20} className="text-[#ff1a1a] fill-current drop-shadow-[0_0_8px_rgba(255,26,26,0.6)]" />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <div className="stat-value" style={{ color: '#ff1a1a', fontSize: '1.5rem' }}>{playerData.rating || 0}</div>
+                                <div className="stat-label" style={{ color: '#ff1a1a', fontSize: '0.7rem' }}>PERFORMANCE RATING</div>
+                                
+                                {/* Hover Breakdown */}
+                                <div className="absolute top-full left-0 w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-black/80 backdrop-blur-md p-3 rounded-xl border border-[#ff1a1a]/30 pointer-events-none">
+                                    <div className="space-y-1.5">
+                                        {getRatingBreakdown(playerData.rating, playerData.role).map((stat, idx) => (
+                                            <div key={idx} className="flex justify-between items-center text-[10px]">
+                                                <span className="text-gray-400 uppercase font-black tracking-widest">{stat.n}</span>
+                                                <span className="text-red-500 font-black">{stat.p} pts</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

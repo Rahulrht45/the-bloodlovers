@@ -265,7 +265,7 @@ const MatchesPage = () => {
 
             {/* WALLET HUD */}
             <div className="wallet-hud">
-                <div className="p-2 bg-[var(--neon-cyan)]/10 rounded-lg text-[var(--neon-cyan)]">
+                <div className="p-2 bg-[#ff1a1a]/10 rounded-lg text-[#ff1a1a]">
                     <Wallet size={20} />
                 </div>
                 <div>
@@ -294,7 +294,7 @@ const MatchesPage = () => {
                                     <Zap size={10} className={mState === 'LIVE' ? 'animate-pulse' : ''} />
                                     {mState}
                                     {mState === 'UPCOMING' && (
-                                        <span className="ml-3 border-l border-white/20 pl-3 text-[var(--neon-cyan)] font-mono tracking-tighter">
+                                        <span className="ml-3 border-l border-white/20 pl-3 text-[#ff1a1a] font-mono tracking-tighter">
                                             {getTimeRemaining(match.start_at)}
                                         </span>
                                     )}
@@ -319,7 +319,7 @@ const MatchesPage = () => {
                                     </div>
                                     <div className="match-card-map-wrapper flex flex-wrap gap-2 mt-2">
                                         {(match.map_name || 'BERMUDA').split(',').map((m, idx) => (
-                                            <span key={idx} className="px-2 py-0.5 bg-[var(--neon-cyan)]/20 border border-[var(--neon-cyan)]/30 rounded text-[9px] font-black text-[var(--neon-cyan)] uppercase tracking-tighter">
+                                            <span key={idx} className="px-2 py-0.5 bg-[#ff1a1a]/20 border border-[#ff1a1a]/30 rounded text-[9px] font-black text-[#ff1a1a] uppercase tracking-tighter">
                                                 {m.trim()}
                                             </span>
                                         ))}
@@ -393,7 +393,7 @@ const MatchesPage = () => {
                                                     return (
                                                         <div key={rank} className="flex justify-between items-center text-[10px]">
                                                             <span className="font-bold text-gray-400">Position #{rank}</span>
-                                                            <span className="font-black text-[var(--neon-cyan)]">৳{amt.toLocaleString()}</span>
+                                                            <span className="font-black text-[#ff1a1a]">৳{amt.toLocaleString()}</span>
                                                         </div>
                                                     );
                                                 })}
@@ -651,7 +651,7 @@ const MatchesPage = () => {
             {/* FOOTER TIMER */}
             < div className="matches-footer-timer" >
                 <div className="flex items-center gap-3">
-                    <Clock size={20} className="text-[var(--neon-cyan)]" />
+                    <Clock size={20} className="text-[#ff1a1a]" />
                     <span className="footer-time">{currentTime.toLocaleTimeString()}</span>
                 </div>
                 <div className="hidden sm:flex items-center gap-2">

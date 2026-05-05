@@ -82,19 +82,29 @@ def save_results(data):
             if res.data:
                 # Update
                 existing = res.data[0]
-                new_kills = existing.get('kills', 0) + p['kills']
-                # new_damage = existing.get('damage', 0) + p['damage'] # If damage column exists
+                new_stats = {
+                    'kills': existing.get('kills', 0) + p['kills'],
+                    'assists': existing.get('assists', 0) + p.get('assists', 0),
+                    'damage': existing.get('damage', 0) + p.get('damage', 0),
+                    'matches': existing.get('matches', 0) + 1
+                }
                 
-                supabase.table('players').update({
-                    'kills': new_kills,
-                    # 'damage': new_damage 
-                }).eq('id', existing['id']).execute()
+                # Keep the best survival time or some other logic? 
+                # For now let's just update if provided
+                if p.get('survival'):
+                    new_stats['survival_time'] = p['survival']
+
+                supabase.table('players').update(new_stats).eq('id', existing['id']).execute()
             else:
                 # Create New Player
                 supabase.table('players').insert({
                     'ign': p['name'],
                     'kills': p['kills'],
-                    # 'damage': p['damage']
+                    'assists': p.get('assists', 0),
+                    'damage': p.get('damage', 0),
+                    'survival_time': p.get('survival', '00:00'),
+                    'matches': 1,
+                    'rating': 0 # Initial rating
                 }).execute()
                 
     except Exception as e:

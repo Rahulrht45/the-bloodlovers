@@ -180,8 +180,8 @@ const ImageExtractorPage = () => {
     return (
         <div className="image-extractor-page">
             <header className="header">
-                <div className="logo">
-                    <Zap size={20} className="text-[var(--neon-cyan)] mr-2" />
+                <div className="logo flex items-center">
+                    <img src="/src/assets/logo.png" alt="Logo" className="w-8 h-8 object-contain mr-2" />
                     BLOODLOVERS <span className="text-[var(--neon-cyan)] italic ml-1">AI</span>
                 </div>
                 <div className="flex gap-4">

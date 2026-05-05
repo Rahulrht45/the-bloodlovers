@@ -1,40 +1,157 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { Trophy, Star, Zap, Target, ArrowRight } from 'lucide-react';
 
-const AchievementCard = ({ title, image_url }) => {
+/* ─── Static showcase data (shown when DB is empty) ─── */
+const SHOWCASE = [
+    {
+        id: 's1',
+        rank: '01',
+        badge: '🥇',
+        title: 'VALORANT CHAMPIONS 2024',
+        event: 'World Championship',
+        prize: '$250,000',
+        date: 'DEC 15, 2024',
+        tier: 'PLATINUM',
+        color: '#ffd700',
+    },
+    {
+        id: 's2',
+        rank: '02',
+        badge: '🥈',
+        title: 'VCT PACIFIC FINALS',
+        event: 'Regional Championship',
+        prize: '$120,000',
+        date: 'SEP 10, 2024',
+        tier: 'GOLD',
+        color: '#ff1a1a',
+    },
+    {
+        id: 's3',
+        rank: '03',
+        badge: '🥉',
+        title: 'ESL PRO LEAGUE S19',
+        event: 'Pro League',
+        prize: '$80,000',
+        date: 'JUL 22, 2024',
+        tier: 'SILVER',
+        color: '#7000ff',
+    },
+    {
+        id: 's4',
+        rank: '04',
+        badge: '🏆',
+        title: 'BLAST PREMIER SPRING',
+        event: 'Invitational',
+        prize: '$50,000',
+        date: 'APR 5, 2024',
+        tier: 'BRONZE',
+        color: '#0070ff',
+    },
+];
+
+const TIER_CONFIG = {
+    PLATINUM: { glow: '#ffd700', bg: 'rgba(255,215,0,0.08)', border: 'rgba(255,215,0,0.25)' },
+    GOLD:     { glow: '#ff1a1a', bg: 'rgba(255,26,26,0.08)', border: 'rgba(255,26,26,0.25)' },
+    SILVER:   { glow: '#7000ff', bg: 'rgba(112,0,255,0.08)', border: 'rgba(112,0,255,0.25)' },
+    BRONZE:   { glow: '#0070ff', bg: 'rgba(0,112,255,0.08)', border: 'rgba(0,112,255,0.25)' },
+    DEFAULT:  { glow: '#ff1a1a', bg: 'rgba(255,26,26,0.05)', border: 'rgba(255,26,26,0.15)' },
+};
+
+/* ─── Single Achievement Card ─── */
+const AchievementCard = ({ achievement, index }) => {
+    const tier = TIER_CONFIG[achievement.tier] || TIER_CONFIG.DEFAULT;
+    const delay = `${index * 0.12}s`;
+
     return (
-        <div className="relative w-full aspect-video md:aspect-square max-w-[280px] group cursor-pointer transform transition-transform duration-300 hover:scale-105">
-            {/* Neon Glow Layer */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#ff3333] via-[#ffffff] to-[#33ff33] rounded-3xl blur opacity-30 group-hover:opacity-80 group-hover:blur-md transition duration-500"></div>
+        <div
+            className="achievement-card-wrap"
+            style={{ animationDelay: delay }}
+        >
+            {/* Rank number */}
+            <div className="achievement-rank" style={{ color: tier.glow }}>
+                {achievement.rank || String(index + 1).padStart(2, '0')}
+            </div>
 
-            {/* Main Card Container */}
-            <div className="relative w-full h-full bg-black rounded-3xl p-[2px]">
-                {/* Gradient Border Line - Matching the Red-White-Green theme */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#ff0000] via-[#ffffff] to-[#00ff00] rounded-3xl opacity-90" />
+            {/* Card body */}
+            <div
+                className="achievement-card"
+                style={{
+                    background: tier.bg,
+                    borderColor: tier.border,
+                    '--glow': tier.glow,
+                }}
+            >
+                {/* Glow top line */}
+                <div
+                    className="achievement-top-line"
+                    style={{ background: `linear-gradient(90deg, transparent, ${tier.glow}, transparent)` }}
+                />
 
-                {/* Inner Content */}
-                <div className="absolute inset-[2px] bg-[#050505] rounded-[22px] flex flex-col items-center justify-center overflow-hidden group-hover:bg-[#0a0a0a] transition-colors duration-300">
-
-                    {/* Background Image (If uploaded) */}
-                    {image_url && (
-                        <div className="absolute inset-0 z-0">
-                            <img src={image_url} alt={title} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="absolute inset-0 bg-black/60 group-hover:bg-black/30 transition-all duration-500" />
+                <div className="achievement-card-inner">
+                    {/* Left: Badge + info */}
+                    <div className="achievement-left">
+                        <div className="achievement-badge">
+                            {achievement.image_url ? (
+                                <img
+                                    src={achievement.image_url}
+                                    alt={achievement.title}
+                                    className="achievement-badge-img"
+                                />
+                            ) : (
+                                <span className="achievement-badge-emoji">
+                                    {achievement.badge || '🏆'}
+                                </span>
+                            )}
                         </div>
-                    )}
+                        <div className="achievement-meta">
+                            {achievement.tier && (
+                                <span
+                                    className="achievement-tier-tag"
+                                    style={{ color: tier.glow, borderColor: tier.border }}
+                                >
+                                    {achievement.tier}
+                                </span>
+                            )}
+                            <h3 className="achievement-title">{achievement.title || 'ACHIEVEMENT'}</h3>
+                            {achievement.event && (
+                                <p className="achievement-event">{achievement.event}</p>
+                            )}
+                        </div>
+                    </div>
 
-                    {/* Subtle Inner Highlight */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                    <h3 className="relative text-white font-orbitron text-xl md:text-2xl font-extrabold text-center tracking-wider uppercase z-10 drop-shadow-md group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 transition-all duration-300 p-4">
-                        {title}
-                    </h3>
+                    {/* Right: Prize + Date */}
+                    <div className="achievement-right">
+                        {achievement.prize && (
+                            <div className="achievement-prize" style={{ color: tier.glow }}>
+                                {achievement.prize}
+                            </div>
+                        )}
+                        {achievement.date && (
+                            <div className="achievement-date">{achievement.date}</div>
+                        )}
+                        <div className="achievement-arrow" style={{ color: tier.glow }}>
+                            <ArrowRight size={18} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
 
+/* ─── Stat Counter Card ─── */
+const StatCard = ({ icon: Icon, value, label, color }) => (
+    <div className="ach-stat-card">
+        <div className="ach-stat-icon" style={{ color, borderColor: `${color}33` }}>
+            <Icon size={22} />
+        </div>
+        <div className="ach-stat-value" style={{ color }}>{value}</div>
+        <div className="ach-stat-label">{label}</div>
+    </div>
+);
+
+/* ─── Main Page ─── */
 const AchievementPage = () => {
     const [achievements, setAchievements] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -48,28 +165,61 @@ const AchievementPage = () => {
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                if (data) setAchievements(data);
-            } catch (err) {
-                console.error('Error fetching achievements:', err);
+                if (data && data.length > 0) setAchievements(data);
+                else setAchievements(SHOWCASE); // Fallback to showcase
+            } catch {
+                setAchievements(SHOWCASE);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchAchievements();
     }, []);
 
     return (
-        <div className="min-h-screen bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center pt-24 pb-12 px-6 gap-8 animate-fade-in relative z-10">
-            {loading ? (
-                <div className="text-[var(--neon-cyan)] animate-pulse font-bold tracking-widest uppercase">Loading Achievements...</div>
-            ) : achievements.length > 0 ? (
-                achievements.map((ach) => (
-                    <AchievementCard key={ach.id} title={ach.title || "Achievement"} image_url={ach.image_url} />
-                ))
-            ) : (
-                <div className="text-gray-500 font-bold tracking-widest uppercase">No achievements yet</div>
-            )}
+        <div className="ach-page">
+            {/* BG effects */}
+            <div className="ach-bg-glow ach-bg-glow--red" />
+            <div className="ach-bg-glow ach-bg-glow--purple" />
+            <div className="ach-grid-overlay" />
+
+            <div className="ach-container">
+                {/* ── Header ── */}
+                <header className="ach-header">
+                    <div className="ach-header-tag">
+                        <Zap size={12} /> HALL OF FAME
+                    </div>
+                    <h1 className="ach-h1">
+                        OUR <span className="ach-h1-accent">ACHIEVEMENTS</span>
+                    </h1>
+                    <p className="ach-subtitle">
+                        Built through blood, strategy, and relentless domination.<br />
+                        Every trophy is a battle won, every rank a legacy cemented.
+                    </p>
+                </header>
+
+                {/* ── Stats Bar ── */}
+                <div className="ach-stats-bar">
+                    <StatCard icon={Trophy}  value="12+"  label="TITLES WON"     color="#ffd700" />
+                    <StatCard icon={Star}    value="$2M+"  label="PRIZE MONEY"    color="#ff1a1a" />
+                    <StatCard icon={Target}  value="98%"   label="WIN RATE"       color="#7000ff" />
+                    <StatCard icon={Zap}     value="3YRS"  label="ACTIVE STREAK"  color="#0070ff" />
+                </div>
+
+                {/* ── Achievement List ── */}
+                <div className="ach-list">
+                    {loading ? (
+                        <div className="ach-loading">
+                            <div className="ach-loading-dot" />
+                            <span>Loading Hall of Fame...</span>
+                        </div>
+                    ) : (
+                        achievements.map((ach, i) => (
+                            <AchievementCard key={ach.id || i} achievement={ach} index={i} />
+                        ))
+                    )}
+                </div>
+            </div>
         </div>
     );
 };
