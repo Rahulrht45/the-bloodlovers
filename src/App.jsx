@@ -16,15 +16,16 @@ import AchievementPage from './pages/AchievementPage';
 import EsportsPage from './pages/EsportsPage';
 import HomePage from './pages/HomePage';
 
-import { OurLegends, Achievements, Sponsors, JoinSection, Footer } from './components/HomeSections';
+import { OurLegends, Achievements, Sponsors, JoinSection, Footer, MediaGallery } from './components/HomeSections';
 
 function LandingPage() {
     return (
         <>
             <HeroSection />
-            <Sponsors />
             <OurLegends />
             <Achievements />
+            <MediaGallery />
+            <Sponsors />
             <JoinSection />
             <Footer />
         </>

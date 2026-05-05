@@ -65,22 +65,22 @@ const Header = () => {
                     </div>
                 </Link>
 
-                {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-6">
+                {/* Desktop Navigation - Centered */}
+                <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         return (
                             <Link
                                 key={item.name}
                                 to={item.path}
-                                className={`font-orbitron text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 relative group ${
-                                    isActive ? 'text-red-500' : 'text-gray-300 hover:text-red-500'
+                                className={`font-orbitron text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 relative group ${
+                                    isActive ? 'text-red-500' : 'text-gray-400 hover:text-white'
                                 }`}
                             >
                                 {item.name}
-                                <span className={`absolute -bottom-1 left-0 h-[2px] bg-red-600 transition-all duration-300 ${
-                                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                                }`}></span>
+                                {isActive && (
+                                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-600 rounded-full shadow-[0_0_8px_#dc2626]"></span>
+                                )}
                             </Link>
                         );
                     })}
@@ -90,18 +90,20 @@ const Header = () => {
                 <div className="flex items-center gap-6">
                     {user ? (
                         <div className="flex items-center gap-4">
-                            <Link to="/profile" className="flex items-center gap-2 text-white/80 hover:text-white">
-                                <User size={16} className="text-red-600" />
-                                <span className="font-orbitron text-[10px] font-bold uppercase tracking-widest">
+                            <Link to="/profile" className="flex items-center gap-2 text-white/80 hover:text-white group">
+                                <div className="w-8 h-8 rounded-full bg-red-600/10 border border-red-600/20 flex items-center justify-center group-hover:bg-red-600/20 transition-all">
+                                    <User size={14} className="text-red-500" />
+                                </div>
+                                <span className="font-orbitron text-[10px] font-black uppercase tracking-widest hidden lg:block">
                                     {user.user_metadata?.full_name || 'OPERATIVE'}
                                 </span>
                             </Link>
-                            <button onClick={handleLogout} className="text-gray-500 hover:text-white transition-colors">
+                            <button onClick={handleLogout} className="text-gray-500 hover:text-red-500 transition-colors">
                                 <LogOut size={18} />
                             </button>
                         </div>
                     ) : (
-                        <Link to="/login" className="btn-outline text-[10px] py-2 px-6 border-red-600/30 hover:border-red-600">
+                        <Link to="/login" className="px-6 py-2 border-2 border-red-600 text-white font-orbitron text-[10px] font-black tracking-widest hover:bg-red-600 transition-all duration-300 rounded-sm">
                             LOGIN
                         </Link>
                     )}

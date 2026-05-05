@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy, Play, ArrowRight, Twitter, Twitch, MessageSquare, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const useDraggableScroll = () => {
     const ref = React.useRef(null);
@@ -55,110 +56,49 @@ const useDraggableScroll = () => {
 const OurLegends = () => {
     const drag = useDraggableScroll();
     const legends = [
-        { 
-            name: 'BLOODKING',  
-            realName: 'Alex Chen',    
-            role: 'IGL',     
-            kd: '1.87', 
-            win: '78%', 
-            color: '#dc2626',
-            img: 'https://picsum.photos/seed/p1/600/800' 
-        },
-        { 
-            name: 'DEATHSHOT', 
-            realName: 'Maria Lopez',  
-            role: 'DUELIST', 
-            kd: '2.14', 
-            win: '82%', 
-            color: '#9333ea',
-            img: 'https://picsum.photos/seed/p2/600/800' 
-        },
-        { 
-            name: 'SHADOW',    
-            realName: 'Liam Park',    
-            role: 'RIFLER',  
-            kd: '1.65', 
-            win: '75%', 
-            color: '#dc2626',
-            img: 'https://picsum.photos/seed/p3/600/800' 
-        },
-        { 
-            name: 'VAMPIRE',   
-            realName: 'Sophia Reed',  
-            role: 'SUPPORT', 
-            kd: '1.42', 
-            win: '71%', 
-            color: '#9333ea',
-            img: 'https://picsum.photos/seed/p4/600/800' 
-        }
+        { name: 'BLOODKING', realName: 'Alex Chen', role: 'IGL', kd: '1.87', win: '78%', color: '#dc2626', img: 'https://picsum.photos/seed/p1/600/800' },
+        { name: 'DEATHSHOT', realName: 'Maria Lopez', role: 'DUELIST', kd: '2.14', win: '82%', color: '#9333ea', img: 'https://picsum.photos/seed/p2/600/800' },
+        { name: 'SHADOW', realName: 'Liam Park', role: 'RIFLER', kd: '1.65', win: '75%', color: '#dc2626', img: 'https://picsum.photos/seed/p3/600/800' },
+        { name: 'VAMPIRE', realName: 'Sophia Reed', role: 'SUPPORT', kd: '1.42', win: '71%', color: '#9333ea', img: 'https://picsum.photos/seed/p4/600/800' }
     ];
 
     return (
-        <section className="legends-section">
-            {/* Background elements */}
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-red-600/5 blur-[150px] rounded-full pointer-events-none"></div>
-            
-            <div className="container-wide mx-auto px-6 relative z-10">
-                
-                {/* Section Header */}
-                <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 border-b border-white/10 pb-4 gap-4">
-                    <h2 className="font-orbitron text-2xl md:text-3xl font-black text-white uppercase italic flex items-center gap-3 tracking-tighter">
-                        OUR LEGENDS <span className="w-6 h-[3px] bg-red-600"></span>
+        <section className="py-24 bg-[#05010d]">
+            <div className="container-wide mx-auto px-6">
+                <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                    <h2 className="font-orbitron text-2xl font-black text-white uppercase italic flex items-center gap-4">
+                        OUR LEGENDS <span className="w-12 h-[2px] bg-red-600"></span>
                     </h2>
-                    <a href="/members" className="text-[10px] text-gray-400 hover:text-white font-orbitron font-bold tracking-[0.2em] flex items-center gap-2 transition-colors uppercase">
+                    <Link to="/members" className="text-[10px] text-gray-400 hover:text-white font-orbitron font-bold tracking-[0.2em] flex items-center gap-2 transition-colors uppercase">
                         View All Players <ArrowRight size={14} />
-                    </a>
+                    </Link>
                 </div>
 
-                {/* Grid */}
-                <div 
-                    ref={drag.ref}
-                    {...drag.props}
-                    className={`mobile-h-scroll ${drag.props.className}`}
-                >
-                    {legends.map((legend, index) => (
-                        <div 
-                            key={legend.name} 
-                            className="legend-card-container animate-in select-none"
-                            style={{ animationDelay: `${index * 0.15}s` }}
-                        >
-                            <div 
-                                className="legend-card group" 
-                                style={{ '--card-color': legend.color }}
-                            >
-                                <div className="legend-img-wrap">
-                                    <span 
-                                        className="legend-role" 
-                                        style={{ backgroundColor: legend.color }}
-                                    >
-                                        {legend.role}
-                                    </span>
-                                    <img src={legend.img} alt={legend.name} className="legend-img pointer-events-none" />
-                                    <div className="img-overlay-gradient"></div>
+                <div ref={drag.ref} {...drag.props} className={`mobile-h-scroll ${drag.props.className}`}>
+                    {legends.map((legend) => (
+                        <div key={legend.name} className="legend-card-v2 group">
+                            <div className="card-top">
+                                <span className="role-tag" style={{ background: legend.color }}>{legend.role}</span>
+                                <img src={legend.img} alt={legend.name} className="avatar-img" />
+                                <div className="avatar-glow" style={{ background: legend.color }}></div>
+                            </div>
+                            <div className="card-body">
+                                <h3 className="name">{legend.name}</h3>
+                                <p className="real-name">{legend.realName}</p>
+                                <div className="stats-row">
+                                    <div className="stat">
+                                        <span className="label">K/D RATIO</span>
+                                        <span className="val" style={{ color: legend.color }}>{legend.kd}</span>
+                                    </div>
+                                    <div className="stat">
+                                        <span className="label">WIN RATE</span>
+                                        <span className="val" style={{ color: legend.color }}>{legend.win}</span>
+                                    </div>
                                 </div>
-                                
-                                <div className="legend-info">
-                                    <div className="text-center mb-5">
-                                        <h3 className="legend-name">{legend.name}</h3>
-                                        <p className="legend-realname">{legend.realName}</p>
-                                    </div>
-                                    
-                                    <div className="legend-stats">
-                                        <div className="stat-col">
-                                            <span className="stat-label">K/D RATIO</span>
-                                            <span className="stat-val" style={{ color: legend.color }}>{legend.kd}</span>
-                                        </div>
-                                        <div className="stat-col">
-                                            <span className="stat-label">WIN RATE</span>
-                                            <span className="stat-val" style={{ color: legend.color }}>{legend.win}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="legend-socials">
-                                        <Twitter size={15} />
-                                        <Twitch size={15} />
-                                        <MessageSquare size={15} />
-                                    </div>
+                                <div className="socials-row">
+                                    <Twitter size={14} />
+                                    <MessageSquare size={14} />
+                                    <Twitch size={14} />
                                 </div>
                             </div>
                         </div>
@@ -170,43 +110,40 @@ const OurLegends = () => {
 };
 
 const Achievements = () => {
-    const drag = useDraggableScroll();
     const achievements = [
         { rank: '1ST', title: 'VALORANT CHAMPIONS 2024', prize: '$250,000', date: 'DEC 15, 2024' },
         { rank: '2ND', title: 'VCT PACIFIC LEAGUE', prize: '$120,000', date: 'SEP 10, 2024' },
         { rank: '3RD', title: 'ESL PRO LEAGUE SEASON 19', prize: '$80,000', date: 'JUL 22, 2024' }
     ];
 
+    const news = [
+        { tag: 'CHAMPIONSHIP', title: 'BloodLovers Esports wins VCT Pacific 2024!', date: 'December 16, 2024', img: 'https://picsum.photos/seed/n1/400/200' },
+        { tag: 'TEAM UPDATE', title: 'Welcome our new IGL BLOODKING!', date: 'November 28, 2024', img: 'https://picsum.photos/seed/n2/400/200' },
+        { tag: 'ANNOUNCEMENT', title: 'BloodLovers partners with ROG!', date: 'November 15, 2024', img: 'https://picsum.photos/seed/n3/400/200' }
+    ];
+
     return (
-        <section className="py-48 bg-[#05010d] px-4 md:px-8 border-t border-white/5 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/5 blur-[120px] rounded-full"></div>
-            <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-32 relative z-10">
+        <section className="py-24 bg-[#05010d] border-t border-white/5">
+            <div className="container-wide mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20">
                 {/* ACHIEVEMENTS */}
-                <div className="animate-in-fade-up">
-                    <div className="flex flex-col mb-12 border-l-4 border-red-600 pl-6">
-                        <h2 className="font-orbitron text-3xl font-black text-white uppercase tracking-tighter leading-none mb-2">
-                            CORE <span className="text-red-600">ACHIEVEMENTS</span>
-                        </h2>
-                        <span className="text-[10px] text-gray-500 font-orbitron tracking-[0.4em] font-bold uppercase opacity-60">Success & Milestones</span>
+                <div>
+                    <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                        <h2 className="font-orbitron text-xl font-black text-white uppercase italic">ACHIEVEMENTS</h2>
+                        <Link to="/achievement" className="text-[9px] text-gray-500 font-bold tracking-widest uppercase">VIEW ALL →</Link>
                     </div>
-                    <div 
-                        ref={drag.ref}
-                        {...drag.props}
-                        className={`mobile-h-scroll ${drag.props.className}`}
-                    >
-                        {achievements.map((item, idx) => (
-                            <div key={idx} className="ach-card group select-none">
-                                <div className={`ach-icon-box ${idx === 0 ? 'gold' : idx === 1 ? 'silver' : 'bronze'}`}>
-                                    <Trophy size={24} className="sm:w-8 sm:h-8" />
+                    <div className="space-y-6">
+                        {achievements.map((ach, i) => (
+                            <div key={i} className="ach-list-item group">
+                                <div className={`rank-box ${i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze'}`}>
+                                    <Trophy size={20} />
+                                    <span>{ach.rank}</span>
                                 </div>
-                                <div className="ach-info">
-                                    <div className="ach-top-meta">
-                                        <span className="ach-rank">{item.rank} PLACE</span>
-                                        <span className="ach-prize">{item.prize}</span>
-                                    </div>
-                                    <div className="ach-main-meta">
-                                        <h3 className="ach-title">{item.title}</h3>
-                                        <span className="ach-date">{item.date}</span>
+                                <div className="ach-main">
+                                    <h3 className="title">{ach.title}</h3>
+                                    <div className="meta">
+                                        <span className="prize text-red-600">{ach.prize}</span>
+                                        <span className="dot"></span>
+                                        <span className="date">{ach.date}</span>
                                     </div>
                                 </div>
                             </div>
@@ -215,78 +152,83 @@ const Achievements = () => {
                 </div>
 
                 {/* LATEST NEWS */}
-                <div className="animate-in-fade-up" style={{ animationDelay: '0.2s' }}>
-                    <NewsFeed />
+                <div>
+                    <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                        <h2 className="font-orbitron text-xl font-black text-white uppercase italic">LATEST NEWS</h2>
+                        <Link to="/news" className="text-[9px] text-gray-500 font-bold tracking-widest uppercase">VIEW ALL →</Link>
+                    </div>
+                    <div className="space-y-6">
+                        {news.map((n, i) => (
+                            <div key={i} className="news-list-item group">
+                                <div className="img-wrap">
+                                    <img src={n.img} alt="" />
+                                </div>
+                                <div className="content">
+                                    <span className="tag">{n.tag}</span>
+                                    <h3 className="title">{n.title}</h3>
+                                    <p className="date">{n.date}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
     );
 };
 
-const NewsFeed = () => {
+const MediaGallery = () => {
     const drag = useDraggableScroll();
+    const media = [
+        { title: 'VCT PACIFIC FINALS GRAND FINAL HIGHLIGHTS', img: 'https://picsum.photos/seed/m1/400/220' },
+        { title: 'INSANE 1V4 CLUTCH - DEATHSHOT', img: 'https://picsum.photos/seed/m2/400/220' },
+        { title: 'TEAM COMMS - FUNNY MOMENTS', img: 'https://picsum.photos/seed/m3/400/220' },
+        { title: 'EPIC COMEBACK AGAINST DRX', img: 'https://picsum.photos/seed/m4/400/220' },
+        { title: 'BEST PLAYS OF 2024 MONTAGE', img: 'https://picsum.photos/seed/m5/400/220' }
+    ];
+
     return (
-        <>
-            <div className="flex flex-col mb-12 border-l-4 border-purple-600 pl-6">
-                <h2 className="font-orbitron text-3xl font-black text-white uppercase tracking-tighter leading-none mb-2">
-                    INTEL <span className="text-purple-600">FEED</span>
-                </h2>
-                <span className="text-[10px] text-gray-500 font-orbitron tracking-[0.4em] font-bold uppercase opacity-60">Latest Updates & News</span>
-            </div>
-            <div 
-                ref={drag.ref}
-                {...drag.props}
-                className={`news-grid-scroll ${drag.props.className}`}
-            >
-                <div className="news-card group select-none">
-                    <div className="news-img-wrap">
-                        <img src="https://picsum.photos/seed/vctnews/400/300" className="news-img" alt="VCT News" />
-                        <div className="news-tag">CHAMPIONSHIP</div>
-                    </div>
-                    <div className="news-content">
-                        <h3 className="news-title">BloodLovers Esports wins VCT Pacific 2024!</h3>
-                        <div className="news-footer">
-                            <span className="news-date">DECEMBER 16, 2024</span>
-                            <span className="news-link">READ INTEL →</span>
-                        </div>
-                    </div>
+        <section className="py-24 bg-[#05010d] border-t border-white/5">
+            <div className="container-wide mx-auto px-6">
+                <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                    <h2 className="font-orbitron text-xl font-black text-white uppercase italic flex items-center gap-4">
+                        MEDIA GALLERY <span className="w-12 h-[2px] bg-red-600"></span>
+                    </h2>
+                    <Link to="/media" className="text-[9px] text-gray-500 font-bold tracking-widest uppercase">VIEW ALL →</Link>
                 </div>
-                <div className="news-card group select-none">
-                    <div className="news-img-wrap">
-                        <img src="https://picsum.photos/seed/roster28/400/300" className="news-img" alt="Roster News" />
-                        <div className="news-tag">ROSTER</div>
-                    </div>
-                    <div className="news-content">
-                        <h3 className="news-title">Welcome our new IGL BLOODKING!</h3>
-                        <div className="news-footer">
-                            <span className="news-date">NOVEMBER 28, 2024</span>
-                            <span className="news-link">READ INTEL →</span>
+                <div ref={drag.ref} {...drag.props} className={`mobile-h-scroll ${drag.props.className}`}>
+                    {media.map((item, i) => (
+                        <div key={i} className="media-card group">
+                            <div className="img-wrap">
+                                <img src={item.img} alt="" />
+                                <div className="play-btn">
+                                    <Play size={20} fill="white" />
+                                </div>
+                            </div>
+                            <h3 className="title">{item.title}</h3>
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
-        </>
+        </section>
     );
 };
 
 const Sponsors = () => {
+    const sponsors = [
+        'REPUBLIC OF GAMERS', 'HYPERX', 'MONSTER ENERGY', 'ZOWIE', 'CORSAIR', 'XPG'
+    ];
     return (
-        <section className="sponsor-marquee-container">
-            <div className="banner-sparks"></div>
-            <div className="marquee-content">
-                {[...Array(6)].map((_, i) => (
-                    <div key={i} className="sponsor-banner-item">
-                        <div className="kia-mart-logo-wrap">
-                            <div className="kia-mart-text">
-                                <div className="p-2 bg-red-600/10 rounded-lg border border-red-500/20 shadow-lg">
-                                    <ShoppingBag className="text-red-600 shopping-bag-icon" size={32} />
-                                </div>
-                                KIA MART
-                            </div>
-                            <span className="kia-mart-tagline">Smart Shopping Experience</span>
-                        </div>
-                    </div>
-                ))}
+        <section className="py-20 bg-[#05010d] border-t border-white/5">
+            <div className="container-wide mx-auto px-6">
+                <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                    <h2 className="font-orbitron text-xs font-black text-white/40 uppercase tracking-[0.4em]">OUR SPONSORS</h2>
+                </div>
+                <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:opacity-100 transition-all duration-700">
+                    {sponsors.map(s => (
+                        <div key={s} className="font-orbitron text-lg md:text-xl font-black tracking-tighter text-white select-none">{s}</div>
+                    ))}
+                </div>
             </div>
         </section>
     );
@@ -294,33 +236,23 @@ const Sponsors = () => {
 
 const JoinSection = () => {
     return (
-        <section className="join-section">
-            <div className="join-bg-overlay">
-                <div className="glow-red"></div>
-                <div className="glow-purple"></div>
-            </div>
-
-            <div className="container mx-auto px-4 relative z-10 text-center">
-                <div className="flex flex-col items-center">
-                    <div className="join-badge animate-pulse mb-8">
-                        <span className="dot"></span>
-                        <span className="text">RECRUITMENT ACTIVE</span>
+        <section className="py-24 bg-[#05010d]">
+            <div className="container-wide mx-auto px-6">
+                <div className="join-container-v2">
+                    <div className="join-content">
+                        <h2 className="title">JOIN THE BLOODLINE</h2>
+                        <p className="desc">
+                            Think you have what it takes to be a part of our legacy?<br />
+                            Show us your skills and bleed with us.
+                        </p>
+                        <Link to="/signup" className="btn-join">
+                            APPLY NOW <ArrowRight size={16} />
+                        </Link>
                     </div>
-                    
-                    <h2 className="join-title mb-8">
-                        JOIN THE <span className="highlight">BLOODLINE</span>
-                    </h2>
-                    
-                    <p className="join-desc mb-12">
-                        Think you have what it takes to be a part of our legacy? <br className="hidden md:block" />
-                        Forge your destiny with the ultimate esports family.
-                    </p>
-                    
-                    <button className="btn-join-premium group">
-                        APPLY FOR TRIALS 
-                        <ArrowRight className="arrow" size={24} />
-                        <div className="btn-glow"></div>
-                    </button>
+                    <div className="join-image">
+                        <img src="https://picsum.photos/seed/soldier/800/600" alt="" />
+                        <div className="image-overlay"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -329,61 +261,75 @@ const JoinSection = () => {
 
 const Footer = () => {
     return (
-        <footer className="footer-main">
+        <footer className="footer-v2">
             <div className="container-wide mx-auto px-6">
                 <div className="footer-grid">
-                    <div className="footer-brand">
+                    <div className="brand-col">
                         <div className="footer-logo mb-6">
                             <span className="logo-text">BLOODLOVERS</span>
                             <span className="logo-subtext">ESPORTS</span>
                         </div>
-                        <p className="footer-about">
-                            Built for domination. Driven by blood. United as one. 
-                            The premier esports organization in the region.
+                        <p className="about">
+                            Built for domination.<br />
+                            Driven by blood.<br />
+                            United as one.
                         </p>
-                        <div className="footer-socials">
-                            <a href="#" aria-label="Twitter"><Twitter size={20} /></a>
-                            <a href="#" aria-label="Twitch"><Twitch size={20} /></a>
-                            <a href="#" aria-label="Discord"><MessageSquare size={20} /></a>
+                        <div className="socials">
+                            <Twitter size={16} />
+                            <Twitch size={16} />
+                            <MessageSquare size={16} />
+                            <Play size={16} />
+                            <ShoppingBag size={16} />
+                        </div>
+                    </div>
+                    
+                    <div className="links-col">
+                        <h4>QUICK LINKS</h4>
+                        <div className="links-grid">
+                            <ul>
+                                <li><Link to="/home">Home</Link></li>
+                                <li><Link to="/members">Team</Link></li>
+                                <li><Link to="/achievement">Achievements</Link></li>
+                                <li><Link to="/media">Media</Link></li>
+                            </ul>
+                            <ul>
+                                <li><Link to="/news">News</Link></li>
+                                <li><Link to="/sponsors">Sponsors</Link></li>
+                                <li><Link to="/signup">Join</Link></li>
+                                <li><Link to="/contact">Contact</Link></li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div className="footer-links-col">
-                        <h4 className="footer-heading">OPERATIONS</h4>
-                        <ul className="footer-links">
-                            <li><a href="/home">Command Center</a></li>
-                            <li><a href="/members">Roster Intel</a></li>
-                            <li><a href="/achievement">Hall of Fame</a></li>
-                            <li><a href="/matches">Combat Logs</a></li>
+                    <div className="contact-col">
+                        <h4>CONTACT US</h4>
+                        <ul>
+                            <li><span className="icon">✉</span> hello@bloodlovers.gg</li>
+                            <li><span className="icon">📞</span> +1 (555) 123-4567</li>
+                            <li><span className="icon">📍</span> Los Angeles, California, USA</li>
                         </ul>
                     </div>
 
-                    <div className="footer-links-col">
-                        <h4 className="footer-heading">ENCRYPTED</h4>
-                        <ul className="footer-links">
-                            <li><a href="/news">News Archive</a></li>
-                            <li><a href="/sponsors">Partners</a></li>
-                            <li><a href="/signup">Join Forces</a></li>
-                            <li><a href="/wallet">Bank</a></li>
-                        </ul>
-                    </div>
-
-                    <div className="footer-newsletter">
-                        <h4 className="footer-heading">INTEL SYNC</h4>
-                        <p className="newsletter-text">Subscribe to receive classified updates.</p>
+                    <div className="newsletter-col">
+                        <h4>NEWSLETTER</h4>
+                        <p>Subscribe to get the latest updates</p>
                         <div className="newsletter-form">
-                            <input type="email" placeholder="ENTER OPERATIVE EMAIL" className="newsletter-input" />
-                            <button className="newsletter-btn">SUBSCRIBE</button>
+                            <input type="email" placeholder="Enter your email" />
+                            <button>SUBSCRIBE</button>
                         </div>
                     </div>
                 </div>
-
+                
                 <div className="footer-bottom">
-                    <p className="copyright text-center">© 2024 BLOODLOVERS ESPORTS. ESTABLISHED FOR DOMINATION.</p>
+                    <p>© 2024 BloodLovers Esports. All Rights Reserved.</p>
+                    <div className="legal-links">
+                        <Link to="/privacy">Privacy Policy</Link>
+                        <Link to="/terms">Terms of Service</Link>
+                    </div>
                 </div>
             </div>
         </footer>
     );
 };
 
-export { OurLegends, Achievements, Sponsors, JoinSection, Footer };
+export { OurLegends, Achievements, Sponsors, JoinSection, Footer, MediaGallery };
