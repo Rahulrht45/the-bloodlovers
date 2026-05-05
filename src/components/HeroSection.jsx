@@ -41,24 +41,41 @@ const HeroSection = () => {
     }, []);
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center pt-24 pb-20 overflow-hidden bg-[#05010d]">
+        <section className="relative min-h-screen flex items-center justify-center pt-32 pb-20 overflow-hidden bg-[#05010d]">
             {/* ── Background layers ── */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                {/* Grid */}
-                <div className="absolute inset-0 bg-grid opacity-60" />
-                {/* Red radial glow — top left */}
-                <div className="absolute -top-40 -left-40 w-[700px] h-[700px] bg-red-600/10 rounded-full blur-[160px]" />
-                {/* Purple radial glow — bottom right */}
-                <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-purple-700/8 rounded-full blur-[160px]" />
-                {/* Scanline sweep */}
-                <div
-                    className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-red-600/40 to-transparent animate-scan z-10"
-                    style={{ top: '0' }}
-                />
+                <div className="absolute inset-0 bg-grid opacity-40" />
+                <div className="absolute -top-40 -left-40 w-[700px] h-[700px] bg-red-600/5 rounded-full blur-[160px]" />
+                <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-purple-700/5 rounded-full blur-[160px]" />
             </div>
 
-            {/* ── Main content ── */}
             <div className="container mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+                
+                {/* KIA MART SPONSOR BLOCKS (From Image 0) */}
+                <div className="flex items-center justify-center gap-8 md:gap-20 mb-16 animate-in fade-in slide-in-from-top-4 duration-1000">
+                    <div className="flex items-center gap-4 bg-red-600/5 border border-red-600/20 px-6 py-3 rounded-xl backdrop-blur-md">
+                        <div className="w-10 h-10 bg-red-600 flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                            <span className="text-white font-black text-xl">K</span>
+                        </div>
+                        <div className="text-left">
+                            <div className="font-orbitron text-sm font-black text-white tracking-widest">KIA MART</div>
+                            <div className="font-orbitron text-[8px] text-red-500/80 font-bold tracking-wider">SMART SHOPPING EXPERIENCE</div>
+                        </div>
+                    </div>
+                    
+                    {/* Core Icon */}
+                    <div className="hidden sm:block w-px h-12 bg-gradient-to-b from-transparent via-red-600/30 to-transparent" />
+
+                    <div className="flex items-center gap-4 bg-red-600/5 border border-red-600/20 px-6 py-3 rounded-xl backdrop-blur-md">
+                        <div className="w-10 h-10 bg-red-600 flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                            <span className="text-white font-black text-xl">K</span>
+                        </div>
+                        <div className="text-left">
+                            <div className="font-orbitron text-sm font-black text-white tracking-widest">KIA MART</div>
+                            <div className="font-orbitron text-[8px] text-red-500/80 font-bold tracking-wider">SMART SHOPPING EXPERIENCE</div>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Eyebrow badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 bg-red-600/10 border border-red-600/20 rounded-full animate-pulse">

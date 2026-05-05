@@ -170,17 +170,13 @@ body {
 
 /* Particles / Grid Background */
 .bg-grid {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
+    position: absolute;
+    inset: 0;
     background-image:
-        linear-gradient(rgba(255, 26, 26, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 26, 26, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+        linear-gradient(rgba(255, 26, 26, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 26, 26, 0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 100%);
 }
 
 /* Animations extracted from HeroSection */
@@ -1287,6 +1283,50 @@ body {
     text-transform: uppercase;
     width: fit-content;
 }
+
+/* Hero Typography */
+.hero-h1 {
+    font-family: var(--font-orbitron);
+    font-size: clamp(48px, 10vw, 120px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -4px;
+    text-transform: uppercase;
+    font-style: italic;
+    color: #fff;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
+}
+
+.hero-accent {
+    color: var(--accent-red);
+    text-shadow: 0 0 30px var(--accent-glow);
+}
+
+.hero-muted-text {
+    color: rgba(255, 255, 255, 0.1);
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+}
+
+.hero-desc {
+    font-family: var(--font-inter);
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    line-height: 1.6;
+}
+
+/* Specific Section Heading Utility */
+.section-tag {
+    font-family: var(--font-orbitron);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+}
+
 .achievement-title {
     font-family: var(--font-orbitron);
     font-size: 16px;
