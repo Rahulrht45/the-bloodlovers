@@ -33,17 +33,32 @@ const HeroSection = () => {
             {/* ── Main content ── */}
             <div className="container mx-auto px-6 relative z-10 text-center flex flex-col items-center">
 
-                {/* Eyebrow badge */}
-                <div className="flex flex-col items-center mb-6">
-                    <span className="font-orbitron text-[10px] font-black text-[var(--accent-red)] tracking-[0.6em] uppercase mb-2">
-                        BUILT FOR DOMINATION
-                    </span>
-                    <div className="w-12 h-0.5 bg-[var(--accent-red)]/40"></div>
-                </div>
 
-                {/* Main heading */}
-                <h1 className="hero-h1 mb-8 max-w-5xl">
-                    <span className="text-[var(--text-main)] block mb-2 italic">BLOODLOVERS</span>
+
+                {/* Top Heading: THE */}
+                <h1 className="hero-h1 select-none flex flex-col items-center">
+                    <span className="text-[var(--text-main)] block italic tracking-[0.05em]">
+                        {"THE".split('').map((char, i) => (
+                            <span key={i} className="glow-char inline-block" style={{ '--index': i }}>{char}</span>
+                        ))}
+                    </span>
+                    {/* Tactical Underline */}
+                    <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[var(--accent-red)] to-transparent mt-2 shadow-[0_0_15px_var(--accent-red)] opacity-80"></div>
+                </h1>
+
+                {/* Main Brand: BLOODLOVERS ESPORTS */}
+                <h1 className="hero-h1 mb-8 max-w-5xl select-none">
+                    <span className="text-[var(--text-main)] block mb-2 italic tracking-[0.05em]">
+                        {"BLOODLOVERS".split('').map((char, i) => (
+                            <span 
+                                key={i} 
+                                className="glow-char inline-block" 
+                                style={{ '--index': i }}
+                            >
+                                {char}
+                            </span>
+                        ))}
+                    </span>
                     <span className="text-[var(--accent-red)] block italic opacity-90">ESPORTS</span>
                 </h1>
 

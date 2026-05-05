@@ -218,6 +218,29 @@ h2, h3, .subheading-pro {
     color: var(--text-main);
 }
 
+.glow-char {
+    animation: neon-sweep 6s ease-in-out infinite;
+    animation-delay: calc(var(--index) * 0.12s);
+}
+
+@keyframes neon-sweep {
+    0%, 15%, 85%, 100% {
+        color: var(--text-main);
+        text-shadow: none;
+        opacity: 0.9;
+    }
+    5% {
+        color: var(--accent-red);
+        text-shadow: 0 0 15px rgba(255, 26, 26, 0.4), 
+                     0 0 30px rgba(255, 26, 26, 0.2);
+        opacity: 1;
+    }
+    10% {
+        color: var(--accent-purple);
+        text-shadow: 0 0 15px rgba(112, 0, 255, 0.3);
+    }
+}
+
 .hero-desc {
     font-family: var(--font-inter);
     font-size: clamp(1rem, 2vw, 1.25rem);
