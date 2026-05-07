@@ -1086,8 +1086,8 @@ const AdminPanel = () => {
                     {/* SIDEBAR */}
                     <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                         <div className="sidebar-logo">
-                            <img src="/src/assets/logo.png" alt="BLOODLOVERS" className="w-10 h-10 object-contain" />
-                            <h2 className="ml-3 text-red-600">BLOODLOVERS</h2>
+                            <img src="/src/assets/logo.png" alt="THE BLOODLOVERS" className="w-14 h-14 object-contain" />
+                            <h2 className="ml-1.5 text-red-600">THE BLOODLOVERS</h2>
                         </div>
                         <ul>
                             <li>
@@ -1958,7 +1958,7 @@ const AdminPanel = () => {
                                                 value={matchForm.orgName}
                                                 onChange={(e) => setMatchForm({ ...matchForm, orgName: e.target.value })}
                                                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[var(--neon-cyan)] outline-none transition-all placeholder:text-white/10"
-                                                placeholder="e.g. NOVA ESPORTS"
+                                                placeholder="e.g. NOVA E-SPORTS"
                                             />
                                         </div>
 

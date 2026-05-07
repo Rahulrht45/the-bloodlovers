@@ -13,12 +13,12 @@
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
     --border-color: rgba(255, 255, 255, 0.05);
-    
+
     --font-orbitron: 'Orbitron', sans-serif;
     --font-inter: 'Inter', sans-serif;
     --font-outfit: 'Outfit', sans-serif;
     --font-michroma: 'Michroma', sans-serif;
-    
+
     --hero-bg-image: url('/assets/hero-bg.jpg');
 }
 
@@ -110,6 +110,35 @@ body {
     text-shadow: 0 0 10px var(--accent-glow);
 }
 
+.text-gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffd700 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+    animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position: 200% center;
+    }
+}
+
+@keyframes bounce-slow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 2s ease-in-out infinite;
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--accent-red), #990000);
     color: white;
@@ -189,7 +218,8 @@ body {
 }
 
 /* Base Heading Styles */
-h1, .head-text {
+h1,
+.head-text {
     font-family: var(--font-orbitron);
     font-weight: 900;
     letter-spacing: 0.1em;
@@ -198,7 +228,9 @@ h1, .head-text {
 }
 
 /* Gaming UI Subheadings (Geometric Tech) */
-h2, h3, .subheading-pro {
+h2,
+h3,
+.subheading-pro {
     font-family: var(--font-michroma);
     font-weight: 400;
     letter-spacing: 0.1em;
@@ -224,20 +256,21 @@ h2, h3, .subheading-pro {
 }
 
 @keyframes neon-sweep {
-    0%, 15%, 85%, 100% {
-        color: var(--text-main);
-        text-shadow: none;
-        opacity: 0.9;
+
+    0%,
+    100% {
+        color: #ffffff;
+        /* White */
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+        opacity: 0.95;
     }
-    5% {
-        color: var(--accent-red);
-        text-shadow: 0 0 15px rgba(255, 26, 26, 0.4), 
-                     0 0 30px rgba(255, 26, 26, 0.2);
+
+    50% {
+        color: #ff1a1a;
+        /* Intense Red */
+        text-shadow: 0 0 10px rgba(255, 26, 26, 0.6),
+            0 0 20px rgba(255, 26, 26, 0.3);
         opacity: 1;
-    }
-    10% {
-        color: var(--accent-purple);
-        text-shadow: 0 0 15px rgba(112, 0, 255, 0.3);
     }
 }
 
@@ -797,8 +830,13 @@ body {
 }
 
 @keyframes marquee-loop {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .sponsor-banner-item {
@@ -842,8 +880,19 @@ body {
 }
 
 @keyframes pulse-text-glow {
-    0%, 100% { transform: scale(1); opacity: 1; text-shadow: 0 0 15px rgba(255, 26, 26, 0.5); }
-    50% { transform: scale(1.02); opacity: 0.9; text-shadow: 0 0 30px rgba(255, 26, 26, 0.8), 0 0 10px rgba(255, 200, 0, 0.4); }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        text-shadow: 0 0 15px rgba(255, 26, 26, 0.5);
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.9;
+        text-shadow: 0 0 30px rgba(255, 26, 26, 0.8), 0 0 10px rgba(255, 200, 0, 0.4);
+    }
 }
 
 .banner-sparks {
@@ -859,8 +908,13 @@ body {
 }
 
 @keyframes floating-sparks {
-    from { background-position: 0 0; }
-    to { background-position: 0 -1000px; }
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 -1000px;
+    }
 }
 
 /* ==================== FUTURISTIC ESPORTS LEGENDS SECTION ==================== */
@@ -963,9 +1017,23 @@ body {
     transform: scale(1.1) rotate(5deg);
 }
 
-.ach-icon-box.gold   { background: rgba(255, 215, 0, 0.1); color: #ffd700; border-color: rgba(255, 215, 0, 0.2); }
-.ach-icon-box.silver { background: rgba(192, 192, 192, 0.1); color: #c0c0c0; border-color: rgba(192, 192, 192, 0.2); }
-.ach-icon-box.bronze { background: rgba(205, 127, 50, 0.1); color: #cd7f32; border-color: rgba(205, 127, 50, 0.2); }
+.ach-icon-box.gold {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    border-color: rgba(255, 215, 0, 0.2);
+}
+
+.ach-icon-box.silver {
+    background: rgba(192, 192, 192, 0.1);
+    color: #c0c0c0;
+    border-color: rgba(192, 192, 192, 0.2);
+}
+
+.ach-icon-box.bronze {
+    background: rgba(205, 127, 50, 0.1);
+    color: #cd7f32;
+    border-color: rgba(205, 127, 50, 0.2);
+}
 
 .ach-info {
     flex: 1;
@@ -1120,28 +1188,34 @@ body {
 }
 
 @media (min-width: 640px) {
-    .legend-card-container, .ach-card, .news-card {
+
+    .legend-card-container,
+    .ach-card,
+    .news-card {
         flex: 0 0 45vw;
         max-width: none;
     }
 }
 
 @media (min-width: 1024px) {
-    .legend-card-container, .ach-card, .news-card {
+
+    .legend-card-container,
+    .ach-card,
+    .news-card {
         flex: unset;
         width: 100%;
     }
-    
+
     .news-card {
         flex-direction: row;
         max-height: 160px;
     }
-    
+
     .news-img-wrap {
         width: 200px;
         aspect-ratio: auto;
     }
-    
+
     .news-content {
         justify-content: center;
     }
@@ -1306,7 +1380,7 @@ body {
 
 .glow-text {
     text-shadow: 0 0 20px rgba(255, 26, 26, 0.5),
-                 0 0 40px rgba(255, 26, 26, 0.3);
+        0 0 40px rgba(255, 26, 26, 0.3);
 }
 
 .animate-in-fade-up {
@@ -1316,7 +1390,10 @@ body {
 }
 
 @keyframes fade-up {
-    to { opacity: 1; transform: translateY(0); }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ========== LEGEND CARD ENTRANCE ANIMATION ========== */
@@ -1325,8 +1402,15 @@ body {
 }
 
 @keyframes legend-card-in {
-    from { opacity: 0; transform: translateY(40px) scale(0.96); }
-    to   { opacity: 1; transform: translateY(0)  scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* ========== LEGEND BG STREAKS ========== */
@@ -1338,7 +1422,7 @@ body {
     z-index: 0;
 }
 
-.legends-bg-streaks > div {
+.legends-bg-streaks>div {
     position: absolute;
     top: -10%;
     width: 1px;
@@ -1348,17 +1432,42 @@ body {
 }
 
 @keyframes streak-fall {
-    0%   { transform: translateY(-100%); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { transform: translateY(200%); opacity: 0; }
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(200%);
+        opacity: 0;
+    }
 }
 
 /* ========== ROLE BADGE BACKGROUNDS ========== */
-.legend-role.role-duelist  { background: rgba(255, 26, 26,  0.85); }
-.legend-role.role-rifler   { background: rgba(255, 200, 0,  0.85); color: #000; }
-.legend-role.role-support  { background: rgba(0,  112, 255, 0.85); }
-.legend-role.role-igl      { background: rgba(157, 0, 255,  0.85); }
+.legend-role.role-duelist {
+    background: rgba(255, 26, 26, 0.85);
+}
+
+.legend-role.role-rifler {
+    background: rgba(255, 200, 0, 0.85);
+    color: #000;
+}
+
+.legend-role.role-support {
+    background: rgba(0, 112, 255, 0.85);
+}
+
+.legend-role.role-igl {
+    background: rgba(157, 0, 255, 0.85);
+}
 
 /* ========== RESPONSIVE LEGENDS GRID (desktop 4-up) ========== */
 @media (min-width: 1024px) {
@@ -1367,6 +1476,7 @@ body {
         grid-template-columns: repeat(4, 1fr);
         overflow-x: visible;
     }
+
     .legend-card-container {
         flex: unset;
         max-width: unset;
@@ -1380,6 +1490,7 @@ body {
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
     }
+
     .legend-card-container {
         flex: 0 0 80vw;
         max-width: 300px;
@@ -1391,6 +1502,7 @@ body {
     .legend-card-container {
         flex: 0 0 88vw;
     }
+
     .legends-frame {
         padding: 20px 16px;
         border-radius: 24px;
@@ -1418,16 +1530,23 @@ body {
     pointer-events: none;
     z-index: 0;
 }
+
 .ach-bg-glow--red {
-    width: 600px; height: 600px;
+    width: 600px;
+    height: 600px;
     background: rgba(255, 26, 26, 0.07);
-    top: -100px; left: -200px;
+    top: -100px;
+    left: -200px;
 }
+
 .ach-bg-glow--purple {
-    width: 500px; height: 500px;
+    width: 500px;
+    height: 500px;
     background: rgba(112, 0, 255, 0.06);
-    bottom: -100px; right: -150px;
+    bottom: -100px;
+    right: -150px;
 }
+
 .ach-grid-overlay {
     position: absolute;
     inset: 0;
@@ -1453,6 +1572,7 @@ body {
     text-align: center;
     margin-bottom: 60px;
 }
+
 .ach-header-tag {
     display: inline-flex;
     align-items: center;
@@ -1469,6 +1589,7 @@ body {
     margin-bottom: 20px;
     animation: pulse-glow 3s infinite;
 }
+
 .ach-h1 {
     font-family: var(--font-orbitron);
     font-size: clamp(32px, 7vw, 72px);
@@ -1479,10 +1600,12 @@ body {
     margin-bottom: 18px;
     color: #fff;
 }
+
 .ach-h1-accent {
     color: #ff1a1a;
     text-shadow: 0 0 30px rgba(255, 26, 26, 0.5), 0 0 60px rgba(255, 26, 26, 0.2);
 }
+
 .ach-subtitle {
     color: rgba(255, 255, 255, 0.45);
     font-family: var(--font-inter);
@@ -1499,11 +1622,13 @@ body {
     gap: 16px;
     margin-bottom: 56px;
 }
+
 @media (max-width: 640px) {
     .ach-stats-bar {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
 .ach-stat-card {
     display: flex;
     flex-direction: column;
@@ -1515,23 +1640,30 @@ body {
     border-radius: 16px;
     transition: transform 0.3s ease, border-color 0.3s ease;
 }
+
 .ach-stat-card:hover {
     transform: translateY(-4px);
     border-color: rgba(255, 255, 255, 0.12);
 }
+
 .ach-stat-icon {
-    width: 44px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 12px;
     border: 1px solid;
     background: rgba(255, 255, 255, 0.03);
 }
+
 .ach-stat-value {
     font-family: var(--font-orbitron);
     font-size: 22px;
     font-weight: 900;
     line-height: 1;
 }
+
 .ach-stat-label {
     font-family: var(--font-orbitron);
     font-size: 8px;
@@ -1557,8 +1689,12 @@ body {
     transform: translateX(-30px);
     animation: ach-slide-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 @keyframes ach-slide-in {
-    to { opacity: 1; transform: translateX(0); }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Rank number */
@@ -1573,6 +1709,7 @@ body {
     flex-shrink: 0;
     transition: opacity 0.3s;
 }
+
 .achievement-card-wrap:hover .achievement-rank {
     opacity: 0.5;
 }
@@ -1585,18 +1722,21 @@ body {
     border-radius: 20px;
     overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.4s ease;
+        box-shadow 0.4s ease;
     cursor: pointer;
 }
+
 .achievement-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0 40px var(--glow, rgba(255,26,26,0.15));
+    box-shadow: 0 0 40px var(--glow, rgba(255, 26, 26, 0.15));
 }
 
 /* Top glow line */
 .achievement-top-line {
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 1px;
     opacity: 0.7;
 }
@@ -1609,16 +1749,19 @@ body {
     gap: 20px;
     padding: 24px 28px;
 }
+
 @media (max-width: 560px) {
     .achievement-card-inner {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
     }
+
     .achievement-rank {
         font-size: 32px;
         min-width: 48px;
     }
+
     .achievement-right {
         align-items: flex-start !important;
     }
@@ -1630,28 +1773,37 @@ body {
     align-items: center;
     gap: 20px;
 }
+
 .achievement-badge {
-    width: 64px; height: 64px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     overflow: hidden;
 }
+
 .achievement-badge-emoji {
     font-size: 32px;
     line-height: 1;
 }
+
 .achievement-badge-img {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
+
 .achievement-meta {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
+
 .achievement-tier-tag {
     display: inline-block;
     font-family: var(--font-orbitron);
@@ -1696,12 +1848,14 @@ body {
     gap: 6px;
     flex-shrink: 0;
 }
+
 .achievement-prize {
     font-family: var(--font-orbitron);
     font-size: 20px;
     font-weight: 900;
     letter-spacing: -1px;
 }
+
 .achievement-date {
     font-family: var(--font-orbitron);
     font-size: 9px;
@@ -1710,12 +1864,14 @@ body {
     color: rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
 }
+
 .achievement-arrow {
     margin-top: 4px;
     opacity: 0;
     transform: translateX(-6px);
     transition: opacity 0.3s, transform 0.3s;
 }
+
 .achievement-card:hover .achievement-arrow {
     opacity: 1;
     transform: translateX(0);
@@ -1734,8 +1890,10 @@ body {
     color: rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
 }
+
 .ach-loading-dot {
-    width: 10px; height: 10px;
+    width: 10px;
+    height: 10px;
     background: #ff1a1a;
     border-radius: 50%;
     animation: pulse-glow 1.2s infinite;
@@ -2064,4 +2222,64 @@ body {
     letter-spacing: 2px;
     font-weight: 700;
 }
-
+/* =========================================
+   HORROR & BLOOD BRANDING EFFECTS
+   ========================================= */
+
+.horror-blood-text {
+    color: #ff1a1a;
+    text-shadow: 
+        3px 3px 0px #000,
+        0 0 20px rgba(255, 26, 26, 0.8),
+        0 0 40px rgba(139, 0, 0, 0.6);
+    position: relative;
+    font-style: italic;
+    background: linear-gradient(to bottom, #fff 0%, #ff1a1a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.blood-drip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.blood-drip {
+    position: absolute;
+    top: 90%;
+    width: 3px;
+    background: #ff1a1a;
+    border-radius: 0 0 10px 10px;
+    animation: drip-animation linear infinite;
+    filter: drop-shadow(0 0 5px #ff0000);
+}
+
+@keyframes drip-animation {
+    0% { height: 0; opacity: 1; top: 90%; }
+    50% { height: 40px; opacity: 1; }
+    100% { height: 60px; opacity: 0; top: 150%; }
+}
+
+.horror-smoke-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 0%, rgba(5, 1, 13, 0.9) 100%);
+    z-index: 1;
+}
+
+.horror-glow {
+    filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5));
+}
+
+.blood-float {
+    animation: blood-float 4s ease-in-out infinite;
+    color: #ff1a1a;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+}
+
+@keyframes blood-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.02); filter: brightness(1.2); }
+}

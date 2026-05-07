@@ -157,7 +157,7 @@ const AuthPage = () => {
                             border: '1px solid rgba(255, 26, 26, 0.3)',
                             boxShadow: '0 0 25px rgba(255, 26, 26, 0.2)'
                         }}>
-                            <img src="/src/assets/logo.png" alt="BLOODLOVERS" className="w-12 h-12 object-contain" />
+                            <img src="/src/assets/logo.png" alt="THE BLOODLOVERS" className="w-16 h-16 object-contain" />
                         </div>
                     </div>
                     <h1>{isLogin ? 'LOGIN' : 'SIGN UP'}</h1>

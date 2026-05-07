@@ -2,13 +2,14 @@ import React from 'react';
 // Cache bust: Scroll indicator removed
 import { Link } from 'react-router-dom';
 import { ArrowRight, Play } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 const HeroSection = () => {
 
     return (
-        <section 
+        <section
             className="relative min-h-screen flex items-center justify-center pt-24 pb-20 overflow-hidden bg-[var(--bg-dark)]"
-            style={{ 
+            style={{
                 backgroundImage: 'var(--hero-bg-image)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
@@ -37,38 +38,52 @@ const HeroSection = () => {
 
                 {/* Top Heading: THE */}
                 <h1 className="hero-h1 select-none flex flex-col items-center">
-                    <span className="text-[var(--text-main)] block italic tracking-[0.05em]">
-                        {"THE".split('').map((char, i) => (
-                            <span key={i} className="glow-char inline-block" style={{ '--index': i }}>{char}</span>
-                        ))}
+                    <span className="font-orbitron text-white font-bold tracking-[0.8em] text-[10px] mb-6 uppercase opacity-90">BUILT FOR DOMINATION</span>
+                    <span className="text-[var(--text-main)] flex items-center justify-center gap-1 italic tracking-[0.05em]">
+                        <span className="glow-char inline-block">T</span>
+                        <img
+                            src={logo}
+                            alt="Logo"
+                            className="h-[clamp(80px,20vw,180px)] w-auto object-contain filter drop-shadow-[0_0_40px_var(--accent-red)] animate-bounce-slow mix-blend-screen"
+                        />
+                        <span className="glow-char inline-block">E</span>
                     </span>
                     {/* Tactical Underline */}
-                    <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[var(--accent-red)] to-transparent mt-2 shadow-[0_0_15px_var(--accent-red)] opacity-80"></div>
+                    <div className="w-32 h-1 bg-gradient-to-r from-transparent via-[#ff1a1a] via-[#ffffff] via-[#ff1a1a] to-transparent mt-2 shadow-[0_0_20px_var(--accent-red)] opacity-90"></div>
                 </h1>
 
                 {/* Main Brand: BLOODLOVERS ESPORTS */}
                 <h1 className="hero-h1 mb-8 max-w-5xl select-none">
                     <span className="text-[var(--text-main)] block mb-2 italic tracking-[0.05em]">
                         {"BLOODLOVERS".split('').map((char, i) => (
-                            <span 
-                                key={i} 
-                                className="glow-char inline-block" 
+                            <span
+                                key={i}
+                                className="glow-char inline-block"
                                 style={{ '--index': i }}
                             >
                                 {char}
                             </span>
                         ))}
                     </span>
-                    <span className="text-[var(--accent-red)] block italic opacity-90">ESPORTS</span>
+                    <span className="bg-gradient-to-r from-[#ff1a1a] via-[#ffffff] to-[#ff1a1a] bg-clip-text text-transparent block italic font-black tracking-[0.2em] opacity-95">E-SPORTS</span>
                 </h1>
 
                 {/* Subtitle */}
                 <div className="hero-desc max-w-xl mx-auto mb-14 text-center">
-                    <p className="text-[var(--text-main)]/80 mb-2 font-medium tracking-tight">
-                        We are not just a team. We are a family.
-                    </p>
-                    <p className="font-orbitron text-xs font-bold tracking-widest uppercase">
-                        We <span className="text-[var(--accent-red)]">bleed</span> together. We <span className="text-[var(--accent-purple)]">win</span> together.
+                    <p className="font-orbitron text-xs font-bold tracking-[0.3em] uppercase flex flex-wrap justify-center gap-x-2">
+                        {"We bleed together. We win together.".split(' ').map((word, wi) => (
+                            <span key={wi} className="whitespace-nowrap">
+                                {word.split('').map((char, ci) => (
+                                    <span
+                                        key={ci}
+                                        className="glow-char inline-block"
+                                        style={{ '--index': wi * 10 + ci }}
+                                    >
+                                        {char}
+                                    </span>
+                                ))}
+                            </span>
+                        ))}
                     </p>
                 </div>
 
@@ -83,7 +98,7 @@ const HeroSection = () => {
                     </Link>
                 </div>
 
-                </div>
+            </div>
         </section>
     );
 };

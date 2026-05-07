@@ -244,7 +244,7 @@ const NewsFeed = () => {
                         <div className="news-tag">CHAMPIONSHIP</div>
                     </div>
                     <div className="news-content">
-                        <h3 className="news-title">BloodLovers Esports wins VCT Pacific 2024!</h3>
+                        <h3 className="news-title">THE BLOODLOVERS E-Sports wins VCT Pacific 2024!</h3>
                         <div className="news-footer">
                             <span className="news-date">DECEMBER 16, 2024</span>
                             <span className="news-link">READ INTEL →</span>
@@ -313,7 +313,7 @@ const JoinSection = () => {
                     
                     <p className="join-desc mb-12">
                         Think you have what it takes to be a part of our legacy? <br className="hidden md:block" />
-                        Forge your destiny with the ultimate esports family.
+                        Forge your destiny with the ultimate e-sports family.
                     </p>
                     
                     <button className="btn-join-premium group">
@@ -334,12 +334,12 @@ const Footer = () => {
                 <div className="footer-grid">
                     <div className="footer-brand">
                         <div className="footer-logo mb-6">
-                            <span className="logo-text">BLOODLOVERS</span>
-                            <span className="logo-subtext">ESPORTS</span>
+                            <span className="logo-text">THE BLOODLOVERS</span>
+                            <span className="logo-subtext">E-SPORTS</span>
                         </div>
                         <p className="footer-about">
                             Built for domination. Driven by blood. United as one. 
-                            The premier esports organization in the region.
+                            The premier e-sports organization in the region.
                         </p>
                         <div className="footer-socials">
                             <a href="#" aria-label="Twitter"><Twitter size={20} /></a>
@@ -379,7 +379,7 @@ const Footer = () => {
                 </div>
 
                 <div className="footer-bottom">
-                    <p className="copyright text-center">© 2024 BLOODLOVERS ESPORTS. ESTABLISHED FOR DOMINATION.</p>
+                    <p className="copyright text-center">© 2024 THE BLOODLOVERS E-SPORTS. ESTABLISHED FOR DOMINATION.</p>
                 </div>
             </div>
         </footer>

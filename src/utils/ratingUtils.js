@@ -1,7 +1,7 @@
 
 /**
  * Utility functions for the Player Rating System
- * Designed for The Bloodlovers Esports Management System
+ * Designed for The Bloodlovers E-Sports Management System
  */
 
 export const RATING_CONFIG = {

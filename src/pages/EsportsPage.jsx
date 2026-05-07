@@ -6,7 +6,7 @@ const EsportsPage = ({ title, description }) => {
         <div className="min-h-screen bg-[#05010d] flex flex-col">
             <div className="flex-1 container mx-auto px-4 pt-32 pb-20">
                 <div className="text-center mb-16">
-                    <span className="font-orbitron text-red-600 font-bold tracking-[0.4em] text-xs mb-4">BLOODLOVERS ESPORTS</span>
+                    <span className="font-orbitron text-red-600 font-bold tracking-[0.4em] text-xs mb-4">THE BLOODLOVERS E-SPORTS</span>
                     <h1 className="font-orbitron text-5xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6 italic">
                         {title}
                     </h1>

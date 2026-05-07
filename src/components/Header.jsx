@@ -70,11 +70,11 @@ const Header = () => {
         >
             <div className="container mx-auto px-4 md:px-8 flex items-center justify-between">
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-3 group">
-                    <img src={logo} alt="BL" className="h-10 w-auto object-contain" />
+                <Link to="/" className="flex items-center gap-1.5 group">
+                    <img src={logo} alt="THE BLOODLOVERS" className="h-14 w-auto object-contain" />
                     <div className="flex flex-col leading-none">
-                        <span className="font-orbitron font-black text-xl tracking-tighter text-[var(--text-main)]">BLOODLOVERS</span>
-                        <span className="font-orbitron text-[10px] tracking-[0.3em] text-[var(--accent-red)] font-bold">- ESPORTS -</span>
+                        <span className="font-orbitron font-black text-xl tracking-tighter text-[var(--text-main)]">THE BLOODLOVERS</span>
+                        <span className="font-orbitron text-[10px] tracking-[0.3em] text-[var(--accent-red)] font-bold">- E-SPORTS -</span>
                     </div>
                 </Link>
 
